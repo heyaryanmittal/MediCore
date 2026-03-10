@@ -228,34 +228,16 @@ router.get('/download/:type/:id', async (req, res) => {
         // If it's a Cloudinary URL or any full URL, proxy it
         if (filePath.startsWith('http')) {
             try {
-                console.log(`[Download] Processing Cloudinary file: ${filePath}`);
-
-                // Extract publicId from the URL
-                const regex = /\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
-                const match = filePath.match(regex);
-                const publicId = match ? match[1] : null;
-
-                if (!publicId) {
-                    throw new Error('Could not extract Cloudinary Public ID from URL');
-                }
-
-                console.log(`[Download] Extracted Public ID: ${publicId}. Generating signed URL for proxy...`);
-
-                // Generate a signed URL for internal backend use (valid for 1 hour)
-                const signedUrl = cloudinary.url(publicId, {
-                    sign_url: true,
-                    secure: true,
-                    resource_type: 'image', // PDFs are treated as images in Cloudinary transformations
-                    expires_at: Math.floor(Date.now() / 1000) + 3600
-                });
-
-                console.log(`[Download] Proxying from signed URL...`);
+                console.log(`[Download] Proxying Cloudinary/external file: ${filePath}`);
 
                 const response = await axios({
                     method: 'get',
-                    url: signedUrl,
+                    url: filePath,
                     responseType: 'arraybuffer',
-                    timeout: 45000
+                    timeout: 30000,
+                    headers: {
+                        'Accept': '*/*'
+                    }
                 });
 
                 const contentType = response.headers['content-type'] || 'application/pdf';
@@ -265,14 +247,19 @@ router.get('/download/:type/:id', async (req, res) => {
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
                 return res.status(200).send(Buffer.from(response.data));
             } catch (proxyError) {
-                console.error('[Download] Cloudinary Proxy Error:', {
+                console.error('[Download] External Proxy Error:', {
                     message: proxyError.message,
                     status: proxyError.response?.status,
                     url: filePath
                 });
-                return res.status(502).json({
+
+                // Fallback: If proxying fails, we could redirect the client to the URL, 
+                // but for security we'd rather try to fetch it.
+                // If it's a 404/403 from upstream, we return it to the user.
+                const status = proxyError.response?.status || 502;
+                return res.status(status).json({
                     success: false,
-                    message: 'Could not fetch file from cloud storage. Please check Cloudinary dashboard settings (Strict Transformations).',
+                    message: 'Could not fetch file from storage provider.',
                     error: proxyError.message
                 });
             }

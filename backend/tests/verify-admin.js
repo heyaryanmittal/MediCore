@@ -6,7 +6,7 @@ const verify = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected');
-        const adminEmail = 'admin@medicore.com';
+        const adminEmail = 'superadmin@medicore.com';
         const user = await User.findOne({ email: adminEmail }).select('+password');
         if (!user) {
             console.log('User NOT found');
@@ -14,7 +14,7 @@ const verify = async () => {
             console.log('User found:', user.email);
             console.log('Role:', user.role);
             console.log('IsActive:', user.isActive);
-            const isMatch = await user.comparePassword('Welcomeadmin');
+            const isMatch = await user.comparePassword('adminmedicore');
             console.log('Password Match:', isMatch);
         }
         process.exit(0);

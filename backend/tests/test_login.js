@@ -10,8 +10,8 @@ const testLogin = async () => {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected.');
 
-        const email = 'admin@medicore.com';
-        const password = 'Welcomeadmin';
+        const email = 'superadmin@medicore.com';
+        const password = 'adminmedicore';
 
         console.log(`Searching for user: ${email}`);
         const user = await User.findOne({ email }).select('+password');

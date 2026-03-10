@@ -7,8 +7,8 @@ require('dotenv').config();
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 const SEED_USERS = [
     {
-        email: 'admin@medicore.com',
-        password: 'Admin@1234',
+        email: 'superadmin@medicore.com',
+        password: 'adminmedicore',
         role: 'superadmin',
         profile: {
             firstName: 'Super',
@@ -144,7 +144,7 @@ const seed = async () => {
         console.log('\n══════════════════════════════════════════');
         console.log('  ✓ Seed complete! Login credentials:');
         console.log('══════════════════════════════════════════');
-        console.log('  SUPERADMIN   admin@medicore.com        / Admin@1234');
+        console.log('  SUPERADMIN   superadmin@medicore.com   / adminmedicore');
         console.log('  RECEPTIONIST receptionist@medicore.com / Recep@1234');
         console.log('  DOCTOR       doctor@medicore.com       / Doctor@1234');
         console.log('  PATIENT      patient@medicore.com      / Patient@1234');

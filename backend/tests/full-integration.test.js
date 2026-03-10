@@ -16,7 +16,7 @@ const https = require('https');
 // ─── Config ──────────────────────────────────────────────────────────────────
 const BASE = 'http://localhost:5000/api';
 const CREDS = {
-    superadmin: { email: 'admin@medicore.com', password: 'Admin@1234' },
+    superadmin: { email: 'superadmin@medicore.com', password: 'adminmedicore' },
     receptionist: { email: 'receptionist@medicore.com', password: 'Recep@1234' },
     doctor: { email: 'doctor.rajesh@medicore.com', password: 'Doctor@1234' },
     doctor2: { email: 'doctor.anita@medicore.com', password: 'Doctor@1234' },

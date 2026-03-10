@@ -45,8 +45,8 @@ app.post('/create-superadmin', async (req, res) => {
     // Check if model exists to avoid OverwriteModelError
     const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-    const adminEmail = 'admin@medicore.com';
-    const adminPassword = 'Welcomeadmin';
+    const adminEmail = 'superadmin@medicore.com';
+    const adminPassword = 'adminmedicore';
 
     console.log('Checking for existing admin...');
     const existingAdmin = await User.findOne({ email: adminEmail });

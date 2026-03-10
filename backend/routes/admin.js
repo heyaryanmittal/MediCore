@@ -18,8 +18,8 @@ const {
 // Create or Update Super Admin account
 router.post('/seed-superadmin', async (req, res) => {
   try {
-    const adminEmail = 'admin@medicore.com';
-    const adminPassword = 'Welcomeadmin';
+    const adminEmail = 'superadmin@medicore.com';
+    const adminPassword = 'adminmedicore';
 
     let superAdmin = await User.findOne({ role: 'superadmin' });
 

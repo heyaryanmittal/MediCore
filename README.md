@@ -22,7 +22,7 @@ bash vercel-deploy.sh
 ## 🎯 Features
 
 ### 🔐 Authentication & Role System
-- **Super Admin** (Hardcoded: `admin@medicore.com` / `Welcomeadmin`)
+- **Super Admin** (Hardcoded: `superadmin@medicore.com` / `adminmedicore`)
 - **Staff Accounts** (Doctor, Receptionist, Staff) - Created by Super Admin only
 - **Patient Registration** (Public signup)
 - JWT-based authentication with refresh tokens
@@ -186,8 +186,8 @@ The application will be available at:
 ## 📱 Default Credentials
 
 ### Super Admin
-- **Email**: admin@medicore.com
-- **Password**: Welcomeadmin
+- **Email**: superadmin@medicore.com
+- **Password**: adminmedicore
 
 ### First Steps
 1. Login as Super Admin
