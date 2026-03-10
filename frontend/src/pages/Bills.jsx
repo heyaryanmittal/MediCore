@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { FileText, Download, Clock, AlertCircle, Plus, Info, ShieldCheck, X } from 'lucide-react';
@@ -15,12 +15,7 @@ const Bills = () => {
   const [selectedBill, setSelectedBill] = useState(null);
   const [mockLoading, setMockLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchBills();
-  }, []);
-
-  const fetchBills = async () => {
+  const fetchBills = useCallback(async () => {
     try {
       const endpoint = currentUser.role === 'patient' ? '/patient/bills' : '/receptionist/bills';
       const response = await api.get(endpoint);
@@ -33,7 +28,11 @@ const Bills = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser.role]);
+
+  useEffect(() => {
+    fetchBills();
+  }, [fetchBills]);
 
   const handleDownload = async (billId) => {
     try {

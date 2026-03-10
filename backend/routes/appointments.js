@@ -48,7 +48,8 @@ router.post('/book', [
 
     // Check if doctor is on leave on this date
     const dateString = appointmentDate.toISOString().split('T')[0];
-    if (doctor.leaves && doctor.leaves.includes(dateString)) {
+    const leaves = doctor.leaves || [];
+    if (leaves.includes(dateString)) {
       return res.status(400).json({
         success: false,
         message: 'Doctor is on leave on this date'
@@ -73,7 +74,7 @@ router.post('/book', [
       date: appointmentDate,
       'timeSlot.start': timeSlot.start,
       'timeSlot.end': timeSlot.end,
-      status: { $in: ['pending', 'confirmed'] }
+      status: { $in: ['pending', 'confirmed', 'completed'] }
     });
 
     if (existingAppointment) {
@@ -117,6 +118,12 @@ router.post('/book', [
     });
   } catch (error) {
     console.error('Book appointment error:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'This time slot is already fully booked'
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server error booking appointment'

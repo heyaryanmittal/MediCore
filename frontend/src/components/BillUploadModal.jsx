@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Upload, DollarSign, Plus, FileText, CheckCircle, Pill, ClipboardList } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
@@ -15,14 +15,8 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
     const [prescriptions, setPrescriptions] = useState([]);
     const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => {
-        if (isOpen && patient?._id) {
-            fetchPrescriptions();
-        }
-    }, [isOpen, patient?._id]);
-
-    const fetchPrescriptions = async () => {
+    const fetchPrescriptions = useCallback(async () => {
+        if (!patient?._id) return;
         try {
             setPrescriptionsLoading(true);
             const res = await api.get(`/receptionist/patient/${patient._id}/prescriptions`);
@@ -34,7 +28,13 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
         } finally {
             setPrescriptionsLoading(false);
         }
-    };
+    }, [patient?._id]);
+
+    useEffect(() => {
+        if (isOpen && patient?._id) {
+            fetchPrescriptions();
+        }
+    }, [isOpen, patient?._id, fetchPrescriptions]);
 
     const addMedicineToBill = (medicine) => {
         const newItem = { description: `Medicine: ${medicine.name}`, quantity: 1, unitPrice: 0 };

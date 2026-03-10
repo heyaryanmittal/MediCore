@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Calendar, Clock, User, UserCheck, XCircle, CheckCircle, AlertCircle, Filter, FileText } from 'lucide-react';
@@ -17,12 +17,7 @@ const Appointments = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, appointmentId: null });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchAppointments();
-  }, [filter]);
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
       const params = filter !== 'all' ? { status: filter } : {};
@@ -36,7 +31,11 @@ const Appointments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   const handleCancel = async (appointmentId) => {
     // Open the custom confirm dialog instead of window.confirm

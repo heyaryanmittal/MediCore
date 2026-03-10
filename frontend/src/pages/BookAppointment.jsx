@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Calendar, Clock, User, MessageSquare, ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
@@ -21,18 +21,7 @@ const BookAppointment = () => {
   const [leaveDates, setLeaveDates] = useState([]);
   const [availableDays, setAvailableDays] = useState([]); // e.g. ['monday', 'wednesday']
 
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (selectedDoctor && selectedDate) {
-      fetchAvailability();
-    }
-  }, [selectedDoctor, selectedDate]);
-
-  const fetchDoctors = async () => {
+  const fetchDoctors = useCallback(async () => {
     try {
       const response = await api.get('/patient/doctors');
       if (response.data.success) {
@@ -44,9 +33,14 @@ const BookAppointment = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAvailability = async () => {
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
+
+  const fetchAvailability = useCallback(async () => {
+    if (!selectedDoctor || !selectedDate) return;
     try {
       const response = await api.get(`/patient/doctor/${selectedDoctor._id}/availability`);
       if (response.data.success) {
@@ -64,7 +58,13 @@ const BookAppointment = () => {
     } catch (error) {
       console.error('Failed to fetch availability:', error);
     }
-  };
+  }, [selectedDoctor, selectedDate]);
+
+  useEffect(() => {
+    if (selectedDoctor && selectedDate) {
+      fetchAvailability();
+    }
+  }, [selectedDoctor, selectedDate, fetchAvailability]);
 
   const handleBook = async () => {
     if (!selectedSlot) {

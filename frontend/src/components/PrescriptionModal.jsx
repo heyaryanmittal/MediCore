@@ -21,8 +21,19 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
             if (p) {
                 setFormData({
                     diagnosis: p.diagnosis || '',
-                    medicines: p.medicines?.length > 0 ? p.medicines : [{ name: '', dosage: '', frequency: '', duration: '', instructions: '' }],
-                    tests: p.tests || [],
+                    medicines: p.medicines?.length > 0
+                        ? p.medicines.map(m => ({
+                            name: m.name || '',
+                            dosage: m.dosage || '',
+                            frequency: m.frequency || '',
+                            duration: m.duration || '',
+                            instructions: m.instructions || ''
+                        }))
+                        : [{ name: '', dosage: '', frequency: '', duration: '', instructions: '' }],
+                    tests: (p.tests || []).map(t => ({
+                        name: typeof t === 'string' ? t : (t.name || ''),
+                        instructions: typeof t === 'string' ? '' : (t.instructions || '')
+                    })),
                     advice: p.advice || '',
                     followUpDate: p.followUpDate ? new Date(p.followUpDate).toISOString().split('T')[0] : ''
                 });
@@ -51,8 +62,19 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                 const p = response.data.data.prescription;
                 setFormData({
                     diagnosis: p.diagnosis || '',
-                    medicines: p.medicines?.length > 0 ? p.medicines : [{ name: '', dosage: '', frequency: '', duration: '', instructions: '' }],
-                    tests: p.tests || [],
+                    medicines: p.medicines?.length > 0
+                        ? p.medicines.map(m => ({
+                            name: m.name || '',
+                            dosage: m.dosage || '',
+                            frequency: m.frequency || '',
+                            duration: m.duration || '',
+                            instructions: m.instructions || ''
+                        }))
+                        : [{ name: '', dosage: '', frequency: '', duration: '', instructions: '' }],
+                    tests: (p.tests || []).map(t => ({
+                        name: typeof t === 'string' ? t : (t.name || ''),
+                        instructions: typeof t === 'string' ? '' : (t.instructions || '')
+                    })),
                     advice: p.advice || '',
                     followUpDate: p.followUpDate ? new Date(p.followUpDate).toISOString().split('T')[0] : ''
                 });
@@ -175,7 +197,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                             <h3 className="font-black font-display text-lg">Clinical Diagnosis</h3>
                         </div>
                         <textarea
-                            value={formData.diagnosis}
+                            value={formData.diagnosis || ''}
                             onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                             className="input min-h-[100px]"
                             placeholder="Enter clinical diagnosis and primary complaints..."
@@ -216,7 +238,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Medicine Name*</label>
                                             <input
                                                 type="text"
-                                                value={med.name}
+                                                value={med.name || ''}
                                                 onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
                                                 placeholder="e.g. Paracetamol"
                                                 className="input bg-white"
@@ -227,7 +249,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dosage*</label>
                                             <input
                                                 type="text"
-                                                value={med.dosage}
+                                                value={med.dosage || ''}
                                                 onChange={(e) => handleMedicineChange(index, 'dosage', e.target.value)}
                                                 placeholder="e.g. 500mg"
                                                 className="input bg-white"
@@ -238,7 +260,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Frequency*</label>
                                             <input
                                                 type="text"
-                                                value={med.frequency}
+                                                value={med.frequency || ''}
                                                 onChange={(e) => handleMedicineChange(index, 'frequency', e.target.value)}
                                                 placeholder="e.g. 1-0-1 (BD)"
                                                 className="input bg-white"
@@ -249,7 +271,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration*</label>
                                             <input
                                                 type="text"
-                                                value={med.duration}
+                                                value={med.duration || ''}
                                                 onChange={(e) => handleMedicineChange(index, 'duration', e.target.value)}
                                                 placeholder="e.g. 5 days"
                                                 className="input bg-white"
@@ -260,7 +282,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Instructions (Optional)</label>
                                             <input
                                                 type="text"
-                                                value={med.instructions}
+                                                value={med.instructions || ''}
                                                 onChange={(e) => handleMedicineChange(index, 'instructions', e.target.value)}
                                                 placeholder="e.g. After meal"
                                                 className="input bg-white"
@@ -294,14 +316,14 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                     <div className="flex-1 space-y-3">
                                         <input
                                             type="text"
-                                            value={test.name}
+                                            value={test.name || ''}
                                             onChange={(e) => handleTestChange(index, 'name', e.target.value)}
                                             placeholder="Test Name (e.g. CBC)"
                                             className="input bg-white py-2"
                                         />
                                         <input
                                             type="text"
-                                            value={test.instructions}
+                                            value={test.instructions || ''}
                                             onChange={(e) => handleTestChange(index, 'instructions', e.target.value)}
                                             placeholder="Special instructions..."
                                             className="input bg-white py-2"
@@ -326,7 +348,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                                 <h3 className="font-black font-display text-lg">General Advice</h3>
                             </div>
                             <textarea
-                                value={formData.advice}
+                                value={formData.advice || ''}
                                 onChange={(e) => setFormData({ ...formData, advice: e.target.value })}
                                 className="input min-h-[120px]"
                                 placeholder="Dietary advice, lifestyle changes, etc..."
@@ -340,7 +362,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                             </div>
                             <input
                                 type="date"
-                                value={formData.followUpDate}
+                                value={formData.followUpDate || ''}
                                 onChange={(e) => setFormData({ ...formData, followUpDate: e.target.value })}
                                 className="input"
                                 min={new Date().toISOString().split('T')[0]}

@@ -15,6 +15,9 @@ const DetailedAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
   const [chartData, setChartData] = useState([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportType, setExportType] = useState('appointments');
+  const [exporting, setExporting] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -80,8 +83,29 @@ const DetailedAnalytics = () => {
 
   const [departmentData, setDepartmentData] = useState([]);
 
-  const exportReport = () => {
-    toast.success('Analytics report downloaded successfully');
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const response = await api.get(`/admin/export?type=${exportType}&format=csv`, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${exportType}_report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success(`${exportType.charAt(0).toUpperCase() + exportType.slice(1)} Excel report downloaded successfully`);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Failed to export report');
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (loading) {
@@ -115,7 +139,7 @@ const DetailedAnalytics = () => {
             <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           </div>
           <button
-            onClick={exportReport}
+            onClick={() => setShowExportModal(true)}
             className="btn btn-secondary flex items-center"
           >
             <Download className="h-4 w-4 mr-2" />
@@ -326,6 +350,61 @@ const DetailedAnalytics = () => {
           <p className="text-gray-500 text-center py-8">No data available</p>
         )}
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-md animate-fade-in" onClick={() => setShowExportModal(false)}></div>
+          <div className="bg-white rounded-[2.5rem] shadow-premium w-full max-w-md relative animate-slide-up overflow-hidden border border-slate-100 flex flex-col p-8">
+            <h2 className="text-2xl font-black font-display text-brand-dark mb-2">Export Data</h2>
+            <p className="text-slate-500 text-sm mb-6 font-medium">Select the type of data you want to export to a JSON file.</p>
+
+            <div className="space-y-3 mb-8">
+              {['appointments', 'users', 'patients', 'doctors'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setExportType(type)}
+                  className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between group ${exportType === type
+                    ? 'border-brand-teal bg-brand-light text-brand-dark'
+                    : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
+                    }`}
+                >
+                  <span className={`font-black uppercase tracking-widest text-xs ${exportType === type ? 'text-brand-teal' : ''}`}>
+                    {type}
+                  </span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${exportType === type ? 'border-brand-teal bg-brand-teal' : 'border-slate-200'
+                    }`}>
+                    {exportType === type && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="flex-1 py-4 border border-slate-200 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                className="flex-1 py-4 bg-brand-dark text-white rounded-2xl font-black font-display flex items-center justify-center gap-3 shadow-2xl hover:bg-slate-800 transition-all disabled:opacity-50"
+              >
+                {exporting ? (
+                  <div className="loading-spinner h-5 w-5 border-white/30 border-t-white"></div>
+                ) : (
+                  <>
+                    <Download className="h-5 w-5" />
+                    DOWNLOAD
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

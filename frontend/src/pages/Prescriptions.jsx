@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { FileText, Download, User, Calendar, Pill, Search, Activity, AlertCircle } from 'lucide-react';
@@ -11,12 +11,7 @@ const Prescriptions = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchPrescriptions();
-  }, []);
-
-  const fetchPrescriptions = async () => {
+  const fetchPrescriptions = useCallback(async () => {
     try {
       const endpoint = currentUser.role === 'patient' ? '/patient/prescriptions' : '/doctor/prescriptions';
       const response = await api.get(endpoint);
@@ -40,7 +35,11 @@ const Prescriptions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser.role]);
+
+  useEffect(() => {
+    fetchPrescriptions();
+  }, [fetchPrescriptions]);
 
   const handleDownload = async (id) => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { TestTube, Download, Calendar, Activity, CheckCircle, Clock, Plus } from 'lucide-react';
@@ -11,12 +11,7 @@ const LabReports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       const endpoint = currentUser.role === 'patient' ? '/patient/lab-reports' : '/receptionist/lab-reports';
       const response = await api.get(endpoint);
@@ -29,7 +24,11 @@ const LabReports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser.role]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   const handleDownload = async (id) => {
     try {

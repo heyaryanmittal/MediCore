@@ -335,7 +335,7 @@ router.post('/prescription', [
       doctorId: doctor._id,
       diagnosis,
       medicines,
-      tests: tests || [],
+      tests: (tests || []).map(t => typeof t === 'string' ? { name: t } : t),
       advice,
       followUpDate: followUpDate ? new Date(followUpDate) : undefined
     });

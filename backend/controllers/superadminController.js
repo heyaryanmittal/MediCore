@@ -211,8 +211,20 @@ const exportData = async (req, res) => {
         break;
       case 'appointments':
         data = await Appointment.find({})
-          .populate('patientId', 'profile.firstName profile.lastName')
-          .populate('doctorId', 'userId.profile.firstName userId.profile.lastName')
+          .populate({
+            path: 'patientId',
+            populate: {
+              path: 'userId',
+              select: 'profile email'
+            }
+          })
+          .populate({
+            path: 'doctorId',
+            populate: {
+              path: 'userId',
+              select: 'profile email'
+            }
+          })
           .lean();
         break;
       default:
@@ -222,18 +234,82 @@ const exportData = async (req, res) => {
         });
     }
 
-    const filename = `${type}_export_${new Date().toISOString().split('T')[0]}.${format || 'json'}`;
+    const filename = `${type}_export_${new Date().toISOString().split('T')[0]}.${format === 'json' ? 'json' : 'csv'}`;
+
+    // BEAUTIFY EXPORT DATA: Map to clean, user-friendly objects for professional reports
+    let processedData = [];
+
+    if (type === 'users') {
+      processedData = data.map(u => ({
+        'Email Address': u.email || 'N/A',
+        'User Role': (u.role || 'user').toUpperCase(),
+        'Full Name': getFullName(u.profile) || 'N/A',
+        'Contact Number': u.profile?.phone || 'N/A',
+        'Account Status': u.isActive ? 'Active' : 'Deactivated',
+        'Registered On': u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A',
+        'Last Login': u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'Never'
+      }));
+    } else if (type === 'patients') {
+      processedData = data.map(p => {
+        const name = getFullName(p.userId?.profile);
+        return {
+          'Patient Name': name || 'N/A',
+          'Email Address': p.userId?.email || 'N/A',
+          'Phone Number': p.userId?.profile?.phone || 'N/A',
+          'Blood Group': p.bloodGroup || 'N/A',
+          'Gender': p.gender || 'N/A',
+          'Date of Birth': p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : 'N/A',
+          'Emergency Contact': p.emergencyContact?.name ? `${p.emergencyContact.name} (${p.emergencyContact.relationship})` : 'N/A',
+          'Allergies': (p.allergies || []).join(', ') || 'None',
+          'Joined On': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'N/A'
+        };
+      });
+    } else if (type === 'doctors') {
+      processedData = data.map(d => {
+        const name = getFullName(d.userId?.profile);
+        return {
+          'Doctor Name': name ? `Dr. ${name}` : 'N/A',
+          'Specialization': d.specialization,
+          'Department': d.department,
+          'Email Address': d.userId?.email || 'N/A',
+          'License Number': d.licenseNumber,
+          'Experience (Years)': d.experience,
+          'Consultation Fee': `₹${d.consultationFee}`,
+          'Consultations Done': d.consultationCount || 0,
+          'Average Rating': d.averageRating || 'N/A',
+          'Joining Date': d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'N/A'
+        };
+      });
+    } else if (type === 'appointments') {
+      processedData = data.map(a => {
+        const patientName = getFullName(a.patientId?.userId?.profile);
+        const doctorName = getFullName(a.doctorId?.userId?.profile);
+
+        return {
+          'Appointment Date': a.date ? new Date(a.date).toLocaleDateString() : 'N/A',
+          'Scheduled Time': a.timeSlot ? `${a.timeSlot.start} - ${a.timeSlot.end}` : 'N/A',
+          'Patient Name': patientName || 'N/A',
+          'Doctor Name': doctorName ? `Dr. ${doctorName}` : 'N/A',
+          'Consultation Type': (a.consultationType || 'in-person').toUpperCase(),
+          'Reported Symptoms': a.symptoms || 'General Checkup',
+          'Current Status': (a.status || 'pending').toUpperCase(),
+          'Payment Status': (a.paymentStatus || 'pending').toUpperCase()
+        };
+      });
+    } else {
+      processedData = data;
+    }
 
     if (format === 'csv') {
-      // Convert to CSV format
-      const csv = convertToCSV(data);
-      res.setHeader('Content-Type', 'text/csv');
+      const csv = convertToCSV(processedData);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(csv);
+      // Add UTF-8 BOM for Excel to recognize it correctly
+      return res.send('\ufeff' + csv);
     } else {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.json(data);
+      return res.json(processedData);
     }
   } catch (error) {
     console.error('Export data error:', error);
@@ -244,19 +320,36 @@ const exportData = async (req, res) => {
   }
 };
 
+// Helper function to extract full name from profile object
+const getFullName = (profile) => {
+  if (!profile || !profile.firstName) return '';
+  return `${profile.firstName} ${profile.lastName || ''}`.trim();
+};
+
+// Flattening logic removed in favor of explicit mapping for better readability
+
 // Helper function to convert JSON to CSV
 const convertToCSV = (data) => {
   if (!data || data.length === 0) return '';
 
-  const headers = Object.keys(data[0]);
+  // Get all unique keys across all objects (some might be missing in others)
+  const allKeys = new Set();
+  data.forEach(item => Object.keys(item).forEach(key => allKeys.add(key)));
+  const headers = Array.from(allKeys);
+
   const csvHeaders = headers.join(',');
 
   const csvRows = data.map(row => {
     return headers.map(header => {
-      const value = row[header];
-      return typeof value === 'string' && value.includes(',')
-        ? `"${value}"`
-        : value;
+      let value = row[header];
+      if (value === undefined || value === null) return '';
+
+      // Escape for CSV (Excel preference)
+      value = String(value).replace(/"/g, '""');
+      if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+        return `"${value}"`;
+      }
+      return value;
     }).join(',');
   });
 
