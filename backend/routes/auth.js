@@ -26,7 +26,7 @@ router.get('/test', (req, res) => {
 // Create superadmin (for testing)
 router.post('/create-superadmin', async (req, res) => {
   try {
-    const adminEmail = 'admin@orvantahealth.com';
+    const adminEmail = 'admin@medicore.com';
     const adminPassword = 'Welcomeadmin';
 
     // Check if admin exists

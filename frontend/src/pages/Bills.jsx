@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { FileText, Download, CheckCircle, Clock, AlertCircle, Plus, Info, ShieldCheck, X } from 'lucide-react';
+import { FileText, Download, Clock, AlertCircle, Plus, Info, ShieldCheck, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const Bills = () => {
   const [selectedBill, setSelectedBill] = useState(null);
   const [mockLoading, setMockLoading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchBills();
   }, []);
@@ -108,7 +109,7 @@ const Bills = () => {
         key: keyId,
         amount: amount,
         currency: currency,
-        name: 'OrvantaHealth',
+        name: 'MediCore',
         description: `Payment for Invoice #${bill.billNumber || bill._id.slice(-6).toUpperCase()}`,
         order_id: orderId,
         handler: async (response) => {
@@ -348,7 +349,7 @@ const Bills = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-black font-display uppercase tracking-wider">Secure Payment</h2>
-                  <p className="text-white/80 font-medium text-sm">OrvantaHealth Demo Portal</p>
+                  <p className="text-white/80 font-medium text-sm">MediCore Demo Portal</p>
                 </div>
               </div>
 

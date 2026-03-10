@@ -90,7 +90,7 @@ export const ChatbotProvider = ({ children }) => {
       type: 'ADD_MESSAGE',
       payload: {
         type: 'bot',
-        content: 'Hello! I\'m OrvantaHealth\'s medical assistant. How can I help you with your health-related questions today?',
+        content: 'Hello! I\'m MediCore\'s medical assistant. How can I help you with your health-related questions today?',
         timestamp: new Date(),
       },
     });

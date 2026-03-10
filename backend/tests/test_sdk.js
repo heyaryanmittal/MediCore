@@ -20,7 +20,7 @@ async function testCloudinarySDK() {
         console.log('URL in DB:', url);
 
         // Extract Public ID from URL
-        // Example: https://res.cloudinary.com/detmmsjbu/image/upload/v1771774619/OrvantaHealth/lab-reports/lbs7hpy02hygxhgepuqp.pdf
+        // Example: https://res.cloudinary.com/detmmsjbu/image/upload/v1771774619/MediCore/lab-reports/lbs7hpy02hygxhgepuqp.pdf
         const regex = /\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
         const match = url.match(regex);
         const publicId = match ? match[1] : null;

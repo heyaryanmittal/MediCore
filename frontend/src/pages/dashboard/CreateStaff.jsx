@@ -166,17 +166,17 @@ const CreateStaff = () => {
                                     {...register('email', {
                                         required: 'Email is required',
                                         pattern: {
-                                            value: /^[A-Z0-9._%+-]+@orvanta\.com$/i,
-                                            message: 'Email must end with @orvanta.com'
+                                            value: /^[A-Z0-9._%+-]+@medicore\.com$/i,
+                                            message: 'Email must end with @medicore.com'
                                         }
                                     })}
                                     className="input"
-                                    placeholder="name@orvanta.com"
+                                    placeholder="name@medicore.com"
                                 />
                                 {errors.email && (
                                     <p className="mt-2 text-xs font-bold text-rose-500 uppercase tracking-tighter">{errors.email.message}</p>
                                 )}
-                                <p className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Verification: @orvanta.com domain required</p>
+                                <p className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Verification: @medicore.com domain required</p>
                             </div>
 
                             <div>

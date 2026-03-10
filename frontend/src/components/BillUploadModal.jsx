@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, DollarSign, Plus, Trash2, FileText, CheckCircle, Pill, ClipboardList, ChevronRight } from 'lucide-react';
+import { X, Upload, DollarSign, Plus, FileText, CheckCircle, Pill, ClipboardList } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
 
@@ -15,6 +15,7 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
     const [prescriptions, setPrescriptions] = useState([]);
     const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (isOpen && patient?._id) {
             fetchPrescriptions();

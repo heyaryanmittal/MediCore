@@ -17,7 +17,7 @@ app.use(helmet());
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://orvanta-health.vercel.app',
+  'https://medicore.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -81,13 +81,13 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'OrvantaHealth Backend API is successfully running on Vercel!',
+    message: 'MediCore Backend API is successfully running!',
     version: '1.0.0'
   });
 });
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/orvantahealth', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -142,7 +142,7 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const server = app.listen(PORT, () => {
     console.log(`
   ╔════════════════════════════════════════╗
-  ║ OrvantaHealth Backend Server Running   ║
+  ║ MediCore Backend Server Running        ║
   ╠════════════════════════════════════════╣
   ║ Environment: ${NODE_ENV.toUpperCase().padEnd(29)} ║
   ║ Port: ${PORT.toString().padEnd(34)} ║

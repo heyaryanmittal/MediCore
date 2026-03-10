@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, Filter, Eye, Edit, Star, Calendar, Phone, Mail, Save, Edit2, XCircle, Clock } from 'lucide-react';
+import { Users, UserPlus, Search, Eye, Edit, Star, Calendar, Phone, Mail, Save, Edit2, XCircle, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -181,18 +181,6 @@ const DoctorsManagement = () => {
     return matchesSearch && matchesDepartment;
   });
 
-  const getDepartmentBadgeColor = (department) => {
-    switch (department) {
-      case 'cardiology': return 'bg-red-100 text-red-800';
-      case 'neurology': return 'bg-blue-100 text-blue-800';
-      case 'orthopedics': return 'bg-green-100 text-green-800';
-      case 'pediatrics': return 'bg-purple-100 text-purple-800';
-      case 'gynecology': return 'bg-pink-100 text-pink-800';
-      case 'dermatology': return 'bg-yellow-100 text-yellow-800';
-      case 'general': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const getRatingStars = (rating) => {
     const stars = [];

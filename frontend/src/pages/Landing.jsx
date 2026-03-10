@@ -1,23 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-    Stethoscope,
     Calendar,
     FileText,
     Activity,
     Users,
     ShieldCheck,
-    ArrowRight,
     Heart,
     Award,
     Target,
-    Github,
-    Linkedin,
-    Mail,
-    Code,
-    Lightbulb,
-    Star,
-    ExternalLink
+    Star
 } from 'lucide-react';
 
 const Landing = () => {
@@ -31,7 +23,7 @@ const Landing = () => {
                             <div className="h-10 w-10 bg-brand-dark rounded-xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform">
                                 <Activity className="h-6 w-6 text-white" />
                             </div>
-                            <span className="text-2xl font-black text-brand-dark tracking-tight font-display">OrvantaHealth</span>
+                            <span className="text-2xl font-black text-brand-dark tracking-tight font-display">MediCore</span>
                         </div>
                         <div className="flex items-center gap-8">
                             <Link to="/login" className="hidden sm:block text-slate-600 hover:text-brand-dark font-bold transition-colors">
@@ -181,7 +173,7 @@ const Landing = () => {
                                 Redefining the Standard of <span className="text-brand-teal italic">Medical Excellence.</span>
                             </h2>
                             <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-                                OrvantaHealth was born from a simple realization: medical professionals spend too much time on paperwork and not enough time on patients. Our mission is to bridge that gap with a unified operating system that handles the complexity of hospital management, so you can focus on what matters most—saving lives.
+                                MediCore was born from a simple realization: medical professionals spend too much time on paperwork and not enough time on patients. Our mission is to bridge that gap with a unified operating system that handles the complexity of hospital management, so you can focus on what matters most—saving lives.
                             </p>
                             <div className="grid grid-cols-2 gap-8">
                                 <div>
@@ -240,7 +232,7 @@ const Landing = () => {
                 <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
                     <Activity className="h-16 w-16 text-brand-teal mx-auto mb-10 opacity-50" />
                     <h2 className="text-4xl md:text-6xl font-black font-display tracking-tighter mb-8 italic">
-                        "Healthcare is complex. OrvantaHealth makes it human."
+                        "Healthcare is complex. MediCore makes it human."
                     </h2>
                     <p className="text-teal-100/60 text-xl font-medium mb-12 max-w-2xl mx-auto uppercase tracking-widest">
                         Ready to elevate your facility?
@@ -259,54 +251,6 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Meet the Developer Section */}
-            <section className="py-24 bg-brand-light text-brand-dark selection:bg-brand-dark selection:text-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="text-xs font-black text-brand-teal uppercase tracking-[0.3em] mb-4">The Architect</h2>
-                        <p className="text-4xl md:text-5xl font-black font-display tracking-tight text-brand-dark">
-                            Meet the Creative Force.
-                        </p>
-                    </div>
-
-                    <div className="max-w-5xl mx-auto bg-white rounded-[3.5rem] p-8 md:p-16 shadow-premium border border-slate-100 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-light rounded-full -mr-32 -mt-32 transition-transform group-hover:scale-110 duration-700"></div>
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                            <div className="w-64 h-64 shrink-0 rounded-[3.5rem] overflow-hidden shadow-2xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-500 bg-brand-dark flex items-center justify-center">
-                                <img
-                                    src="/developer.jpg"
-                                    alt="Ketan Kumar - Lead Developer"
-                                    className="w-full h-full object-cover object-top scale-110 group-hover:scale-100 transition-transform duration-700"
-                                />
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-dark text-white mb-6">
-                                    <Code className="h-3.5 w-3.5" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Lead Engineer & Visionary</span>
-                                </div>
-                                <h3 className="text-4xl font-black text-brand-dark font-display mb-6 tracking-tight">Ketan Kumar</h3>
-                                <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-                                    Passionate about bridging technology and healthcare. Ketan designed OrvantaHealth as a response to the technical hurdles faced by modern hospitals, focusing on creating a seamless, intuitive experience for both patients and practitioners.
-                                </p>
-                                <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                    <a href="https://github.com/Ksingla1885" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-teal transition-all shadow-lg hover:-translate-y-1">
-                                        <Github className="h-5 w-5" />
-                                        <span>GitHub</span>
-                                    </a>
-                                    <a href="www.linkedin.com/in/ketan-kumar1885" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 border-2 border-slate-100 text-brand-dark rounded-xl font-bold hover:bg-slate-50 transition-all hover:-translate-y-1">
-                                        <Linkedin className="h-5 w-5 text-blue-600" />
-                                        <span>LinkedIn</span>
-                                    </a>
-                                    <a href="mailto:ketansingla7988@gmail.com" className="flex items-center gap-3 px-6 py-3 bg-brand-teal/10 text-brand-teal rounded-xl font-bold hover:bg-brand-teal hover:text-white transition-all hover:-translate-y-1">
-                                        <Mail className="h-5 w-5" />
-                                        <span>Contact</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* Footer */}
             <footer className="bg-white py-12 border-t border-slate-100">
@@ -314,14 +258,13 @@ const Landing = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center gap-8">
                         <div className="flex items-center gap-3">
                             <Activity className="h-6 w-6 text-brand-teal" />
-                            <span className="text-xl font-black font-display tracking-tight text-brand-dark">OrvantaHealth</span>
+                            <span className="text-xl font-black font-display tracking-tight text-brand-dark">MediCore</span>
                         </div>
                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                            &copy; 2024 OrvantaHealth OS. Crafted for Excellence.
+                            &copy; 2024 MediCore. Crafted for Excellence.
                         </p>
                         <div className="flex gap-6 text-slate-400">
-                            <Github className="h-5 w-5 cursor-pointer hover:text-brand-dark transition-colors" />
-                            <Linkedin className="h-5 w-5 cursor-pointer hover:text-brand-dark transition-colors" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">All Rights Reserved</span>
                         </div>
                     </div>
                 </div>

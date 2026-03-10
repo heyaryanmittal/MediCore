@@ -61,7 +61,7 @@ const Chatbot = () => {
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-brand-dark rounded-full"></span>
             </div>
             <div>
-              <h3 className="font-bold text-base leading-tight">OrvantaHealth Assistant</h3>
+              <h3 className="font-bold text-base leading-tight">MediCore Assistant</h3>
               <p className="text-[10px] text-brand-light/70 uppercase tracking-widest font-bold">Always Online</p>
             </div>
           </div>

@@ -11,6 +11,7 @@ const LabReports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReports();
   }, []);

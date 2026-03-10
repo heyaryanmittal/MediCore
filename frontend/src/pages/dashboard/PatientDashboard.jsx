@@ -188,7 +188,7 @@ const PatientDashboard = () => {
 
       {/* Welcome Message */}
       <div className="card bg-gradient-to-r from-primary-50 to-secondary-50 border-primary-200">
-        <h2 className="text-lg font-semibold text-primary-900 mb-2">Welcome to OrvantaHealth!</h2>
+        <h2 className="text-lg font-semibold text-primary-900 mb-2">Welcome to MediCore!</h2>
         <p className="text-primary-700">
           Your health is our priority. Book appointments, access your medical records,
           and manage your healthcare journey all in one place. Our AI-powered chatbot

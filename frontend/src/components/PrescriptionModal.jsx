@@ -40,6 +40,7 @@ const PrescriptionModal = ({ isOpen, onClose, appointment, onSuccess }) => {
                 followUpDate: ''
             });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, appointment.prescription]);
 
     const fetchPrescription = async () => {

@@ -11,7 +11,7 @@ cloudinary.config({
 const labReportStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'OrvantaHealth/lab-reports',
+        folder: 'MediCore/lab-reports',
         allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
         resource_type: 'auto'
     }
@@ -20,7 +20,7 @@ const labReportStorage = new CloudinaryStorage({
 const prescriptionStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'OrvantaHealth/prescriptions',
+        folder: 'MediCore/prescriptions',
         allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
         resource_type: 'auto'
     }
@@ -29,7 +29,7 @@ const prescriptionStorage = new CloudinaryStorage({
 const profilePicStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'OrvantaHealth/profiles',
+        folder: 'MediCore/profiles',
         allowed_formats: ['jpg', 'png', 'jpeg'],
         resource_type: 'image'
     }

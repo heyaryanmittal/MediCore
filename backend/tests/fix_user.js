@@ -9,7 +9,7 @@ const fixUser = async () => {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected.');
 
-        const email = 'admin@orvantahealth.com';
+        const email = 'admin@medicore.com';
         const password = 'Welcomeadmin';
 
         let user = await User.findOne({ email });

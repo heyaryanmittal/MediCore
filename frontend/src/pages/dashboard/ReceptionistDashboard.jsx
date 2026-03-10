@@ -19,10 +19,9 @@ const ReceptionistDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      
+
       // Get today's date
       const today = new Date().toISOString().split('T')[0];
-      const startOfDay = new Date(today);
       const endOfDay = new Date(today);
       endOfDay.setDate(endOfDay.getDate() + 1);
 

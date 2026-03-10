@@ -1,4 +1,4 @@
-# 🏥 OrvantaHealth - Hospital Management System
+# 🏥 MediCore - Hospital Management System
 
 A comprehensive, production-ready Hospital Management System built with the MERN stack, featuring role-based access control, Razorpay payment integration, and Groq AI chatbot.
 
@@ -7,8 +7,6 @@ A comprehensive, production-ready Hospital Management System built with the MERN
 Ready to deploy? Follow these quick steps:
 - **Frontend**: Deploy to Vercel in 2 minutes
 - **Backend**: Deploy to Render/Railway in 3 minutes
-
-👉 **[Full Deployment Guide](./DEPLOYMENT.md)** | **[Production Checklist](./PRODUCTION_CHECKLIST.md)**
 
 **Quick deployment commands:**
 ```bash
@@ -24,7 +22,7 @@ bash vercel-deploy.sh
 ## 🎯 Features
 
 ### 🔐 Authentication & Role System
-- **Super Admin** (Hardcoded: `admin@orvantahealth.in` / `Welcomeadmin`)
+- **Super Admin** (Hardcoded: `admin@medicore.com` / `Welcomeadmin`)
 - **Staff Accounts** (Doctor, Receptionist, Staff) - Created by Super Admin only
 - **Patient Registration** (Public signup)
 - JWT-based authentication with refresh tokens
@@ -113,7 +111,7 @@ bash vercel-deploy.sh
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd IntelliMed
+cd MediCore
 ```
 
 ### 2. Backend Setup
@@ -138,7 +136,7 @@ cp backend/.env.example backend/.env
 Edit `backend/.env` with your credentials:
 ```env
 # Database
-MONGODB_URI=mongodb://localhost:27017/orvanta
+MONGODB_URI=mongodb://localhost:27017/medicore
 
 # JWT
 JWT_SECRET=your_super_secret_jwt_key_here
@@ -188,7 +186,7 @@ The application will be available at:
 ## 📱 Default Credentials
 
 ### Super Admin
-- **Email**: admin@orvantahealth.in
+- **Email**: admin@medicore.com
 - **Password**: Welcomeadmin
 
 ### First Steps
@@ -200,7 +198,7 @@ The application will be available at:
 ## 🏗 Project Structure
 
 ```
-IntelliMed/
+MediCore/
 ├── backend/
 │   ├── controllers/     # Route controllers
 │   ├── middleware/      # Authentication & validation
@@ -340,4 +338,5 @@ For support and questions:
 
 ---
 
-**OrvantaHealth** - Transforming Healthcare Management with Technology 🏥✨
+**MediCore** - Transforming Healthcare Management with Technology 🏥✨
+

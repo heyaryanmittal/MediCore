@@ -1,6 +1,6 @@
 {
-  "short_name": "OrvantaHealth",
-  "name": "OrvantaHealth Hospital Management System",
+  "short_name": "MediCore",
+  "name": "MediCore Hospital Management System",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",

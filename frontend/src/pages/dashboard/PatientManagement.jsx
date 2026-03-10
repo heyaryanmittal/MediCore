@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Filter, Eye, Calendar, Phone, Mail, FileUp, DollarSign, Activity } from 'lucide-react';
+import { Users, Search, Eye, FileUp, DollarSign } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 import LabReportUploadModal from '../../components/LabReportUploadModal';

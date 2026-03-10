@@ -26,7 +26,7 @@ const generateBillPDF = (bill, res, filename) => {
     // ── Header ──────────────────────────────────────────────────────────────
     doc.rect(0, 0, doc.page.width, 90).fill('#0d9488');
     doc.fillColor('white').fontSize(24).font('Helvetica-Bold')
-        .text('OrvantaHealth', 50, 28);
+        .text('MediCore', 50, 28);
     doc.fontSize(10).font('Helvetica')
         .text('Hospital Management System', 50, 58);
     doc.fillColor('#0d9488').fontSize(20).font('Helvetica-Bold')
@@ -108,7 +108,7 @@ const generateBillPDF = (bill, res, filename) => {
 
     // ── Footer ────────────────────────────────────────────────────────────────
     doc.fillColor('#9CA3AF').fontSize(8).font('Helvetica')
-        .text('Thank you for choosing OrvantaHealth. For billing queries call +91-555-000-1111.',
+        .text('Thank you for choosing MediCore. For billing queries call +91-555-000-1111.',
             50, doc.page.height - 60, { align: 'center', width: doc.page.width - 100 });
 
     doc.end();

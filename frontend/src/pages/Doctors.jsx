@@ -69,7 +69,7 @@ const Doctors = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">Find Your Doctor</h1>
           <p className="text-xl text-primary-100 max-w-2xl mx-auto">
-            Search and book appointments with top-rated medical specialists at OrvantaHealth.
+            Search and book appointments with top-rated medical specialists at MediCore.
           </p>
         </div>
       </div>
@@ -136,7 +136,7 @@ const Doctors = () => {
 
                 <div className="space-y-3 text-sm text-gray-600">
                   <p className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-gray-400" /> OrvantaHealth General Hospital
+                    <MapPin className="h-4 w-4 mr-2 text-gray-400" /> MediCore General Hospital
                   </p>
                   <p className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-gray-400" /> {doctor.availability?.days?.length || 0} days per week

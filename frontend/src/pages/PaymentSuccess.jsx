@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link, Navigate } from 'react-router-dom';
-import { CheckCircle, Download, ArrowLeft, Camera, ExternalLink, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Download, ArrowLeft, Camera, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 
 const PaymentSuccess = () => {

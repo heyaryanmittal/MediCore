@@ -17,6 +17,7 @@ const Appointments = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, appointmentId: null });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchAppointments();
   }, [filter]);

@@ -102,8 +102,6 @@ const DoctorProfile = ({ user }) => {
   }
 
   const fullName = `${user?.profile?.firstName || ''} ${user?.profile?.lastName || ''}`.trim() || 'Doctor';
-  const days = doctor?.availability?.days || [];
-  const slots = doctor?.availability?.timeSlots || [];
   const DAY_LABELS = { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' };
   const ALL_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -233,7 +231,6 @@ const DoctorProfile = ({ user }) => {
 const PatientProfile = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     bloodGroup: '',
@@ -248,7 +245,6 @@ const PatientProfile = ({ user }) => {
         const response = await api.get('/patient/profile');
         if (response.data.success) {
           const patient = response.data.data.patient;
-          setProfileData(patient);
           setFormData({
             bloodGroup: patient.bloodGroup || '',
             emergencyContact: patient.emergencyContact || { name: '', phone: '', relationship: '' },
@@ -272,7 +268,6 @@ const PatientProfile = ({ user }) => {
       setSaving(true);
       const response = await api.patch('/patient/profile', formData);
       if (response.data.success) {
-        setProfileData(response.data.data.patient);
         setIsEditing(false);
         toast.success('Profile updated successfully');
       }
@@ -304,7 +299,7 @@ const PatientProfile = ({ user }) => {
           <div className="text-white">
             <h1 className="text-2xl font-black tracking-tight drop-shadow">{fullName}</h1>
             <p className="opacity-90 flex items-center text-sm font-medium mt-1">
-              <Shield className="h-3.5 w-3.5 mr-1.5" /> OrvantaHealth Member
+              <Shield className="h-3.5 w-3.5 mr-1.5" /> MediCore Member
             </p>
           </div>
         </div>

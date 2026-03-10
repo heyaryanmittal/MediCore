@@ -6,7 +6,7 @@ const verify = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected');
-        const adminEmail = 'admin@orvantahealth.com';
+        const adminEmail = 'admin@medicore.com';
         const user = await User.findOne({ email: adminEmail }).select('+password');
         if (!user) {
             console.log('User NOT found');

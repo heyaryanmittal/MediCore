@@ -15,7 +15,7 @@ const seedAdmin = async () => {
         });
         console.log('Connected to MongoDB successfully');
 
-        const adminEmail = 'admin@orvantahealth.com';
+        const adminEmail = 'admin@medicore.com';
         const adminPassword = 'Welcomeadmin';
 
         console.log('Checking for existing admin:', adminEmail);

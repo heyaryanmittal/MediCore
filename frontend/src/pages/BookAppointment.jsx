@@ -25,6 +25,7 @@ const BookAppointment = () => {
     fetchDoctors();
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (selectedDoctor && selectedDate) {
       fetchAvailability();
@@ -90,12 +91,6 @@ const BookAppointment = () => {
     }
   };
 
-  // Helper: check if a date string falls on a doctor's working day and is not a leave
-  const isDateAvailable = (dateStr) => {
-    if (!availableDays.length) return true; // no filter until doctor is selected
-    const weekDay = format(new Date(dateStr), 'EEEE').toLowerCase();
-    return availableDays.includes(weekDay) && !leaveDates.includes(dateStr);
-  };
 
   // When doctor is picked, jump to Step 2 and auto-select the first valid date
   const handleDoctorSelect = (doctor) => {
@@ -219,10 +214,10 @@ const BookAppointment = () => {
                       disabled={isDisabled}
                       onClick={() => { if (!isDisabled) { setSelectedDate(dateStr); setSelectedSlot(null); } }}
                       className={`flex flex-col items-center p-3 rounded-lg border transition-all ${isOnLeave
-                          ? 'bg-red-50 border-red-200 text-red-400 cursor-not-allowed opacity-70'
-                          : isSelected
-                            ? 'bg-primary-600 border-primary-600 text-white shadow-md'
-                            : 'bg-white border-gray-200 text-gray-900 hover:border-primary-400 hover:shadow'
+                        ? 'bg-red-50 border-red-200 text-red-400 cursor-not-allowed opacity-70'
+                        : isSelected
+                          ? 'bg-primary-600 border-primary-600 text-white shadow-md'
+                          : 'bg-white border-gray-200 text-gray-900 hover:border-primary-400 hover:shadow'
                         }`}
                       title={isOnLeave ? 'Doctor is on leave' : ''}
                     >

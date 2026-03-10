@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, FileText, Calendar, Activity, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Upload, FileText, Activity, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
 

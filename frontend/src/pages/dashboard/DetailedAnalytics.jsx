@@ -4,8 +4,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import {
-  TrendingUp, Users, Calendar, DollarSign, Activity,
-  Download, Filter, ChevronDown
+  Users, Calendar, DollarSign, Activity,
+  Download, ChevronDown
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -16,6 +16,7 @@ const DetailedAnalytics = () => {
   const [timeRange, setTimeRange] = useState('7d');
   const [chartData, setChartData] = useState([]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchAnalytics();
   }, [timeRange]);
@@ -68,9 +69,6 @@ const DetailedAnalytics = () => {
     }
   };
 
-  const generateChartData = () => {
-    // No longer needed as we fetch real data
-  };
 
   const appointmentStatusData = analytics?.appointmentStats?.map(stat => ({
     name: stat._id,

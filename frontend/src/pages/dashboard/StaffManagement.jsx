@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, Filter, MoreVertical, Eye, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Users, UserPlus, Search, Eye, UserCheck, UserX } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -51,12 +51,6 @@ const StaffManagement = () => {
     return matchesSearch && isReceptionist;
   });
 
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'receptionist': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   if (loading) {
     return (

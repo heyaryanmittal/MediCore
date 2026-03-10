@@ -7,7 +7,7 @@ const check = async () => {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to DB');
 
-        const email = 'admin@orvantahealth.com';
+        const email = 'admin@medicore.com';
         const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
