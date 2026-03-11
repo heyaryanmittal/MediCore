@@ -32,7 +32,7 @@ const PatientDashboard = () => {
 
       setStats({
         upcomingAppointments: appointmentsRes.data.data.appointments.filter(
-          apt => new Date(apt.date) >= today && apt.status !== 'cancelled'
+          apt => new Date(apt.date) >= today && !['cancelled', 'rejected'].includes(apt.status)
         ).length,
         totalBills: billsRes.data.data.bills.filter(bill => bill.status !== 'paid').length,
         prescriptions: prescriptionsRes.data.data.prescriptions.length,

@@ -30,6 +30,49 @@ router.get('/doctors', async (req, res) => {
 
 // All patient routes below require patient authentication
 router.use(authenticateToken);
+// Get doctor availability (accessible by all authenticated users)
+router.get('/doctor/:doctorId/availability', async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    const doctor = await Doctor.findById(doctorId)
+      .populate('userId', 'profile');
+
+    if (!doctor || !doctor.isAvailable) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found or not available'
+      });
+    }
+
+    // Get booked slots for the next 30 days
+    const today = new Date();
+    const monthLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const bookedAppointments = await Appointment.find({
+      doctorId,
+      date: { $gte: today, $lte: monthLater },
+      status: { $in: ['confirmed', 'pending', 'rescheduled'] }
+    }).select('date timeSlot');
+
+    res.json({
+      success: true,
+      data: {
+        doctor,
+        availability: doctor.availability,
+        bookedSlots: bookedAppointments,
+        leaves: doctor.leaves || []
+      }
+    });
+  } catch (error) {
+    console.error('Get doctor availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching availability'
+    });
+  }
+});
+
 router.use(patientOnly);
 
 // Middleware to attach patient record to request
@@ -111,48 +154,7 @@ router.patch('/profile', async (req, res) => {
   }
 });
 
-// Get doctor availability
-router.get('/doctor/:doctorId/availability', async (req, res) => {
-  try {
-    const { doctorId } = req.params;
 
-    const doctor = await Doctor.findById(doctorId)
-      .populate('userId', 'profile');
-
-    if (!doctor || !doctor.isAvailable) {
-      return res.status(404).json({
-        success: false,
-        message: 'Doctor not found or not available'
-      });
-    }
-
-    // Get booked slots for the next 7 days
-    const today = new Date();
-    const weekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    const bookedAppointments = await Appointment.find({
-      doctorId,
-      date: { $gte: today, $lte: weekLater },
-      status: { $in: ['confirmed', 'pending'] }
-    }).select('date timeSlot');
-
-    res.json({
-      success: true,
-      data: {
-        doctor,
-        availability: doctor.availability,
-        bookedSlots: bookedAppointments,
-        leaves: doctor.leaves || []
-      }
-    });
-  } catch (error) {
-    console.error('Get doctor availability error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching availability'
-    });
-  }
-});
 
 // Get patient appointments
 router.get('/appointments', async (req, res) => {

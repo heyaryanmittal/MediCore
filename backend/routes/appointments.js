@@ -216,7 +216,7 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // Update appointment status (receptionist, doctor, superadmin)
 router.patch('/:appointmentId/status', [
-  body('status').isIn(['confirmed', 'cancelled', 'completed'])
+  body('status').isIn(['confirmed', 'cancelled', 'completed', 'rejected', 'rescheduled'])
 ], authenticateToken, authorizeRoles('receptionist', 'doctor', 'superadmin'), async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -229,7 +229,7 @@ router.patch('/:appointmentId/status', [
     }
 
     const { appointmentId } = req.params;
-    const { status, cancellationReason } = req.body;
+    const { status, cancellationReason, date, timeSlot } = req.body;
 
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
@@ -249,11 +249,11 @@ router.patch('/:appointmentId/status', [
         });
       }
 
-      // Doctors can only confirm or complete appointments
-      if (!['confirmed', 'completed'].includes(status)) {
+      // Doctors can only confirm, complete, reject, or reschedule appointments
+      if (!['confirmed', 'completed', 'rejected', 'rescheduled'].includes(status)) {
         return res.status(403).json({
           success: false,
-          message: 'Doctors can only confirm or complete appointments'
+          message: 'Doctors can only confirm, complete, reject or reschedule appointments'
         });
       }
     }
@@ -261,7 +261,7 @@ router.patch('/:appointmentId/status', [
     // Update appointment
     appointment.status = status;
 
-    if (status === 'cancelled') {
+    if (status === 'cancelled' || status === 'rejected') {
       appointment.cancellationReason = cancellationReason;
       appointment.cancelledBy = req.user._id;
 
@@ -269,6 +269,17 @@ router.patch('/:appointmentId/status', [
       if (appointment.paymentStatus === 'paid') {
         appointment.paymentStatus = 'refunded';
       }
+    }
+
+    if (status === 'rescheduled') {
+      if (!date || !timeSlot) {
+        return res.status(400).json({
+          success: false,
+          message: 'Date and time slot are required for rescheduling'
+        });
+      }
+      appointment.date = new Date(date);
+      appointment.timeSlot = timeSlot;
     }
 
     await appointment.save();
