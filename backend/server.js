@@ -18,7 +18,7 @@ app.use(helmet());
 const allowedOrigins = [
   'http://localhost:3000',
   'https://medicore.vercel.app',
-  process.env.FRONTEND_URL
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : [])
 ].filter(Boolean);
 
 app.use(cors({
@@ -26,7 +26,7 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+    if (allowedOrigins.includes('*') || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       console.log('CORS rejected origin:', origin);
