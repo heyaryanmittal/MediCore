@@ -18,6 +18,7 @@ app.use(helmet());
 const allowedOrigins = [
   'http://localhost:3000',
   'https://medicore.vercel.app',
+  'https://medicore-coral.vercel.app',
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : [])
 ].filter(Boolean);
 
