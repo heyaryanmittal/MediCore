@@ -12,12 +12,12 @@ const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-// Security middleware
-app.use(helmet());
-
+// Security middleware - Moved CORS to the top to ensure preflight works correctly
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:5173', // Support for Vite's default port
+  'http://localhost:5173',
+  'https://medicore-hmss.vercel.app',
+  'https://medicore-hmss-git-main-aryans-projects-42111422.vercel.app',
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : [])
 ].filter(Boolean);
 
@@ -27,13 +27,10 @@ app.use(cors({
     if (!origin) return callback(null, true);
 
     const isWhitelisted = allowedOrigins.includes(origin);
-
-    // Support Vercel Deployments and Subdomains dynamically
     const isVercelDomain = origin.endsWith('.vercel.app');
     const isLocalhost = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
-    const isCustomFrontend = origin === 'https://medicore-hmss.vercel.app';
 
-    if (isWhitelisted || isVercelDomain || isCustomFrontend || isLocalhost) {
+    if (isWhitelisted || isVercelDomain || isLocalhost) {
       callback(null, true);
     } else {
       console.warn(`CORS blocked for origin: ${origin}`);
@@ -42,8 +39,17 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cache-Control', 'Pragma'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cache-Control', 'Pragma', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200
+}));
+
+// Handle preflight requests for all routes
+app.options('*', cors());
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
 }));
 
 // Enable trust proxy for rate limiting behind proxies

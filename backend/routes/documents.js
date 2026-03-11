@@ -224,29 +224,65 @@ router.get('/download/:type/:id', async (req, res) => {
 
         // If it's a Cloudinary URL or any full URL
         if (filePath.startsWith('http')) {
-            console.log(`[DocumentDownload] Cloudinary URL detected: ${filePath}`);
+            console.log(`[DocumentDownload] Secure Storage URL detected: ${filePath}`);
             
             try {
-                // If it's a patient downloading, we can redirect for better performance on Vercel
-                if (role === 'patient') {
-                    console.log(`[DocumentDownload] Redirecting patient directly to secure storage`);
-                    return res.redirect(filePath);
+                // If it's Cloudinary, extract publicId and generate a signed URL
+                let finalUrl = filePath;
+                
+                if (filePath.includes('cloudinary.com')) {
+                    console.log('[DocumentDownload] Cloudinary detected, generating signed URL...');
+                    
+                    // Regex to extract delivery type and publicId from Cloudinary URL
+                    // Example: .../image/upload/v177/path/to/id.pdf -> match[1]='upload', match[2]='path/to/id'
+                    const regex = /\/(upload|private|authenticated)\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
+                    const match = filePath.match(regex);
+                    
+                    if (match) {
+                        const deliveryType = match[1];
+                        const publicId = match[2];
+                        try {
+                            // Determine resource type based on file extension
+                            const isPdf = filePath.toLowerCase().endsWith('.pdf');
+                            const resourceType = isPdf ? 'image' : 'image'; 
+                            
+                            // Generate signed URL
+                            finalUrl = cloudinary.url(publicId, {
+                                sign_url: true,
+                                secure: true,
+                                resource_type: resourceType,
+                                type: deliveryType
+                            });
+                            
+                            console.log(`[DocumentDownload] Generated signed URL for ${publicId} (Type: ${deliveryType})`);
+                        } catch (signErr) {
+                            console.warn('[DocumentDownload] Failed to sign URL:', signErr.message);
+                        }
+                    }
                 }
 
-                console.log(`[DocumentDownload] Proxying for staff/doctor...`);
+                console.log(`[DocumentDownload] Proxying file content from: ${finalUrl.split('?')[0]}...`);
+                
                 const response = await axios({
                     method: 'get',
-                    url: filePath,
+                    url: finalUrl,
                     responseType: 'arraybuffer',
-                    headers: { 'Accept': '*/*' }
+                    headers: { 'Accept': '*/*' },
+                    timeout: 10000 // 10s timeout
                 });
 
                 const contentType = response.headers['content-type'] || 'application/pdf';
                 res.setHeader('Content-Type', contentType);
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.setHeader('Cache-Control', 'no-cache');
+                
+                console.log(`[DocumentDownload] Successfully fetched and streaming file (${contentType})`);
                 return res.send(Buffer.from(response.data));
             } catch (proxyError) {
-                console.error('[DocumentDownload] Proxy/Redirect failed, trying direct redirect as last resort');
+                console.error('[DocumentDownload] Proxy failed:', proxyError.message);
+                
+                // Final fallback: redirect to original URL
+                console.log('[DocumentDownload] Final Fallback: Redirecting to original URL');
                 return res.redirect(filePath);
             }
         }
