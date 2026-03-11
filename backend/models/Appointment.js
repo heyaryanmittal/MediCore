@@ -61,7 +61,11 @@ const appointmentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for preventing double bookings
+// Indices for performance and constraints
 appointmentSchema.index({ doctorId: 1, date: 1, timeSlot: 1 }, { unique: true });
+appointmentSchema.index({ patientId: 1 });
+appointmentSchema.index({ doctorId: 1 });
+appointmentSchema.index({ date: 1 });
+appointmentSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

@@ -58,4 +58,10 @@ const billSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indices for performance
+billSchema.index({ patientId: 1 });
+billSchema.index({ appointmentId: 1 });
+billSchema.index({ status: 1 });
+billSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Bill', billSchema);

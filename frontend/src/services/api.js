@@ -23,6 +23,21 @@ api.interceptors.request.use(
   }
 );
 
+// Variables to handle multiple requests during refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
@@ -31,7 +46,21 @@ api.interceptors.response.use(
 
     // If error is 401 and we haven't tried to refresh token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const tokens = JSON.parse(localStorage.getItem('tokens'));
@@ -43,15 +72,28 @@ api.interceptors.response.use(
           const { tokens: newTokens } = response.data.data;
           localStorage.setItem('tokens', JSON.stringify(newTokens));
 
+          isRefreshing = false;
+          processQueue(null, newTokens.accessToken);
+
           // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
           return api(originalRequest);
+        } else {
+          throw new Error('No refresh token available');
         }
       } catch (refreshError) {
+        isRefreshing = false;
+        processQueue(refreshError, null);
+
         // Refresh failed, logout user
-        localStorage.removeItem('tokens');
-        localStorage.removeItem('user');
-        window.location.href = '/';
+        // Only clear if tokens haven't been updated by another tab already
+        const currentTokens = localStorage.getItem('tokens');
+        if (!currentTokens || JSON.parse(currentTokens).refreshToken === JSON.parse(localStorage.getItem('tokens'))?.refreshToken) {
+           localStorage.removeItem('tokens');
+           localStorage.removeItem('user');
+           window.location.href = '/login';
+        }
+        
         return Promise.reject(refreshError);
       }
     }

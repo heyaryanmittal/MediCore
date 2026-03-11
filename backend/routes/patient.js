@@ -80,7 +80,7 @@ router.use(patientOnly);
 // instead of userId (from User collection)
 const attachPatient = async (req, res, next) => {
   try {
-    const patient = await Patient.findOne({ userId: req.user._id });
+    const patient = await Patient.findOne({ userId: req.user._id }).lean();
     if (!patient) {
       return res.status(404).json({
         success: false,
@@ -96,6 +96,41 @@ const attachPatient = async (req, res, next) => {
 };
 
 router.use(attachPatient);
+
+// Get consolidated dashboard stats
+router.get('/dashboard-stats', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [appointmentsCount, billsCount, prescriptionsCount, labReportsCount] = await Promise.all([
+      Appointment.countDocuments({
+        patientId: req.patient._id,
+        date: { $gte: today },
+        status: { $nin: ['cancelled', 'rejected'] }
+      }),
+      Bill.countDocuments({
+        patientId: req.patient._id,
+        status: { $ne: 'paid' }
+      }),
+      Prescription.countDocuments({ patientId: req.patient._id }),
+      LabReport.countDocuments({ patientId: req.patient._id })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        upcomingAppointments: appointmentsCount,
+        pendingBills: billsCount,
+        totalPrescriptions: prescriptionsCount,
+        totalLabReports: labReportsCount
+      }
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching stats' });
+  }
+});
 
 // Get patient profile
 router.get('/profile', async (req, res) => {
@@ -138,7 +173,7 @@ router.patch('/profile', async (req, res) => {
         allergies
       },
       { new: true }
-    );
+    ).lean();
 
     res.json({
       success: true,
@@ -162,7 +197,8 @@ router.get('/appointments', async (req, res) => {
     const appointments = await Appointment.find({ patientId: req.patient._id })
       .populate('doctorId')
       .populate('doctorId.userId', 'profile')
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -182,7 +218,8 @@ router.get('/bills', async (req, res) => {
   try {
     const bills = await Bill.find({ patientId: req.patient._id })
       .populate('createdBy', 'profile')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -208,7 +245,8 @@ router.get('/prescriptions', async (req, res) => {
           select: 'profile'
         }
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Map fields to match frontend expectations
     const mappedPrescriptions = prescriptions.map(p => {
@@ -242,7 +280,8 @@ router.get('/lab-reports', async (req, res) => {
         populate: { path: 'userId', select: 'profile' }
       })
       .populate('uploadedBy', 'profile')
-      .sort({ reportDate: -1 });
+      .sort({ reportDate: -1 })
+      .lean();
 
     res.json({
       success: true,

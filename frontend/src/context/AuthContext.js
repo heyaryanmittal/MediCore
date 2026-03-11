@@ -62,16 +62,38 @@ export const AuthProvider = ({ children }) => {
     const tokens = localStorage.getItem('tokens');
     if (tokens) {
       const parsedTokens = JSON.parse(tokens);
+      const user = JSON.parse(localStorage.getItem('user'));
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
-          user: JSON.parse(localStorage.getItem('user')),
+          user,
           tokens: parsedTokens,
         },
       });
     } else {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
+
+    // Listener for cross-tab synchronization
+    const handleStorageChange = (e) => {
+      if (e.key === 'tokens' || e.key === 'user') {
+        if (!e.newValue) {
+          dispatch({ type: 'LOGOUT' });
+        } else {
+          const tokens = JSON.parse(localStorage.getItem('tokens'));
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (tokens && user) {
+            dispatch({
+              type: 'LOGIN_SUCCESS',
+              payload: { user, tokens },
+            });
+          }
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const login = async (email, password) => {

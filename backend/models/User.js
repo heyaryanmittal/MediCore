@@ -68,4 +68,9 @@ userSchema.methods.toJSON = function () {
   return user;
 };
 
+// Indices for performance
+userSchema.index({ role: 1 });
+userSchema.index({ isActive: 1 });
+userSchema.index({ 'profile.firstName': 1, 'profile.lastName': 1 });
+
 module.exports = mongoose.model('User', userSchema);

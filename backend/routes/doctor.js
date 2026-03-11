@@ -43,7 +43,7 @@ router.patch('/availability', [
     // Check authorization
     if (req.user.role === 'doctor') {
       // Doctors can only update their own availability
-      doctor = await Doctor.findOne({ userId: req.user._id });
+      doctor = await Doctor.findOne({ userId: req.user._id }).lean();
       if (!doctor) {
         return res.status(404).json({
           success: false,
@@ -58,7 +58,7 @@ router.patch('/availability', [
           message: 'doctorId is required for receptionist/superadmin'
         });
       }
-      doctor = await Doctor.findById(doctorId);
+      doctor = await Doctor.findById(doctorId).lean();
       if (!doctor) {
         return res.status(404).json({
           success: false,
@@ -141,7 +141,8 @@ router.get('/dashboard-stats', async (req, res) => {
         }
       })
       .sort({ updatedAt: -1 })
-      .limit(5);
+      .limit(5)
+      .lean();
 
     res.json({
       success: true,
@@ -172,7 +173,8 @@ router.get('/dashboard-stats', async (req, res) => {
 router.get('/profile', async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ userId: req.user._id })
-      .populate('userId', 'email profile');
+      .populate('userId', 'email profile')
+      .lean();
 
     if (!doctor) {
       return res.status(404).json({
@@ -229,7 +231,8 @@ router.get('/appointments', async (req, res) => {
       .populate('patientId')
       .populate('patientId.userId', 'profile')
       .populate('prescription')
-      .sort({ date: -1, 'timeSlot.start': -1 });
+      .sort({ date: -1, 'timeSlot.start': -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -259,7 +262,8 @@ router.get('/patient/:patientId/history', async (req, res) => {
 
     const patient = await Patient.findById(patientId)
       .populate('userId', 'profile')
-      .populate('medicalHistory.doctor', 'profile');
+      .populate('medicalHistory.doctor', 'profile')
+      .lean();
 
     if (!patient) {
       return res.status(404).json({
@@ -554,7 +558,8 @@ router.get('/prescriptions', async (req, res) => {
         }
       })
       .populate('appointmentId', 'date timeSlot')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Map fields to match frontend expectations
     const mappedPrescriptions = prescriptions.map(p => {

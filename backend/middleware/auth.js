@@ -7,7 +7,10 @@ const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
+    console.log(`[AuthMiddleware] Path: ${req.path}, Token Present: ${!!token}`);
+
     if (!token) {
+      console.warn(`[AuthMiddleware] Missing token for path: ${req.path}`);
       return res.status(401).json({
         success: false,
         message: 'Access token required'
@@ -15,9 +18,12 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(`[AuthMiddleware] Token verified for User ID: ${decoded.userId}`);
+    
     const user = await User.findById(decoded.userId).select('-password -refreshToken');
 
     if (!user || !user.isActive) {
+      console.warn(`[AuthMiddleware] User not found or inactive: ${decoded.userId}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid token or user not active'
@@ -27,9 +33,7 @@ const authenticateToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    // All JWT verification errors (expired, malformed, bad signature) should
-    // return 401 so the frontend's Axios interceptor can attempt a token refresh.
-    // 403 is intentionally reserved for valid tokens that lack the required role.
+    console.error(`[AuthMiddleware] Error verifying token for ${req.path}:`, error.message);
     return res.status(401).json({
       success: false,
       message: error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'

@@ -56,7 +56,8 @@ router.get('/appointments', async (req, res) => {
       .populate('doctorId.userId', 'profile')
       .populate('patientId')
       .populate('patientId.userId', 'profile')
-      .sort({ date: -1, 'timeSlot.start': -1 });
+      .sort({ date: -1, 'timeSlot.start': -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -182,7 +183,8 @@ router.get('/doctors/availability', async (req, res) => {
   try {
     const doctors = await Doctor.find({ isAvailable: true })
       .populate('userId', 'profile')
-      .select('specialization availability consultationFee');
+      .select('specialization availability consultationFee')
+      .lean();
 
     res.json({
       success: true,
@@ -246,7 +248,7 @@ router.patch('/doctors/:doctorId/availability', [
 router.get('/doctors/:doctorId/leaves', async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const doctor = await Doctor.findById(doctorId).select('leaves');
+    const doctor = await Doctor.findById(doctorId).select('leaves').lean();
 
     if (!doctor) {
       return res.status(404).json({
@@ -579,7 +581,8 @@ router.get('/bills', async (req, res) => {
       .populate('patientId')
       .populate('patientId.userId', 'profile')
       .populate('createdBy', 'profile')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -646,7 +649,8 @@ router.get('/lab-reports', async (req, res) => {
         populate: { path: 'userId', select: 'profile' }
       })
       .populate('uploadedBy', 'profile')
-      .sort({ reportDate: -1 });
+      .sort({ reportDate: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -718,7 +722,8 @@ router.get('/patient/:patientId/prescriptions', async (req, res) => {
         path: 'doctorId',
         populate: { path: 'userId', select: 'profile' }
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,

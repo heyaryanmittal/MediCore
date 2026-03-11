@@ -20,24 +20,16 @@ const PatientDashboard = () => {
 
   const fetchPatientStats = async () => {
     try {
-      const [appointmentsRes, billsRes, prescriptionsRes, labReportsRes] = await Promise.all([
-        api.get('/patient/appointments'),
-        api.get('/patient/bills'),
-        api.get('/patient/prescriptions'),
-        api.get('/patient/lab-reports'),
-      ]);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      setStats({
-        upcomingAppointments: appointmentsRes.data.data.appointments.filter(
-          apt => new Date(apt.date) >= today && !['cancelled', 'rejected'].includes(apt.status)
-        ).length,
-        totalBills: billsRes.data.data.bills.filter(bill => bill.status !== 'paid').length,
-        prescriptions: prescriptionsRes.data.data.prescriptions.length,
-        labReports: labReportsRes.data.data.labReports.length,
-      });
+      const response = await api.get('/patient/dashboard-stats');
+      if (response.data.success) {
+        const data = response.data.data;
+        setStats({
+          upcomingAppointments: data.upcomingAppointments,
+          totalBills: data.pendingBills,
+          prescriptions: data.totalPrescriptions,
+          labReports: data.totalLabReports,
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch patient stats:', error);
     } finally {

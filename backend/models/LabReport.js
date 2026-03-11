@@ -48,4 +48,9 @@ const labReportSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indices for performance
+labReportSchema.index({ patientId: 1 });
+labReportSchema.index({ doctorId: 1 });
+labReportSchema.index({ reportDate: -1 });
+
 module.exports = mongoose.model('LabReport', labReportSchema);

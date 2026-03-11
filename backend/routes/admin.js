@@ -74,7 +74,8 @@ router.get('/doctors', authorizeRoles('superadmin', 'receptionist', 'doctor'), a
   try {
     const doctors = await Doctor.find()
       .populate('userId', 'email profile isActive lastLogin')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -94,7 +95,8 @@ router.get('/patients', authorizeRoles('superadmin', 'receptionist', 'doctor'), 
   try {
     const patients = await Patient.find()
       .populate('userId', 'email profile isActive lastLogin')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -234,7 +236,8 @@ router.get('/staff', async (req, res) => {
       role: { $in: ['doctor', 'receptionist'] }
     })
       .select('email profile role isActive createdAt lastLogin')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
