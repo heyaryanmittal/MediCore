@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -32,13 +32,7 @@ const CreateStaff = () => {
 
     const role = watch('role');
 
-    useEffect(() => {
-        if (editId) {
-            fetchStaffDetails();
-        }
-    }, [editId]);
-
-    const fetchStaffDetails = async () => {
+    const fetchStaffDetails = useCallback(async () => {
         try {
             setFetchingData(true);
             const endpoint = roleParam === 'receptionist'
@@ -81,7 +75,13 @@ const CreateStaff = () => {
         } finally {
             setFetchingData(false);
         }
-    };
+    }, [editId, roleParam, reset]);
+
+    useEffect(() => {
+        if (editId) {
+            fetchStaffDetails();
+        }
+    }, [editId, fetchStaffDetails]);
 
     const onSubmit = async (data) => {
         setLoading(true);
