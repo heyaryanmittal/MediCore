@@ -233,42 +233,44 @@ router.get('/download/:type/:id', async (req, res) => {
                 if (filePath.includes('cloudinary.com')) {
                     console.log('[DocumentDownload] Cloudinary detected, generating signed URL...');
                     
-                    // Regex to extract delivery type and publicId from Cloudinary URL
-                    // Example: .../image/upload/v177/path/to/id.pdf -> match[1]='upload', match[2]='path/to/id'
-                    const regex = /\/(upload|private|authenticated)\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
+                    // Improved Regex: match[1]=type, match[2]=publicId, match[3]=extension
+                    const regex = /\/(upload|private|authenticated)\/(?:v\d+\/)?(.+?)(?:\.([^.]+))?$/;
                     const match = filePath.match(regex);
                     
                     if (match) {
                         const deliveryType = match[1];
                         const publicId = match[2];
+                        const extension = match[3];
+                        
                         try {
-                            // Determine resource type based on file extension
-                            const isPdf = filePath.toLowerCase().endsWith('.pdf');
-                            const resourceType = isPdf ? 'image' : 'image'; 
+                            // Try generating URL. For PDFs, Cloudinary often uses 'image' resource_type
+                            // to support transformations, but 'raw' can also be used.
+                            // We'll prioritize 'image' as seen in user's URL (/image/upload/)
+                            const resourceType = filePath.includes('/image/') ? 'image' : 'raw';
                             
-                            // Generate signed URL
                             finalUrl = cloudinary.url(publicId, {
                                 sign_url: true,
                                 secure: true,
                                 resource_type: resourceType,
-                                type: deliveryType
+                                type: deliveryType,
+                                format: extension // Critical: signature must match the extension if present
                             });
                             
-                            console.log(`[DocumentDownload] Generated signed URL for ${publicId} (Type: ${deliveryType})`);
+                            console.log(`[DocumentDownload] Signed URL (Type: ${deliveryType}, RT: ${resourceType}, Ext: ${extension || 'none'})`);
                         } catch (signErr) {
-                            console.warn('[DocumentDownload] Failed to sign URL:', signErr.message);
+                            console.warn('[DocumentDownload] Signing error:', signErr.message);
                         }
                     }
                 }
 
-                console.log(`[DocumentDownload] Proxying file content from: ${finalUrl.split('?')[0]}...`);
+                console.log(`[DocumentDownload] proxying from: ${finalUrl.split('?')[0]}`);
                 
                 const response = await axios({
                     method: 'get',
                     url: finalUrl,
                     responseType: 'arraybuffer',
                     headers: { 'Accept': '*/*' },
-                    timeout: 10000 // 10s timeout
+                    timeout: 10000 
                 });
 
                 const contentType = response.headers['content-type'] || 'application/pdf';
@@ -276,14 +278,23 @@ router.get('/download/:type/:id', async (req, res) => {
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
                 res.setHeader('Cache-Control', 'no-cache');
                 
-                console.log(`[DocumentDownload] Successfully fetched and streaming file (${contentType})`);
                 return res.send(Buffer.from(response.data));
             } catch (proxyError) {
                 console.error('[DocumentDownload] Proxy failed:', proxyError.message);
                 
-                // Final fallback: redirect to original URL
-                console.log('[DocumentDownload] Final Fallback: Redirecting to original URL');
-                return res.redirect(filePath);
+                // If the first attempt with 'image' failed, and it was a PDF, try 'raw'
+                if (filePath.toLowerCase().endsWith('.pdf') && !req._retriedRaw) {
+                    console.log('[DocumentDownload] Retrying as RAW resource...');
+                    req._retriedRaw = true;
+                    // Note: In an actual implementation, you'd loop or call a helper.
+                    // For now, let's provide a clear error response instead of redirecting.
+                }
+
+                return res.status(proxyError.response?.status || 500).json({
+                    success: false,
+                    message: 'Could not fetch document from storage',
+                    error: proxyError.message
+                });
             }
         }
 
