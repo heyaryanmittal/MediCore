@@ -31,10 +31,11 @@ app.use(cors({
       return allowed === origin;
     });
 
-    // Support Vercel Preview Deployments and Subdomains dynamically in production
-    const isVercelDomain = origin.endsWith('.vercel.app') && NODE_ENV === 'production';
+    // Support Vercel Deployments and Subdomains dynamically
+    const isVercelDomain = origin.endsWith('.vercel.app');
+    const isCustomFrontend = origin === 'https://medicore-hmss.vercel.app';
 
-    if (isWhitelisted || isVercelDomain) {
+    if (isWhitelisted || isVercelDomain || isCustomFrontend) {
       callback(null, true);
     } else {
       console.error(`Blocked by CORS: Origin ${origin} is not in whitelist or a trusted domain.`);
