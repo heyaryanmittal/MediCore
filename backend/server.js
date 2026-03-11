@@ -26,20 +26,18 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    const isWhitelisted = allowedOrigins.some(allowed => {
-      if (allowed === '*') return true;
-      return allowed === origin;
-    });
+    const isWhitelisted = allowedOrigins.includes(origin);
 
     // Support Vercel Deployments and Subdomains dynamically
     const isVercelDomain = origin.endsWith('.vercel.app');
+    const isLocalhost = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
     const isCustomFrontend = origin === 'https://medicore-hmss.vercel.app';
 
-    if (isWhitelisted || isVercelDomain || isCustomFrontend) {
+    if (isWhitelisted || isVercelDomain || isCustomFrontend || isLocalhost) {
       callback(null, true);
     } else {
-      console.error(`Blocked by CORS: Origin ${origin} is not in whitelist or a trusted domain.`);
-      callback(new Error('Not allowed by CORS'));
+      console.warn(`CORS blocked for origin: ${origin}`);
+      callback(null, false);
     }
   },
   credentials: true,
