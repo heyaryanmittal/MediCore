@@ -17,8 +17,7 @@ app.use(helmet());
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://medicore.vercel.app',
-  'https://medicore-coral.vercel.app',
+  'http://localhost:5173', // Support for Vite's default port
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : [])
 ].filter(Boolean);
 
@@ -27,16 +26,25 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes('*') || allowedOrigins.indexOf(origin) !== -1) {
+    const isWhitelisted = allowedOrigins.some(allowed => {
+      if (allowed === '*') return true;
+      return allowed === origin;
+    });
+
+    // Support Vercel Preview Deployments and Subdomains dynamically in production
+    const isVercelDomain = origin.endsWith('.vercel.app') && NODE_ENV === 'production';
+
+    if (isWhitelisted || isVercelDomain) {
       callback(null, true);
     } else {
-      console.log('CORS rejected origin:', origin);
+      console.error(`Blocked by CORS: Origin ${origin} is not in whitelist or a trusted domain.`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cache-Control', 'Pragma'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
 
 // Enable trust proxy for rate limiting behind proxies
