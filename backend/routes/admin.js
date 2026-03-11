@@ -231,10 +231,9 @@ router.post('/create-staff', [
 router.get('/staff', async (req, res) => {
   try {
     const staff = await User.find({
-      role: { $in: ['doctor', 'receptionist'] },
-      isActive: true
+      role: { $in: ['doctor', 'receptionist'] }
     })
-      .select('email profile role createdAt lastLogin')
+      .select('email profile role isActive createdAt lastLogin')
       .sort({ createdAt: -1 });
 
     res.json({
