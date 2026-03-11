@@ -250,21 +250,178 @@ router.get('/staff', async (req, res) => {
   }
 });
 
+// Get specific doctor by ID
+router.get('/doctor/:id', async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id).populate('userId', 'email profile');
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { doctor }
+    });
+  } catch (error) {
+    console.error('Get doctor error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// Get specific staff by ID (general user)
+router.get('/staff/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Staff not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { user }
+    });
+  } catch (error) {
+    console.error('Get staff error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// Update staff account
+router.patch('/update-staff/:id', [
+  body('email').isEmail().normalizeEmail(),
+  body('firstName').notEmpty().trim(),
+  body('lastName').notEmpty().trim(),
+  body('role').isIn(['doctor', 'receptionist']),
+  body('phone').optional({ checkFalsy: true })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+    const { email, firstName, lastName, role, phone, specialization, qualifications, experience, licenseNumber, consultationFee, department, password } = req.body;
+
+    // We assume ID is the model ID (Doctor ID for doctors)
+    let user;
+    let doctor;
+
+    if (role === 'doctor') {
+      doctor = await Doctor.findById(id);
+      if (!doctor) {
+        return res.status(404).json({
+          success: false,
+          message: 'Doctor not found'
+        });
+      }
+      user = await User.findById(doctor.userId);
+    } else {
+      user = await User.findById(id);
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update user info
+    user.email = email;
+    user.profile.firstName = firstName;
+    user.profile.lastName = lastName;
+    user.profile.phone = phone;
+
+    if (password) {
+      user.password = password;
+    }
+
+    await user.save();
+
+    // Update role specific data
+    if (role === 'doctor') {
+      doctor.specialization = specialization;
+      doctor.qualifications = qualifications;
+      doctor.experience = Number(experience);
+      doctor.licenseNumber = licenseNumber;
+      doctor.consultationFee = Number(consultationFee);
+      doctor.department = department;
+      await doctor.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Staff account updated successfully',
+      data: { user, doctor }
+    });
+  } catch (error) {
+    console.error('Staff update error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during staff update'
+    });
+  }
+});
+
 // Get system analytics
 router.get('/analytics', async (req, res) => {
   try {
+    // We fetch active doctors and patients by joining with User model to ensure validity
     const [
-      totalPatients,
-      totalDoctors,
+      activeDoctorsCount,
+      activePatientsCount,
       totalStaff,
+      totalReceptionists,
       todayAppointments,
       totalRevenue,
       appointmentStats,
       topDoctor
     ] = await Promise.all([
-      Patient.countDocuments(),
-      Doctor.countDocuments(),
-      User.countDocuments({ role: { $in: ['doctor', 'receptionist'] } }),
+      Doctor.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        { $unwind: '$user' },
+        { $match: { 'user.isActive': true } },
+        { $count: 'count' }
+      ]),
+      Patient.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        { $unwind: '$user' },
+        { $match: { 'user.isActive': true } },
+        { $count: 'count' }
+      ]),
+      User.countDocuments({ role: { $in: ['doctor', 'receptionist'] }, isActive: true }),
+      User.countDocuments({ role: 'receptionist', isActive: true }),
       Appointment.countDocuments({
         date: {
           $gte: new Date(new Date().setHours(0, 0, 0, 0)),
@@ -321,6 +478,8 @@ router.get('/analytics', async (req, res) => {
       ])
     ]);
 
+    const totalDoctors = activeDoctorsCount[0]?.count || 0;
+    const totalPatients = activePatientsCount[0]?.count || 0;
     const revenue = totalRevenue[0]?.total || 0;
     const mostConsultedDoctor = topDoctor[0]?.doctor[0] || null;
 
@@ -330,6 +489,7 @@ router.get('/analytics', async (req, res) => {
         totalPatients,
         totalDoctors,
         totalStaff,
+        totalReceptionists,
         todayAppointments,
         totalRevenue: revenue,
         appointmentStats,

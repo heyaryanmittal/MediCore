@@ -210,7 +210,7 @@ const DetailedAnalytics = () => {
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Receptionists</p>
               <p className="text-3xl font-black text-brand-dark font-display">
-                {analytics?.totalStaff || 0}
+                {analytics?.totalReceptionists || 0}
               </p>
               <div className="flex items-center mt-3 gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse"></div>

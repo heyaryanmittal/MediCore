@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, Eye, UserCheck, UserX } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, UserPlus, Search, Eye, UserCheck, UserX, Edit } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
 const StaffManagement = () => {
+  const navigate = useNavigate();
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +75,7 @@ const StaffManagement = () => {
           <p className="text-slate-500 font-medium text-lg">Manage receptionists</p>
         </div>
         <button
-          onClick={() => window.location.href = '/dashboard/create-staff'}
+          onClick={() => navigate('/dashboard/create-staff')}
           className="btn btn-primary flex items-center shadow-2xl hover:scale-105 active:scale-95 transition-all"
         >
           <UserPlus className="h-5 w-5 mr-3" />
@@ -203,6 +205,12 @@ const StaffManagement = () => {
                           className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
                         >
                           <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/dashboard/create-staff?edit=${member._id}&role=receptionist`)}
+                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-dark transition-colors"
+                        >
+                          <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => toggleUserStatus(member._id, member.isActive)}

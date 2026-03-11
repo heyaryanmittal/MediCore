@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Search, Eye, Edit, Star, Calendar, Phone, Mail, Save, Edit2, XCircle, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
 const DoctorsManagement = () => {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -220,7 +222,7 @@ const DoctorsManagement = () => {
           <p className="text-slate-500 font-medium text-lg">View and manage all medical practitioners in the ecosystem</p>
         </div>
         <button
-          onClick={() => window.location.href = '/dashboard/create-staff'}
+          onClick={() => navigate('/dashboard/create-staff')}
           className="btn btn-primary flex items-center shadow-2xl hover:scale-105 active:scale-95 transition-all"
         >
           <UserPlus className="h-5 w-5 mr-3" />
@@ -316,7 +318,7 @@ const DoctorsManagement = () => {
                       <Eye className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => window.location.href = `/dashboard/create-staff?edit=${doctor._id}`}
+                      onClick={() => navigate(`/dashboard/create-staff?edit=${doctor._id}`)}
                       className="p-3 bg-brand-dark rounded-xl text-white shadow-lg hover:shadow-brand-dark/30 hover:scale-105 active:scale-95 transition-all"
                     >
                       <Edit className="h-5 w-5" />

@@ -48,6 +48,12 @@ const SuperAdminDashboard = () => {
       color: 'bg-green-500',
     },
     {
+      name: 'Total Receptionists',
+      value: analytics?.totalReceptionists || 0,
+      icon: Users,
+      color: 'bg-violet-500',
+    },
+    {
       name: "Today's Appointments",
       value: analytics?.todayAppointments || 0,
       icon: Calendar,
@@ -81,7 +87,7 @@ const SuperAdminDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (

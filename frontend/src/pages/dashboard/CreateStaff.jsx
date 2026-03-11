@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { UserPlus, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, Save } from 'lucide-react';
 import api from '../../services/api';
 
 const CreateStaff = () => {
+    const [searchParams] = useSearchParams();
+    const editId = searchParams.get('edit');
+    const roleParam = searchParams.get('role'); // 'receptionist' if coming from StaffManagement
     const [loading, setLoading] = useState(false);
+    const [fetchingData, setFetchingData] = useState(!!editId);
     const [showPassword, setShowPassword] = useState(false);
 
     const {
@@ -16,7 +21,7 @@ const CreateStaff = () => {
         watch
     } = useForm({
         defaultValues: {
-            role: 'doctor',
+            role: roleParam || 'doctor',
             email: '',
             firstName: '',
             lastName: '',
@@ -27,14 +32,73 @@ const CreateStaff = () => {
 
     const role = watch('role');
 
+    useEffect(() => {
+        if (editId) {
+            fetchStaffDetails();
+        }
+    }, [editId]);
+
+    const fetchStaffDetails = async () => {
+        try {
+            setFetchingData(true);
+            const endpoint = roleParam === 'receptionist'
+                ? `/admin/staff/${editId}`
+                : `/admin/doctor/${editId}`;
+
+            const response = await api.get(endpoint);
+            if (response.data.success) {
+                if (roleParam === 'receptionist') {
+                    const user = response.data.data.user;
+                    reset({
+                        role: 'receptionist',
+                        email: user.email,
+                        firstName: user.profile.firstName,
+                        lastName: user.profile.lastName,
+                        phone: user.profile.phone || '',
+                        password: ''
+                    });
+                } else {
+                    const doctor = response.data.data.doctor;
+                    reset({
+                        role: 'doctor',
+                        email: doctor.userId.email,
+                        firstName: doctor.userId.profile.firstName,
+                        lastName: doctor.userId.profile.lastName,
+                        phone: doctor.userId.profile.phone || '',
+                        specialization: doctor.specialization,
+                        qualifications: doctor.qualifications,
+                        experience: doctor.experience,
+                        consultationFee: doctor.consultationFee,
+                        licenseNumber: doctor.licenseNumber,
+                        department: doctor.department,
+                        password: ''
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Fetch staff error:', error);
+            toast.error('Failed to fetch staff details');
+        } finally {
+            setFetchingData(false);
+        }
+    };
+
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            const response = await api.post('/admin/create-staff', data);
+            let response;
+            if (editId) {
+                response = await api.patch(`/admin/update-staff/${editId}`, data);
+            } else {
+                response = await api.post('/admin/create-staff', data);
+            }
 
             if (response.data.success) {
-                toast.success(`${data.role.charAt(0).toUpperCase() + data.role.slice(1)} account created successfully`);
-                reset();
+                toast.success(editId
+                    ? 'Staff account updated successfully'
+                    : `${data.role.charAt(0).toUpperCase() + data.role.slice(1)} account created successfully`
+                );
+                if (!editId) reset();
             }
         } catch (error) {
             const errorData = error.response?.data;
@@ -42,12 +106,20 @@ const CreateStaff = () => {
                 const errorMsg = errorData.errors.map(err => err.msg || err.message).join(', ');
                 toast.error(`Validation failed: ${errorMsg}`);
             } else {
-                toast.error(errorData?.message || 'Failed to create staff account');
+                toast.error(errorData?.message || 'Failed to process request');
             }
         } finally {
             setLoading(false);
         }
     };
+
+    if (fetchingData) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="loading-spinner"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
@@ -57,10 +129,10 @@ const CreateStaff = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest">Administrative Panel</span>
                 </div>
                 <h1 className="text-4xl font-extrabold text-brand-dark tracking-tight font-display mb-2">
-                    Create Staff Account
+                    {editId ? 'Edit Staff Account' : 'Create Staff Account'}
                 </h1>
                 <p className="text-slate-500 font-medium text-lg">
-                    Add a new doctor or receptionist to the system
+                    {editId ? 'Modify existing staff details' : 'Add a new doctor or receptionist to the system'}
                 </p>
             </div>
 
@@ -76,6 +148,7 @@ const CreateStaff = () => {
                         <select
                             {...register('role', { required: 'Role is required' })}
                             className="input text-lg font-bold"
+                            disabled={!!editId}
                         >
                             <option value="doctor">Doctor</option>
                             <option value="receptionist">Receptionist</option>
@@ -122,12 +195,12 @@ const CreateStaff = () => {
                         <div className="space-y-6">
                             <h3 className="text-sm font-black text-brand-dark uppercase tracking-widest border-l-4 border-brand-teal pl-3">Security</h3>
                             <div>
-                                <label className="label">Initial Access Password *</label>
+                                <label className="label">{editId ? 'Change Password (Optional)' : 'Initial Access Password *'}</label>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         {...register('password', {
-                                            required: 'Password is required',
+                                            required: !editId ? 'Password is required' : false,
                                             minLength: {
                                                 value: 6,
                                                 message: 'Password must be at least 6 characters'
@@ -203,7 +276,7 @@ const CreateStaff = () => {
                                         <label className="label">Medical Specialization *</label>
                                         <input
                                             type="text"
-                                            {...register('specialization', { required: 'Specialization is required' })}
+                                            {...register('specialization', { required: role === 'doctor' ? 'Specialization is required' : false })}
                                             className="input bg-white"
                                             placeholder="e.g., Cardiology"
                                         />
@@ -213,7 +286,7 @@ const CreateStaff = () => {
                                         <label className="label">Academic Qualifications *</label>
                                         <input
                                             type="text"
-                                            {...register('qualifications', { required: 'Qualifications are required' })}
+                                            {...register('qualifications', { required: role === 'doctor' ? 'Qualifications are required' : false })}
                                             className="input bg-white"
                                             placeholder="MBBS, MD, FRCS"
                                         />
@@ -226,7 +299,7 @@ const CreateStaff = () => {
                                             <label className="label">Exp. (Years) *</label>
                                             <input
                                                 type="number"
-                                                {...register('experience', { required: true })}
+                                                {...register('experience', { required: role === 'doctor' })}
                                                 className="input bg-white"
                                             />
                                         </div>
@@ -234,7 +307,7 @@ const CreateStaff = () => {
                                             <label className="label">Fee (₹) *</label>
                                             <input
                                                 type="number"
-                                                {...register('consultationFee', { required: true })}
+                                                {...register('consultationFee', { required: role === 'doctor' })}
                                                 className="input bg-white"
                                             />
                                         </div>
@@ -244,7 +317,7 @@ const CreateStaff = () => {
                                         <label className="label">Medical License Number *</label>
                                         <input
                                             type="text"
-                                            {...register('licenseNumber', { required: true })}
+                                            {...register('licenseNumber', { required: role === 'doctor' })}
                                             className="input bg-white"
                                             placeholder="LIC-9988-77"
                                         />
@@ -255,7 +328,7 @@ const CreateStaff = () => {
                             <div className="mt-8">
                                 <label className="label">Assigned Department *</label>
                                 <select
-                                    {...register('department', { required: true })}
+                                    {...register('department', { required: role === 'doctor' })}
                                     className="input bg-white font-bold"
                                 >
                                     <option value="">Choose Unit</option>
@@ -280,10 +353,16 @@ const CreateStaff = () => {
                         <div className="flex gap-4 w-full sm:w-auto">
                             <button
                                 type="button"
-                                onClick={() => reset()}
+                                onClick={() => {
+                                    if (editId) {
+                                        fetchStaffDetails();
+                                    } else {
+                                        reset();
+                                    }
+                                }}
                                 className="btn btn-secondary flex-1 sm:flex-none uppercase tracking-widest text-[10px] font-black"
                             >
-                                Reset Form
+                                {editId ? 'Revert Changes' : 'Reset Form'}
                             </button>
                             <button
                                 type="submit"
@@ -294,8 +373,8 @@ const CreateStaff = () => {
                                     <div className="loading-spinner h-5 w-5"></div>
                                 ) : (
                                     <>
-                                        <UserPlus className="h-5 w-5" />
-                                        <span className="font-display font-black tracking-tight">Generate Profile</span>
+                                        {editId ? <Save className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+                                        <span className="font-display font-black tracking-tight">{editId ? 'Update Profile' : 'Generate Profile'}</span>
                                     </>
                                 )}
                             </button>
