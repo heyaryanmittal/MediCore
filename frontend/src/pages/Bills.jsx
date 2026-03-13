@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { FileText, Download, Clock, AlertCircle, Plus, Info, ShieldCheck, X } from 'lucide-react';
+import { FileText, Download, Clock, AlertCircle, Plus, Info, ShieldCheck, X, CreditCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
@@ -261,6 +261,10 @@ const Bills = () => {
                       <div className="flex items-center font-bold text-brand-teal">
                         <FileText className="h-4 w-4 mr-2" />
                         Status: {bill.status.toUpperCase()}
+                      </div>
+                      <div className="flex items-center font-medium text-slate-500 italic">
+                        <CreditCard className="h-3.5 w-3.5 mr-2" />
+                        Method: {bill.paymentMethod ? bill.paymentMethod.toUpperCase() : 'PENDING'}
                       </div>
                     </div>
                   </div>

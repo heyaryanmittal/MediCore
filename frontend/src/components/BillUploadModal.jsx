@@ -14,6 +14,7 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
     );
     const [prescriptions, setPrescriptions] = useState([]);
     const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('online');
 
     const fetchPrescriptions = useCallback(async () => {
         if (!patient?._id) return;
@@ -96,7 +97,8 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
             const billData = {
                 patientId: patient._id,
                 items: validItems,
-                dueDate: dueDate
+                dueDate: dueDate,
+                paymentMethod: paymentMethod
             };
 
             const billResponse = await api.post('/receptionist/bill', billData);
@@ -113,7 +115,11 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
                     });
                 }
 
-                toast.success(file ? 'Bill created and receipt uploaded' : 'Bill created successfully');
+                toast.success(
+                    paymentMethod === 'cash' 
+                    ? 'Bill created and marked as PAID (Cash)' 
+                    : (file ? 'Bill created and receipt uploaded' : 'Bill created successfully')
+                );
                 onSuccess && onSuccess();
                 onClose();
             }
@@ -212,6 +218,55 @@ const BillUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Payment Method Selection */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-brand-dark">
+                                <DollarSign className="h-5 w-5" />
+                                <h3 className="font-black font-display text-lg tracking-tight">Payment Method</h3>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('online')}
+                                    className={`p-5 rounded-3xl border-2 transition-all text-left flex flex-col gap-2 ${paymentMethod === 'online'
+                                        ? 'border-brand-teal bg-brand-teal/5 ring-4 ring-brand-teal/10'
+                                        : 'border-slate-100 hover:border-slate-200 bg-white'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === 'online' ? 'bg-brand-teal text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                            <FileText className="h-5 w-5" />
+                                        </div>
+                                        {paymentMethod === 'online' && <CheckCircle className="h-5 w-5 text-brand-teal" />}
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-xs uppercase tracking-widest text-brand-dark">Online Payment</p>
+                                        <p className="text-[10px] font-medium text-slate-500">Patient pays via their portal</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('cash')}
+                                    className={`p-5 rounded-3xl border-2 transition-all text-left flex flex-col gap-2 ${paymentMethod === 'cash'
+                                        ? 'border-brand-teal bg-brand-teal/5 ring-4 ring-brand-teal/10'
+                                        : 'border-slate-100 hover:border-slate-200 bg-white'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === 'cash' ? 'bg-brand-teal text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                            <DollarSign className="h-5 w-5" />
+                                        </div>
+                                        {paymentMethod === 'cash' && <CheckCircle className="h-5 w-5 text-brand-teal" />}
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-xs uppercase tracking-widest text-brand-dark">Cash Payment</p>
+                                        <p className="text-[10px] font-medium text-slate-500">Collected immediately</p>
+                                    </div>
+                                </button>
                             </div>
                         </div>
 
