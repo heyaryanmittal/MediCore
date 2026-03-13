@@ -7,6 +7,8 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
+const User = require('../models/User');
+const { sendAppointmentConfirmation } = require('../utils/emailService');
 
 // Initialize Razorpay
 let razorpay;
@@ -22,12 +24,7 @@ router.post('/create-order', [
   body('appointmentId').isMongoId()
 ], authenticateToken, authorizeRoles('patient'), async (req, res) => {
   try {
-    if (!razorpay) {
-      return res.status(503).json({
-        success: false,
-        message: 'Payment service is not configured. Please contact administrator.'
-      });
-    }
+    const isMock = !razorpay || process.env.RAZORPAY_KEY_ID === 'rzp_test_1234567890abcdef' || !process.env.RAZORPAY_KEY_SECRET;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -89,6 +86,32 @@ router.post('/create-order', [
         doctorId: appointment.doctorId._id
       }
     };
+
+    if (isMock) {
+      // Create mock order
+      const mockOrder = {
+        id: `order_mock_${Date.now()}`,
+        amount,
+        currency: 'INR'
+      };
+
+      appointment.paymentDetails.orderId = mockOrder.id;
+      appointment.paymentDetails.amount = amount / 100;
+      appointment.paymentDetails.currency = mockOrder.currency;
+      await appointment.save();
+
+      return res.json({
+        success: true,
+        isMock: true,
+        message: 'Mock order created (Demo Mode)',
+        data: {
+          orderId: mockOrder.id,
+          amount: mockOrder.amount,
+          currency: mockOrder.currency,
+          keyId: 'mock_key'
+        }
+      });
+    }
 
     const order = await razorpay.orders.create(options);
 
@@ -168,34 +191,42 @@ router.post('/verify', [
       });
     }
 
-    // Verify signature
-    const generated_signature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
-
-    if (generated_signature !== razorpay_signature) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid payment signature'
-      });
-    }
-
-    // Verify payment with Razorpay
-    try {
-      const payment = await razorpay.payments.fetch(razorpay_payment_id);
-
-      if (payment.status !== 'captured') {
-        return res.status(400).json({
+    // Verify signature (skip for mock)
+    if (!razorpay_order_id.startsWith('order_mock_')) {
+      if (!razorpay || !process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(503).json({
           success: false,
-          message: 'Payment not successful'
+          message: 'Payment service is not configured. Please contact administrator.'
         });
       }
-    } catch (error) {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment verification failed'
-      });
+      const generated_signature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest('hex');
+
+      if (generated_signature !== razorpay_signature) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid payment signature'
+        });
+      }
+
+      // Verify payment with Razorpay
+      try {
+        const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+        if (payment.status !== 'captured') {
+          return res.status(400).json({
+            success: false,
+            message: 'Payment not successful'
+          });
+        }
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Payment verification failed'
+        });
+      }
     }
 
     // Update appointment payment status
@@ -204,15 +235,60 @@ router.post('/verify', [
     appointment.status = 'confirmed';
     await appointment.save();
 
-    // TODO: Send confirmation email
-    // await sendPaymentConfirmationEmail(patient.email, appointment);
+    // Create a Bill for this appointment
+    const bill = new Bill({
+      patientId: patient._id,
+      appointmentId: appointment._id,
+      items: [{
+        description: 'Consultation Fee',
+        quantity: 1,
+        unitPrice: appointment.paymentDetails.amount,
+        total: appointment.paymentDetails.amount
+      }],
+      subtotal: appointment.paymentDetails.amount,
+      tax: 0,
+      total: appointment.paymentDetails.amount,
+      status: 'paid',
+      paymentMethod: 'online',
+      paymentDetails: {
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        amount: appointment.paymentDetails.amount
+      },
+      createdBy: patient.userId // System generated from patient action
+    });
+    await bill.save();
+
+    // Fetch full patient and doctor details for email
+    const fullAppointment = await Appointment.findById(appointmentId)
+      .populate({ path: 'patientId', populate: { path: 'userId' } })
+      .populate({ path: 'doctorId', populate: { path: 'userId' } });
+
+    if (fullAppointment && fullAppointment.patientId && fullAppointment.doctorId) {
+      const patientUser = fullAppointment.patientId.userId;
+      const doctorUser = fullAppointment.doctorId.userId;
+      
+      await sendAppointmentConfirmation(
+        { 
+          firstName: patientUser.profile.firstName, 
+          lastName: patientUser.profile.lastName, 
+          email: patientUser.email 
+        },
+        fullAppointment,
+        { 
+          firstName: doctorUser.profile.firstName, 
+          lastName: doctorUser.profile.lastName 
+        }
+      );
+    }
 
     res.json({
       success: true,
-      message: 'Payment verified successfully',
+      message: 'Payment verified and appointment confirmed successfully',
       data: {
         paymentId: razorpay_payment_id,
-        appointment: appointment
+        appointment: appointment,
+        billId: bill._id
       }
     });
   } catch (error) {

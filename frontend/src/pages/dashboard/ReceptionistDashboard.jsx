@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, DollarSign, FileText, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
 const ReceptionistDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     todaysAppointments: 0,
     newPatients: 0,
@@ -86,7 +88,7 @@ const ReceptionistDashboard = () => {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/receptionist/bills')}>
           <div className="flex items-center">
             <div className="bg-green-100 p-3 rounded-lg">
               <Users className="h-6 w-6 text-green-600" />

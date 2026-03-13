@@ -169,6 +169,19 @@ const SuperAdminDashboard = () => {
                   </div>
                   <ArrowRight className="h-5 w-5 text-white/50 group-hover:text-white transition-all transform group-hover:translate-x-1" />
                 </button>
+
+                <button
+                  onClick={() => navigate('/dashboard/bills')}
+                  className="flex items-center justify-between p-5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl transition-all duration-300 group shadow-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white rounded-xl">
+                      <DollarSign className="h-5 w-5 text-brand-dark" />
+                    </div>
+                    <span className="font-bold text-white">Financial Records</span>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-white/50 group-hover:text-white transition-all transform group-hover:translate-x-1" />
+                </button>
               </div>
             </div>
           </div>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
 import { Calendar, Clock, User, MessageSquare, ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, addDays, startOfToday } from 'date-fns';
 
 const BookAppointment = () => {
+  const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [doctors, setDoctors] = useState([]);
@@ -66,13 +69,26 @@ const BookAppointment = () => {
     }
   }, [selectedDoctor, selectedDate, fetchAvailability]);
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleBook = async () => {
     if (!selectedSlot) {
       toast.error('Please select a time slot');
       return;
     }
 
+    setLoading(true);
     try {
+      // 1. Create Appointment
       const response = await api.post('/appointments/book', {
         doctorId: selectedDoctor._id,
         date: selectedDate,
@@ -82,12 +98,126 @@ const BookAppointment = () => {
       });
 
       if (response.data.success) {
-        toast.success('Appointment booked successfully!');
-        navigate('/patient/appointments');
+        const appointment = response.data.data.appointment;
+        const appointmentId = appointment._id;
+
+        // 2. Create Razorpay Order
+        const orderResponse = await api.post('/payments/create-order', {
+          appointmentId
+        });
+
+        if (!orderResponse.data.success) {
+          toast.success('Appointment booked, but payment failed to initiate. Please pay from Bills section.');
+          navigate('/patient/bills');
+          return;
+        }
+
+        const { orderId, amount, currency, keyId } = orderResponse.data.data;
+
+        // Handle Mock Mode
+        if (orderResponse.data.isMock) {
+          toast('Demo Mode: Simulating secure payment...', { icon: '🛡️' });
+          setTimeout(async () => {
+            try {
+              const verifyRes = await api.post('/payments/verify', {
+                razorpay_order_id: orderId,
+                razorpay_payment_id: `pay_mock_${Date.now()}`,
+                razorpay_signature: 'mock_signature',
+                appointmentId
+              });
+
+              if (verifyRes.data.success) {
+                toast.success('Payment successful (Demo Mode)!');
+                navigate('/patient/payment-success', {
+                  state: {
+                    bill: {
+                      _id: verifyRes.data.data.billId,
+                      total: amount / 100,
+                      items: [{ description: 'Consultation Fee' }]
+                    },
+                    paymentId: `pay_mock_${Date.now()}`
+                  }
+                });
+              }
+            } catch (err) {
+              toast.error('Mock payment failed');
+              navigate('/patient/bills');
+            }
+          }, 2000);
+          return;
+        }
+
+        // 3. Open Razorpay Checkout
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
+          toast.error('Razorpay SDK failed to load. Please pay from Bills section.');
+          navigate('/patient/bills');
+          return;
+        }
+
+        const options = {
+          key: keyId,
+          amount: amount,
+          currency: currency,
+          name: 'MediCore',
+          description: `Consultation with Dr. ${selectedDoctor.userId.profile.firstName}`,
+          order_id: orderId,
+          handler: async (paymentResponse) => {
+            try {
+              // 4. Verify Payment
+              const verifyRes = await api.post('/payments/verify', {
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+                appointmentId
+              });
+
+              if (verifyRes.data.success) {
+                toast.success('Payment successful!');
+                navigate('/patient/payment-success', {
+                  state: {
+                    bill: {
+                      _id: verifyRes.data.data.billId,
+                      total: amount / 100,
+                      items: [{ description: 'Consultation Fee' }]
+                    },
+                    paymentId: paymentResponse.razorpay_payment_id
+                  }
+                });
+              } else {
+                toast.error('Payment verification failed. Please check with support.');
+                navigate('/patient/bills');
+              }
+            } catch (error) {
+              console.error('Payment verification error:', error);
+              toast.error('Error verifying payment');
+              navigate('/patient/bills');
+            }
+          },
+          prefill: {
+            name: `${currentUser?.profile?.firstName || ''} ${currentUser?.profile?.lastName || ''}`,
+            email: currentUser?.email || '',
+            contact: currentUser?.profile?.phone || '',
+          },
+          theme: {
+            color: '#0d9488',
+          },
+          modal: {
+            ondismiss: function() {
+              toast('Payment cancelled. Your appointment is pending.', { icon: 'ℹ️' });
+              navigate('/patient/appointments');
+            }
+          }
+        };
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.open();
       }
     } catch (error) {
       console.error('Booking error:', error);
       toast.error(error.response?.data?.message || 'Failed to book appointment');
+    } finally {
+      setLoading(false);
     }
   };
 
