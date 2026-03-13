@@ -2,18 +2,19 @@ const nodemailer = require('nodemailer');
 
 // Create transporter
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-  port: process.env.SMTP_PORT || 587,
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: process.env.EMAIL_PORT || 587,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
 const sendEmail = async (options) => {
   try {
     const mailOptions = {
-      from: `MediCore <${process.env.FROM_EMAIL || 'noreply@medicore.com'}>`,
+      from: `MediCore <${process.env.EMAIL_USER}>`,
       to: options.email,
       subject: options.subject,
       html: options.html

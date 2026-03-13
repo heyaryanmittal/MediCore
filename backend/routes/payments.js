@@ -148,12 +148,8 @@ router.post('/verify', [
   body('appointmentId').isMongoId()
 ], authenticateToken, authorizeRoles('patient'), async (req, res) => {
   try {
-    if (!razorpay) {
-      return res.status(503).json({
-        success: false,
-        message: 'Payment service is not configured. Please contact administrator.'
-      });
-    }
+    console.log('--- PAYMENT VERIFICATION REQUEST RECEIVED ---');
+    console.log('Order ID:', req.body.razorpay_order_id);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -164,7 +160,7 @@ router.post('/verify', [
     }
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, appointmentId } = req.body;
-
+    const isMock = razorpay_order_id && razorpay_order_id.startsWith('order_mock_');
     // Get patient profile
     const patient = await Patient.findOne({ userId: req.user._id });
     if (!patient) {
@@ -191,8 +187,7 @@ router.post('/verify', [
       });
     }
 
-    // Verify signature (skip for mock)
-    if (!razorpay_order_id.startsWith('order_mock_')) {
+    if (!isMock) {
       if (!razorpay || !process.env.RAZORPAY_KEY_SECRET) {
         return res.status(503).json({
           success: false,
@@ -265,21 +260,33 @@ router.post('/verify', [
       .populate({ path: 'doctorId', populate: { path: 'userId' } });
 
     if (fullAppointment && fullAppointment.patientId && fullAppointment.doctorId) {
+      console.log('Sending confirmation email to:', fullAppointment.patientId.userId.email);
       const patientUser = fullAppointment.patientId.userId;
       const doctorUser = fullAppointment.doctorId.userId;
       
-      await sendAppointmentConfirmation(
-        { 
-          firstName: patientUser.profile.firstName, 
-          lastName: patientUser.profile.lastName, 
-          email: patientUser.email 
-        },
-        fullAppointment,
-        { 
-          firstName: doctorUser.profile.firstName, 
-          lastName: doctorUser.profile.lastName 
-        }
-      );
+      try {
+        await sendAppointmentConfirmation(
+          { 
+            firstName: patientUser.profile.firstName, 
+            lastName: patientUser.profile.lastName, 
+            email: patientUser.email 
+          },
+          fullAppointment,
+          { 
+            firstName: doctorUser.profile.firstName, 
+            lastName: doctorUser.profile.lastName 
+          }
+        );
+        console.log('Email process triggered successfully');
+      } catch (emailErr) {
+        console.error('Failed to trigger email notification:', emailErr);
+      }
+    } else {
+      console.warn('Skipping email notification: Missing appointment, patient, or doctor data.', {
+        hasApp: !!fullAppointment,
+        hasPatient: !!fullAppointment?.patientId,
+        hasDoctor: !!fullAppointment?.doctorId
+      });
     }
 
     res.json({

@@ -36,8 +36,10 @@ router.post('/book', [
     }
 
     // Check if doctor is available on this day and time
+    // Use UTC to avoid timezone shifts when parsing YYYY-MM-DD
     const appointmentDate = new Date(date);
-    const dayOfWeek = appointmentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayOfWeek = dayNames[appointmentDate.getUTCDay()];
 
     if (!doctor.availability.days.includes(dayOfWeek)) {
       return res.status(400).json({
