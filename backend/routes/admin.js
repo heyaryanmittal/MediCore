@@ -386,104 +386,60 @@ router.patch('/update-staff/:id', [
 router.get('/analytics', async (req, res) => {
   try {
     // We fetch active doctors and patients by joining with User model to ensure validity
+    // Optimized: Fetch counts and analytics in parallel with more efficient queries
     const [
-      activeDoctorsCount,
-      activePatientsCount,
+      totalDoctors,
+      totalPatients,
       totalStaff,
       totalReceptionists,
       todayAppointments,
-      totalRevenue,
+      totalRevenueData,
       appointmentStats,
       topDoctor
     ] = await Promise.all([
-      Doctor.aggregate([
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userId',
-            foreignField: '_id',
-            as: 'user'
-          }
-        },
-        { $unwind: '$user' },
-        { $match: { 'user.isActive': true } },
-        { $count: 'count' }
-      ]),
-      Patient.aggregate([
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userId',
-            foreignField: '_id',
-            as: 'user'
-          }
-        },
-        { $unwind: '$user' },
-        { $match: { 'user.isActive': true } },
-        { $count: 'count' }
-      ]),
+      // 1. Efficient count for active doctors (join avoided if consistency is trusted, or we count from User)
+      User.countDocuments({ role: 'doctor', isActive: true }),
+      
+      // 2. Efficient count for active patients
+      User.countDocuments({ role: 'patient', isActive: true }),
+
+      // 3. Total staff
       User.countDocuments({ role: { $in: ['doctor', 'receptionist'] }, isActive: true }),
+
+      // 4. Total receptionists
       User.countDocuments({ role: 'receptionist', isActive: true }),
+
+      // 5. Today's appointments
       Appointment.countDocuments({
         date: {
           $gte: new Date(new Date().setHours(0, 0, 0, 0)),
           $lt: new Date(new Date().setHours(23, 59, 59, 999))
         }
       }),
+
+      // 6. Total Revenue
       Bill.aggregate([
         { $match: { status: 'paid' } },
         { $group: { _id: null, total: { $sum: '$total' } } }
-      ]),
+      ]).then(res => res[0]?.total || 0),
+
+      // 7. Appointment status overview
       Appointment.aggregate([
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 }
-          }
-        }
+        { $group: { _id: '$status', count: { $sum: 1 } } }
       ]),
+
+      // 8. Most consulted doctor
       Appointment.aggregate([
         { $match: { status: 'completed' } },
-        {
-          $group: {
-            _id: '$doctorId',
-            count: { $sum: 1 }
-          }
-        },
+        { $group: { _id: '$doctorId', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 1 },
-        {
-          $lookup: {
-            from: 'doctors',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'doctor'
-          }
-        },
-        {
-          $unwind: '$doctor'
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'doctor.userId',
-            foreignField: '_id',
-            as: 'doctor.userId'
-          }
-        },
-        {
-          $unwind: {
-            path: '$doctor.userId',
-            preserveNullAndEmptyArrays: true
-          }
-        }
-      ])
+        { $lookup: { from: 'doctors', localField: '_id', foreignField: '_id', as: 'doctor' } },
+        { $unwind: '$doctor' },
+        { $lookup: { from: 'users', localField: 'doctor.userId', foreignField: '_id', as: 'user' } },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
+      ]).then(res => res[0]?.doctor ? { ...res[0].doctor, userId: res[0].user } : null)
     ]);
-
-    const totalDoctors = activeDoctorsCount[0]?.count || 0;
-    const totalPatients = activePatientsCount[0]?.count || 0;
-    const revenue = totalRevenue[0]?.total || 0;
-    const mostConsultedDoctor = topDoctor[0]?.doctor[0] || null;
 
     res.json({
       success: true,
@@ -493,9 +449,9 @@ router.get('/analytics', async (req, res) => {
         totalStaff,
         totalReceptionists,
         todayAppointments,
-        totalRevenue: revenue,
+        totalRevenue: totalRevenueData,
         appointmentStats,
-        mostConsultedDoctor
+        mostConsultedDoctor: topDoctor
       }
     });
   } catch (error) {

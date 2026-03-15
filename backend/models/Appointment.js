@@ -67,5 +67,8 @@ appointmentSchema.index({ patientId: 1 });
 appointmentSchema.index({ doctorId: 1 });
 appointmentSchema.index({ date: 1 });
 appointmentSchema.index({ status: 1 });
+appointmentSchema.index({ doctorId: 1, patientId: 1 }); // For unique patient counting
+appointmentSchema.index({ doctorId: 1, status: 1, updatedAt: -1 }); // For recent interactions
+appointmentSchema.index({ patientId: 1, date: 1, status: 1 }); // For patient dashboard upcoming stats
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

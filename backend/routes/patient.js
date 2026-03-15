@@ -249,14 +249,11 @@ router.get('/prescriptions', async (req, res) => {
       .lean();
 
     // Map fields to match frontend expectations
-    const mappedPrescriptions = prescriptions.map(p => {
-      const obj = p.toObject();
-      return {
-        ...obj,
-        medications: obj.medicines, // map medicines to medications
-        instructions: obj.advice   // map advice to instructions
-      };
-    });
+    const mappedPrescriptions = prescriptions.map(p => ({
+      ...p,
+      medications: p.medicines, // map medicines to medications
+      instructions: p.advice   // map advice to instructions
+    }));
 
     res.json({
       success: true,

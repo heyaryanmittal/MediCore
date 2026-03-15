@@ -199,11 +199,12 @@ router.get('/download/:type/:id', async (req, res) => {
                 if (role === 'patient') {
                     const patient = await Patient.findOne({ userId }).lean();
                     if (!patient || !labReport.patientId || labReport.patientId.toString() !== patient._id.toString()) {
-                        console.warn(`[DocumentDownload] Unauthorized patient access attempt to report ${id}`);
+                        console.warn(`[DocumentDownload] Unauthorized patient access: User ${userId} -> Report ${id}`);
                         return res.status(403).json({ success: false, message: 'Access denied: You are not authorized to view this lab report' });
                     }
                 } else if (role === 'doctor') {
                     const doctor = await Doctor.findOne({ userId }).lean();
+                    if (!doctor) return res.status(403).json({ success: false, message: 'Access denied: Doctor profile not found' });
                 }
 
                 filePath = labReport.reportFile;
@@ -211,106 +212,117 @@ router.get('/download/:type/:id', async (req, res) => {
                 break;
 
             default:
-                console.warn(`[DocumentDownload] Invalid document type: ${type}`);
-                return res.status(400).json({ success: false, message: 'Invalid document type requested' });
+                return res.status(400).json({ success: false, message: 'Invalid document type' });
         }
 
         if (!filePath) {
-            console.error(`[DocumentDownload] File path missing in DB for ${type}:${id}`);
-            return res.status(404).json({ success: false, message: 'File reference not found in database' });
+            return res.status(404).json({ success: false, message: 'File reference missing' });
         }
 
-        console.log(`[DocumentDownload] Target file identified: ${filePath}`);
-
-        // If it's a Cloudinary URL or any full URL
+        // --- CLOUDINARY PROXY LOGIC ---
         if (filePath.startsWith('http')) {
-            console.log(`[DocumentDownload] Secure Storage URL detected: ${filePath}`);
+            console.log(`\n--- [DocumentDownload] Multi-Attempt Proxy Started ---`);
+            console.log(`Base Path: ${filePath}`);
             
-            try {
-                // If it's Cloudinary, extract publicId and generate a signed URL
-                let finalUrl = filePath;
+            const tryFetch = async (targetUrl) => {
+                const shortUrl = targetUrl.split('?')[0];
+                return await axios({
+                    method: 'get',
+                    url: targetUrl,
+                    responseType: 'arraybuffer',
+                    timeout: 20000,
+                    headers: { 'User-Agent': 'MediCore-Server/1.1' }
+                });
+            };
+
+            const isCloudinary = filePath.includes('cloudinary.com');
+            const urlsToTry = [];
+
+            if (isCloudinary) {
+                // Parse Cloudinary URL
+                const regex = /\/([^/]+)\/(upload|authenticated|private)\/(?:v\d+\/)?(.+?)(?:\.([^.]+))?$/;
+                const match = filePath.match(regex);
                 
-                if (filePath.includes('cloudinary.com')) {
-                    console.log('[DocumentDownload] Cloudinary detected, generating signed URL...');
-                    
-                    // Improved Regex: match[1]=type, match[2]=publicId, match[3]=extension
-                    const regex = /\/(upload|private|authenticated)\/(?:v\d+\/)?(.+?)(?:\.([^.]+))?$/;
-                    const match = filePath.match(regex);
-                    
-                    if (match) {
-                        const deliveryType = match[1];
-                        const publicId = match[2];
-                        const extension = match[3];
-                        
+                if (match) {
+                    const originalResType = match[1];
+                    const delType = match[2];
+                    const publicId = match[3];
+                    const ext = match[4] || 'pdf';
+
+                    // Generate variants
+                    ['image', 'raw'].forEach(resType => {
+                        // Variant A: Signed
                         try {
-                            // Try generating URL. For PDFs, Cloudinary often uses 'image' resource_type
-                            // to support transformations, but 'raw' can also be used.
-                            // We'll prioritize 'image' as seen in user's URL (/image/upload/)
-                            const resourceType = filePath.includes('/image/') ? 'image' : 'raw';
-                            
-                            finalUrl = cloudinary.url(publicId, {
+                            const signed = cloudinary.url(publicId, {
                                 sign_url: true,
                                 secure: true,
-                                resource_type: resourceType,
-                                type: deliveryType,
-                                format: extension // Critical: signature must match the extension if present
+                                resource_type: resType,
+                                type: delType,
+                                format: ext
                             });
-                            
-                            console.log(`[DocumentDownload] Signed URL (Type: ${deliveryType}, RT: ${resourceType}, Ext: ${extension || 'none'})`);
-                        } catch (signErr) {
-                            console.warn('[DocumentDownload] Signing error:', signErr.message);
-                        }
-                    }
+                            urlsToTry.push({ url: signed, desc: `Signed (${resType})` });
+                        } catch (e) {}
+
+                        // Variant B: Signed with Attachment flag
+                        try {
+                            const signedAttach = cloudinary.url(publicId, {
+                                sign_url: true,
+                                secure: true,
+                                resource_type: resType,
+                                type: delType,
+                                format: ext,
+                                flags: 'attachment'
+                            });
+                            urlsToTry.push({ url: signedAttach, desc: `Signed+Attach (${resType})` });
+                        } catch (e) {}
+                    });
                 }
-
-                console.log(`[DocumentDownload] proxying from: ${finalUrl.split('?')[0]}`);
-                
-                const response = await axios({
-                    method: 'get',
-                    url: finalUrl,
-                    responseType: 'arraybuffer',
-                    headers: { 'Accept': '*/*' },
-                    timeout: 10000 
-                });
-
-                const contentType = response.headers['content-type'] || 'application/pdf';
-                res.setHeader('Content-Type', contentType);
-                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-                res.setHeader('Cache-Control', 'no-cache');
-                
-                return res.send(Buffer.from(response.data));
-            } catch (proxyError) {
-                console.error('[DocumentDownload] Proxy failed:', proxyError.message);
-                
-                // If the first attempt with 'image' failed, and it was a PDF, try 'raw'
-                if (filePath.toLowerCase().endsWith('.pdf') && !req._retriedRaw) {
-                    console.log('[DocumentDownload] Retrying as RAW resource...');
-                    req._retriedRaw = true;
-                    // Note: In an actual implementation, you'd loop or call a helper.
-                    // For now, let's provide a clear error response instead of redirecting.
-                }
-
-                return res.status(proxyError.response?.status || 500).json({
-                    success: false,
-                    message: 'Could not fetch document from storage',
-                    error: proxyError.message
-                });
             }
+
+            // Always add the original URL (force HTTPS)
+            urlsToTry.push({ url: filePath.replace('http://', 'https://'), desc: 'Original (HTTPS)' });
+
+            // Execute sequences
+            let lastError;
+            for (const item of urlsToTry) {
+                try {
+                    console.log(`[DocumentDownload] Trying ${item.desc}...`);
+                    const response = await tryFetch(item.url);
+                    console.log(`[DocumentDownload] SUCCESS: ${item.desc}`);
+                    
+                    const contentType = response.headers['content-type'] || 'application/pdf';
+                    res.setHeader('Content-Type', contentType);
+                    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                    res.setHeader('Cache-Control', 'private, max-age=3600');
+                    return res.send(Buffer.from(response.data));
+                } catch (err) {
+                    const status = err.response?.status || 'ERR';
+                    console.warn(`[DocumentDownload] FAIL (${status}): ${item.desc}`);
+                    lastError = err;
+                }
+            }
+
+            console.error(`--- [DocumentDownload] ALL PROXY ATTEMPTS FAILED ---`);
+            const finalStatus = lastError?.response?.status || 500;
+            return res.status(finalStatus).json({
+                success: false,
+                message: 'Document storage access failed after multiple attempts',
+                error: lastError?.message
+            });
         }
 
-        // Handle local files (Fallback)
-        console.log(`[DocumentDownload] Handling as local file...`);
-        const fullPath = path.resolve(__dirname, '..', filePath);
-        return res.download(fullPath, filename);
+        // --- LOCAL FALLBACK ---
+        try {
+            const fullPath = path.resolve(__dirname, '..', filePath);
+            return res.download(fullPath, filename);
+        } catch (err) {
+            return res.status(404).json({ success: false, message: 'File not found' });
+        }
 
     } catch (error) {
-        console.error('[DocumentDownload] Global Error:', error);
+        console.error('[DocumentDownload] Global Route Error:', error);
         if (!res.headersSent) {
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error during download',
-                error: error.message
-            });
+            res.status(500).json({ success: false, message: 'Internal server error' });
         }
     }
 });

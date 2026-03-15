@@ -58,7 +58,7 @@ app.set('trust proxy', 1);
 // Rate limiting - more lenient in development
 const limiter = rateLimit({
   windowMs: NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 60 * 1000, // 15 min in prod, 1 hour in dev
-  max: NODE_ENV === 'production' ? 100 : 1000, // 100 requests in prod, 1000 in dev
+  max: NODE_ENV === 'production' ? 1000 : 5000, // 1000 requests in prod, 5000 in dev
   message: 'Too many requests from this IP, please try again later.',
   skip: (req, res) => {
     // Skip rate limiting for health check and static files

@@ -61,7 +61,7 @@ const Chatbot = () => {
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-brand-dark rounded-full"></span>
             </div>
             <div>
-              <h3 className="font-bold text-base leading-tight">MediCore Assistant</h3>
+              <h3 className="font-bold text-base leading-tight">MediCore AI</h3>
               <p className="text-[10px] text-brand-light/70 uppercase tracking-widest font-bold">Always Online</p>
             </div>
           </div>
@@ -87,7 +87,11 @@ const Chatbot = () => {
                 </div>
               )}
               <div className="flex-1 overflow-hidden">
-                <p className="text-[13.5px] font-medium leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                <p className="text-[13.5px] font-medium leading-relaxed whitespace-pre-wrap break-words">
+                  {message.content.split(/(•)/).map((part, i) => 
+                    part === '•' ? <span key={i} className="chatbot-bullet">•</span> : part
+                  )}
+                </p>
                 <div className={`flex items-center mt-1.5 gap-1.5 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <span className="text-[10px] opacity-60 font-semibold uppercase tracking-wider">
                     {new Date(message.timestamp).toLocaleTimeString([], {

@@ -186,6 +186,10 @@
   @apply bg-white text-slate-700 mr-auto rounded-tl-none border border-slate-50;
 }
 
+.chatbot-bullet {
+  @apply text-[1.2em] font-bold inline-block mr-1 align-middle text-brand-dark;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .chatbot-window {

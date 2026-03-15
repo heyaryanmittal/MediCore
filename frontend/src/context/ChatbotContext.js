@@ -90,7 +90,7 @@ export const ChatbotProvider = ({ children }) => {
       type: 'ADD_MESSAGE',
       payload: {
         type: 'bot',
-        content: 'Hello! I\'m MediCore\'s medical assistant. How can I help you with your health-related questions today?',
+        content: "• Hello! I am MediCore AI.\n• Your virtual hospital assistant.\n• I can help with diseases, symptoms, medicines, doctors, and hospital services.",
         timestamp: new Date(),
       },
     });

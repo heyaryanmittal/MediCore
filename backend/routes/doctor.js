@@ -112,37 +112,42 @@ router.get('/dashboard-stats', async (req, res) => {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    const todayPatients = await Appointment.countDocuments({
-      doctorId: doctor._id,
-      date: { $gte: startOfToday, $lte: endOfToday }
-    });
+    // Optimized: Run all count and find operations in parallel
+    const [todayPatients, totalNetworkData, activeScripts, recentInteractions] = await Promise.all([
+      // 1. Today's patients count
+      Appointment.countDocuments({
+        doctorId: doctor._id,
+        date: { $gte: startOfToday, $lte: endOfToday }
+      }),
 
-    // Total Network (Unique Patients)
-    const uniquePatients = await Appointment.distinct('patientId', {
-      doctorId: doctor._id
-    });
-    const totalNetwork = uniquePatients.length;
+      // 2. Total Unique Patients (Network) - More efficient than .distinct().length
+      Appointment.aggregate([
+        { $match: { doctorId: doctor._id } },
+        { $group: { _id: "$patientId" } },
+        { $count: "count" }
+      ]),
 
-    // Active Scripts (Total Prescriptions Issued)
-    const activeScripts = await Prescription.countDocuments({
-      doctorId: doctor._id
-    });
+      // 3. Total Prescriptions
+      Prescription.countDocuments({ doctorId: doctor._id }),
 
-    // Recent Interactions
-    const recentInteractions = await Appointment.find({
-      doctorId: doctor._id,
-      status: 'completed'
-    })
-      .populate({
-        path: 'patientId',
-        populate: {
-          path: 'userId',
-          select: 'profile'
-        }
+      // 4. Recent Interactions
+      Appointment.find({
+        doctorId: doctor._id,
+        status: 'completed'
       })
-      .sort({ updatedAt: -1 })
-      .limit(5)
-      .lean();
+        .populate({
+          path: 'patientId',
+          populate: {
+            path: 'userId',
+            select: 'profile'
+          }
+        })
+        .sort({ updatedAt: -1 })
+        .limit(5)
+        .lean()
+    ]);
+
+    const totalNetwork = totalNetworkData[0]?.count || 0;
 
     res.json({
       success: true,
@@ -562,14 +567,11 @@ router.get('/prescriptions', async (req, res) => {
       .lean();
 
     // Map fields to match frontend expectations
-    const mappedPrescriptions = prescriptions.map(p => {
-      const obj = p.toObject();
-      return {
-        ...obj,
-        medications: obj.medicines, // map medicines to medications
-        instructions: obj.advice   // map advice to instructions
-      };
-    });
+    const mappedPrescriptions = prescriptions.map(p => ({
+      ...p,
+      medications: p.medicines, // map medicines to medications
+      instructions: p.advice   // map advice to instructions
+    }));
 
     res.json({
       success: true,

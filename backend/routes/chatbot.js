@@ -14,8 +14,9 @@ const chatbotLimiter = rateLimit({
   }
 });
 
-// Health-related keywords for content filtering
-const healthKeywords = [
+// Health-related and greeting keywords for content filtering
+const allowedKeywords = [
+  'hello', 'hi', 'hey', 'good morning', 'good evening', 'how are you', 'who are you', 'tell me about yourself',
   'health', 'medical', 'doctor', 'medicine', 'hospital', 'clinic', 'treatment',
   'diagnosis', 'symptom', 'disease', 'condition', 'pain', 'fever', 'cough',
   'headache', 'blood pressure', 'diabetes', 'cancer', 'heart', 'lungs',
@@ -25,17 +26,18 @@ const healthKeywords = [
   'anxiety', 'depression', 'sleep', 'weight', 'obesity', 'cholesterol',
   'first aid', 'emergency', 'ambulance', 'pharmacy', 'nurse', 'specialist',
   'cardiologist', 'physician', 'dose', 'ointment', 'syrup', 'flu', 'covid',
-  'vaccine', 'infection', 'allergy', 'bone', 'muscle', 'joint', 'brain',
+  'vaccine', 'infection', 'bone', 'muscle', 'joint', 'brain',
   'vision', 'dental', 'stomach', 'digestion', 'heartbeat', 'sugar', 'glucose',
   'insulin', 'patient', 'appointment', 'scanning', 'therapy', 'rehab', 'healing',
   'wellness', 'hygiene', 'wound', 'injury', 'fracture', 'trauma', 'sore',
-  'nausea', 'vomit', 'dizziness', 'seizure', 'spasm', 'allergen', 'fatigue'
+  'nausea', 'vomit', 'dizziness', 'seizure', 'spasm', 'allergen', 'fatigue',
+  'dengue', 'malaria', 'paracetamol', 'aspirin', 'ibuprofen', 'cold', 'sore throat'
 ];
 
-// Check if query is health-related
-const isHealthRelated = (query) => {
+// Check if query is allowed (health-related or greeting)
+const isAllowedQuery = (query) => {
   const lowerQuery = query.toLowerCase();
-  return healthKeywords.some(keyword => lowerQuery.includes(keyword));
+  return allowedKeywords.some(keyword => lowerQuery.includes(keyword));
 };
 
 // Generate response using Groq API
@@ -43,19 +45,44 @@ const generateGroqResponse = async (query, apiKey) => {
   const Groq = require('groq-sdk');
   const groq = new Groq({ apiKey });
 
-  const systemPrompt = `You are a dedicated Healthcare and Medical Assistant for the MediCore Hospital Management System. 
-  
-  CRITICAL RULE: You MUST ONLY answer questions regarding healthcare, medicine, health advice, hospital operations, or wellness. 
-  
-  Strict Limitations:
-  1. DO NOT answer questions about general knowledge, history, politics, sports, entertainment, technology (unrelated to health), or any other non-healthcare topics.
-  2. If the user asks a non-healthcare question, you must politely decline and state: "I am specialized only in healthcare-related topics. Please ask me questions about health, medical conditions, doctors, medicines, or MediCore hospital services."
-  3. Always include this disclaimer: "I am an AI assistant and not a medical professional. Please consult with a qualified healthcare provider for medical advice, diagnosis, or treatment."
-  4. Never provide specific prescriptions or dosages.
-  5. For emergencies, always tell the user to contact emergency services (like 911 or their local equivalent) immediately.
-  6. Be professional, empathetic, and concise.
+  const systemPrompt = `You are MediCore AI, a virtual assistant integrated into the MediCore Hospital Management System.
 
-  Remember: If it's not about health, medicine, or the hospital, DO NOT answer it.`;
+Your role is to help users ONLY with healthcare-related topics such as:
+- hospitals and departments
+- doctors and medical staff
+- medicines
+- diseases
+- symptoms and signs of health problems
+- basic health awareness
+
+Response Rules:
+1. All responses must be SHORT and written in BULLET POINTS (•).
+2. Maximum 3–5 bullet points per answer.
+3. Each bullet point must be one short sentence.
+4. Always keep responses simple, clear, and easy to understand.
+5. If the user greets you with "hello", "hi", "hey", "good morning", "good evening", "how are you", "who are you", or "tell me about yourself", respond with exactly these bullet points:
+   • Hello! I am MediCore AI.
+   • Your virtual hospital assistant.
+   • I can help with diseases, symptoms, medicines, doctors, and hospital services.
+6. If the user asks about diseases, answer in this format:
+   Disease Name
+   • Short description
+   • Common symptom 1
+   • Common symptom 2
+   • Common symptom 3
+   • Advice to consult a doctor
+7. If the user asks about medicines, answer in this format:
+   Medicine Name
+   • What the medicine is used for
+   • What condition it treats
+   • Advice to consult a doctor before use
+8. If the user asks something unrelated to healthcare (movies, coding, games, politics, jokes, etc.), respond with exactly these bullet points:
+   • I can only assist with healthcare topics.
+   • Please ask about hospitals, diseases, symptoms, medicines, or doctors.
+9. Never give medical diagnosis or prescriptions.
+10. Always maintain a polite and professional tone.
+
+Always format responses using bullet points (•) and avoid long paragraphs.`;
 
   try {
     const chatCompletion = await groq.chat.completions.create({
@@ -69,9 +96,9 @@ const generateGroqResponse = async (query, apiKey) => {
           content: query
         }
       ],
-      model: "llama-3.3-70b-versatile", // Using a newer, more capable model
-      temperature: 0.3, // Lower temperature for more factual and constrained responses
-      max_tokens: 500
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1, // Lower temperature for stricter adherence to rules
+      max_tokens: 300
     });
 
     return chatCompletion.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
@@ -97,12 +124,12 @@ router.post('/chat', [
 
     const { message } = req.body;
 
-    // Check if message is health-related
-    if (!isHealthRelated(message)) {
+    // Check if message is allowed
+    if (!isAllowedQuery(message)) {
       return res.json({
         success: true,
         data: {
-          response: "I am restricted to healthcare-related topics only. Please ask me questions about health, medical conditions, doctors, medicines, or hospital-related topics.",
+          response: "• I can only assist with healthcare topics.\n• Please ask about hospitals, diseases, symptoms, medicines, or doctors.",
           isHealthRelated: false
         }
       });
