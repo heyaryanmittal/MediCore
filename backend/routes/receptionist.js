@@ -52,10 +52,8 @@ router.get('/appointments', async (req, res) => {
     }
 
     const appointments = await Appointment.find(query)
-      .populate('doctorId')
-      .populate('doctorId.userId', 'profile')
-      .populate('patientId')
-      .populate('patientId.userId', 'profile')
+      .populate({ path: 'doctorId', populate: { path: 'userId', select: 'profile' } })
+      .populate({ path: 'patientId', populate: { path: 'userId', select: 'profile' } })
       .sort({ date: -1, 'timeSlot.start': -1 })
       .lean();
 

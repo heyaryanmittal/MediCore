@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 require('dotenv').config();
 
 const app = express();

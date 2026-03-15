@@ -42,6 +42,14 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Pre-validate hook to ensure gender is lowercased
+userSchema.pre('validate', function (next) {
+  if (this.profile && typeof this.profile.gender === 'string') {
+    this.profile.gender = this.profile.gender.toLowerCase();
+  }
+  next();
+});
+
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();

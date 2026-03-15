@@ -36,10 +36,17 @@ const LabReports = () => {
         responseType: 'blob',
       });
 
+      let filename = `lab_report_${id}.pdf`;
+      const disposition = response.headers['content-disposition'];
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `lab_report_${id}.pdf`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();

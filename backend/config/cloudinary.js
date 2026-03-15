@@ -10,19 +10,31 @@ cloudinary.config({
 
 const labReportStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'MediCore/lab-reports',
-        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
-        resource_type: 'auto'
+    params: async (req, file) => {
+        let ext = file.mimetype.split('/')[1] || 'pdf';
+        if (ext === 'jpeg') ext = 'jpg';
+        const isPdf = ext === 'pdf';
+        return {
+            folder: 'MediCore/lab-reports',
+            allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+            format: isPdf ? undefined : ext,
+            resource_type: isPdf ? 'raw' : 'image'
+        };
     }
 });
 
 const prescriptionStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'MediCore/prescriptions',
-        allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
-        resource_type: 'auto'
+    params: async (req, file) => {
+        let ext = file.mimetype.split('/')[1] || 'pdf';
+        if (ext === 'jpeg') ext = 'jpg';
+        const isPdf = ext === 'pdf';
+        return {
+            folder: 'MediCore/prescriptions',
+            allowed_formats: ['jpg', 'png', 'pdf', 'jpeg'],
+            format: isPdf ? undefined : ext,
+            resource_type: isPdf ? 'raw' : 'image'
+        };
     }
 });
 

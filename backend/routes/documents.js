@@ -159,7 +159,8 @@ router.get('/download/:type/:id', async (req, res) => {
                 }
 
                 filePath = prescription.receipt;
-                filename = `prescription_${id}.pdf`;
+                const pExt = filePath.match(/\.([^.]+)(?:\?.*)?$/)?.[1] || 'pdf';
+                filename = `prescription_${id}.${pExt}`;
                 break;
 
             case 'bill':
@@ -185,7 +186,8 @@ router.get('/download/:type/:id', async (req, res) => {
                 }
 
                 filePath = bill.receipt;
-                filename = `bill_${id}.pdf`;
+                const bExt = filePath.match(/\.([^.]+)(?:\?.*)?$/)?.[1] || 'pdf';
+                filename = `bill_${id}.${bExt}`;
                 break;
 
             case 'lab-report':
@@ -208,7 +210,8 @@ router.get('/download/:type/:id', async (req, res) => {
                 }
 
                 filePath = labReport.reportFile;
-                filename = `lab_report_${id}.pdf`;
+                const lExt = filePath.match(/\.([^.]+)(?:\?.*)?$/)?.[1] || 'pdf';
+                filename = `lab_report_${id}.${lExt}`;
                 break;
 
             default:
@@ -275,6 +278,17 @@ router.get('/download/:type/:id', async (req, res) => {
                             });
                             urlsToTry.push({ url: signedAttach, desc: `Signed+Attach (${resType})` });
                         } catch (e) {}
+
+                        // Variant C: Unsigned
+                        try {
+                            const unsigned = cloudinary.url(publicId, {
+                                secure: true,
+                                resource_type: resType,
+                                type: delType,
+                                format: ext
+                            });
+                            urlsToTry.push({ url: unsigned, desc: `Unsigned (${resType})` });
+                        } catch (e) {}
                     });
                 }
             }
@@ -290,7 +304,14 @@ router.get('/download/:type/:id', async (req, res) => {
                     const response = await tryFetch(item.url);
                     console.log(`[DocumentDownload] SUCCESS: ${item.desc}`);
                     
-                    const contentType = response.headers['content-type'] || 'application/pdf';
+                    let contentType = response.headers['content-type'];
+                    // Fallback to infer content type from the extension if missing or generic
+                    if (!contentType || contentType === 'application/octet-stream') {
+                       if (filename.endsWith('.pdf')) contentType = 'application/pdf';
+                       else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) contentType = 'image/jpeg';
+                       else if (filename.endsWith('.png')) contentType = 'image/png';
+                       else contentType = 'application/pdf';
+                    }
                     res.setHeader('Content-Type', contentType);
                     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
                     res.setHeader('Cache-Control', 'private, max-age=3600');
