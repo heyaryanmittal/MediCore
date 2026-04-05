@@ -18,7 +18,10 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'process.env.REACT_APP_API_URL': JSON.stringify(env.REACT_APP_API_URL || 'http://localhost:5000/api'),
+      'process.env.REACT_APP_API_URL': JSON.stringify(
+        env.REACT_APP_API_URL || 
+        (mode === 'production' ? 'https://medi-core-backend.vercel.app/api' : 'http://localhost:5000/api')
+      ),
     },
     server: {
       port: 3000,
