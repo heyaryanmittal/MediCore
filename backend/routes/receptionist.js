@@ -244,7 +244,7 @@ router.patch('/doctors/:doctorId/availability', [
     const doctor = await Doctor.findByIdAndUpdate(
       doctorId,
       { availability: { days, timeSlots } },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('userId', 'profile');
 
     if (!doctor) {
@@ -626,7 +626,7 @@ router.patch('/bill/:billId/mark-paid', async (req, res) => {
     const bill = await Bill.findByIdAndUpdate(
       billId,
       { status: 'paid', paymentMethod: 'cash' },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!bill) {

@@ -69,7 +69,7 @@ router.put('/:id/status', authenticateToken, superAdminOnly, async (req, res) =>
     const message = await ContactMessage.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!message) {

@@ -94,7 +94,7 @@ router.patch('/profile', async (req, res) => {
         insuranceInfo,
         allergies
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     res.json({

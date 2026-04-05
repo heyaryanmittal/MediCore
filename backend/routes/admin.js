@@ -365,7 +365,7 @@ router.patch('/user/:userId/status', async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { isActive },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('email profile role isActive');
 
     res.json({

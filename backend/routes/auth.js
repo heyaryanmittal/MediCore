@@ -319,7 +319,7 @@ router.patch('/profile', authenticateToken, async (req, res) => {
         'profile.gender': gender,
         'profile.address': address
       },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password -refreshToken');
 
     res.json({
