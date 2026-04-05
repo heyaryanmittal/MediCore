@@ -56,7 +56,7 @@ const Landing = () => {
                         <div className="sm:text-center lg:text-left lg:col-span-7">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal/10 text-brand-teal mb-6 animate-fade-in shadow-inner border border-brand-teal/5">
                                 <ShieldCheck className="h-4 w-4" />
-                                <span className="text-xs font-bold uppercase tracking-widest">Enterprise Grade Security</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Hospital Management System</span>
                             </div>
                             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight font-display leading-[0.95]">
                                 <span className="block text-brand-dark">Modern Care,</span>{' '}
