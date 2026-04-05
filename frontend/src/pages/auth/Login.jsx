@@ -192,7 +192,7 @@ const Login = () => {
           <div className="mt-8 p-6 bg-brand-light rounded-2xl border border-teal-50/50">
             <h4 className="text-xs font-bold text-brand-dark uppercase tracking-widest mb-3 flex items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-teal mr-2"></span>
-              Demo Access
+              Super Admin Credentials
             </h4>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
