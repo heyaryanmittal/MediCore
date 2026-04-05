@@ -35,8 +35,12 @@ const StaffManagement = () => {
       });
 
       if (response.data.success) {
-        toast.success(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
-        fetchStaff();
+        const newStatus = !currentStatus;
+        toast.success(`User ${newStatus ? 'activated' : 'deactivated'} successfully`);
+        // Update local state immediately so table and modal reflect the change
+        setStaff(prev => prev.map(m => m._id === userId ? { ...m, isActive: newStatus } : m));
+        // If modal is open for this user, sync its data too
+        setSelectedUser(prev => prev && prev._id === userId ? { ...prev, isActive: newStatus } : prev);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update user status');
