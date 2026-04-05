@@ -186,7 +186,7 @@ const CreateStaff = () => {
                             </p>
                             <div className="mt-8 pt-8 border-t border-white/10 flex items-center gap-3">
                                 <Sparkles className="h-5 w-4 text-teal-200" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-100">Orvanta Sentinel AI</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-100">MediCore Sentinel AI</span>
                             </div>
                         </div>
                     </div>
@@ -237,12 +237,12 @@ const CreateStaff = () => {
                                                     {...register('email', {
                                                         required: 'Required',
                                                         pattern: {
-                                                            value: /^[A-Z0-9._%+-]+@orvanta\.com$/i,
-                                                            message: 'Must end with @orvanta.com'
+                                                            value: /^[A-Z0-9._%+-]+@medicore\.com$/i,
+                                                            message: 'Must end with @medicore.com'
                                                         }
                                                     })}
                                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
-                                                    placeholder="name@orvanta.com"
+                                                    placeholder="name@medicore.com"
                                                     readOnly={isEditMode}
                                                 />
                                             </div>

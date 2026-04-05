@@ -275,7 +275,7 @@ const Landing = () => {
                             <div className="w-64 h-64 shrink-0 rounded-[3.5rem] overflow-hidden shadow-2xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-500 bg-brand-dark flex items-center justify-center">
                                 <img
                                     src="/developer.jpg"
-                                    alt="Ketan Kumar - Lead Developer"
+                                    alt="Aryan Mittal - Lead Developer"
                                     className="w-full h-full object-cover object-top scale-110 group-hover:scale-100 transition-transform duration-700"
                                 />
                             </div>

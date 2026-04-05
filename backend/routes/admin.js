@@ -18,8 +18,8 @@ const {
 // Create or Update Super Admin account
 router.post('/seed-superadmin', async (req, res) => {
   try {
-    const adminEmail = 'admin@MediCore.com';
-    const adminPassword = 'Welcomeadmin';
+    const adminEmail = 'superadmin@medicore.com';
+    const adminPassword = 'adminmedicore';
 
     let superAdmin = await User.findOne({ role: 'superadmin' });
 
@@ -134,10 +134,10 @@ router.post('/create-staff', [
     const { email, password, firstName, lastName, role, phone, specialization, qualifications, experience, licenseNumber, consultationFee, department } = req.body;
 
     // Validate email domain
-    if (!email.endsWith('@orvanta.com')) {
+    if (!email.endsWith('@medicore.com')) {
       return res.status(400).json({
         success: false,
-        message: 'Staff email must end with @orvanta.com'
+        message: 'Staff email must end with @medicore.com'
       });
     }
 

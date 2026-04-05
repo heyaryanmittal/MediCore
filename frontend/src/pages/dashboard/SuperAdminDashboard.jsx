@@ -64,7 +64,7 @@ const SuperAdminDashboard = () => {
         <div className="relative">
           <div className="w-16 h-16 border-4 border-brand-teal/20 border-t-brand-teal rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-brand-dark uppercase tracking-tighter">
-            Orvanta
+            MediCore
           </div>
         </div>
         <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Synchronizing Systems...</p>

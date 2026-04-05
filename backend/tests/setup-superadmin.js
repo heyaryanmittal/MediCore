@@ -16,7 +16,7 @@ app.get('/test', (req, res) => {
 app.post('/create-superadmin', async (req, res) => {
   try {
     console.log('Attempting to connect to MongoDB...');
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/orvanta');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/MediCore');
     console.log('Connected to MongoDB');
 
     // Define User schema inline for this test
@@ -42,8 +42,8 @@ app.post('/create-superadmin', async (req, res) => {
     // Check if model exists to avoid OverwriteModelError
     const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-    const adminEmail = 'admin@MediCore.com';
-    const adminPassword = 'Welcomeadmin';
+    const adminEmail = 'superadmin@medicore.com';
+    const adminPassword = 'adminmedicore';
 
     console.log('Checking for existing admin...');
     const existingAdmin = await User.findOne({ email: adminEmail });

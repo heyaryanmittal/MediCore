@@ -13,7 +13,7 @@
     "node": "18.x || 20.x || 22.x",
     "npm": "9.x || 10.x"
   },
-  "author": "MediCore Team",
+  "author": "Aryan Mittal",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.13.6",

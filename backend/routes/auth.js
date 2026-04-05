@@ -26,8 +26,8 @@ router.get('/test', (req, res) => {
 // Create superadmin (for testing)
 router.post('/create-superadmin', async (req, res) => {
   try {
-    const adminEmail = 'admin@MediCore.com';
-    const adminPassword = 'Welcomeadmin';
+    const adminEmail = 'superadmin@medicore.com';
+    const adminPassword = 'adminmedicore';
 
     // Check if admin exists
     const existingAdmin = await User.findOne({ email: adminEmail });
