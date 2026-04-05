@@ -259,54 +259,6 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Meet the Developer Section */}
-            <section className="py-24 bg-brand-light text-brand-dark selection:bg-brand-dark selection:text-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="text-xs font-black text-brand-teal uppercase tracking-[0.3em] mb-4">The Architect</h2>
-                        <p className="text-4xl md:text-5xl font-black font-display tracking-tight text-brand-dark">
-                            Meet the Creative Force.
-                        </p>
-                    </div>
-
-                    <div className="max-w-5xl mx-auto bg-white rounded-[3.5rem] p-8 md:p-16 shadow-premium border border-slate-100 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-light rounded-full -mr-32 -mt-32 transition-transform group-hover:scale-110 duration-700"></div>
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                            <div className="w-64 h-64 shrink-0 rounded-[3.5rem] overflow-hidden shadow-2xl transform -rotate-3 group-hover:rotate-0 transition-transform duration-500 bg-brand-dark flex items-center justify-center">
-                                <img
-                                    src="/developer.jpg"
-                                    alt="Aryan Mittal - Lead Developer"
-                                    className="w-full h-full object-cover object-top scale-110 group-hover:scale-100 transition-transform duration-700"
-                                />
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-dark text-white mb-6">
-                                    <Code className="h-3.5 w-3.5" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Lead Engineer & Visionary</span>
-                                </div>
-                                <h3 className="text-4xl font-black text-brand-dark font-display mb-6 tracking-tight">Aryan Mittal</h3>
-                                <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-                                    Passionate about bridging technology and healthcare. Aryan designed MediCore as a response to the technical hurdles faced by modern hospitals, focusing on creating a seamless, intuitive experience for both patients and practitioners.
-                                </p>
-                                <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                    <a href="https://github.com/heyaryanmittal" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 bg-brand-dark text-white rounded-xl font-bold hover:bg-brand-teal transition-all shadow-lg hover:-translate-y-1">
-                                        <Github className="h-5 w-5" />
-                                        <span>GitHub</span>
-                                    </a>
-                                    <a href="https://linkedin.com/in/heyaryanmittal" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-6 py-3 border-2 border-slate-100 text-brand-dark rounded-xl font-bold hover:bg-slate-50 transition-all hover:-translate-y-1">
-                                        <Linkedin className="h-5 w-5 text-blue-600" />
-                                        <span>LinkedIn</span>
-                                    </a>
-                                    <a href="mailto:heyaryanmittal@gmail.com" className="flex items-center gap-3 px-6 py-3 bg-brand-teal/10 text-brand-teal rounded-xl font-bold hover:bg-brand-teal hover:text-white transition-all hover:-translate-y-1">
-                                        <Mail className="h-5 w-5" />
-                                        <span>Contact</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* Footer */}
             <footer className="bg-white py-12 border-t border-slate-100">
