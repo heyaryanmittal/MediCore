@@ -361,27 +361,9 @@ router.get('/download/:type/:id', async (req, res) => {
         // If it's a Cloudinary URL or any full URL, proxy it
         if (filePath.startsWith('http')) {
             try {
-
-                // Extract publicId from the URL
-                const regex = /\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
-                const match = filePath.match(regex);
-                const publicId = match ? match[1] : null;
-
-                if (!publicId) {
-                    throw new Error('Could not extract Cloudinary Public ID from URL');
-                }
-
-                // Generate a signed URL for internal backend use (valid for 1 hour)
-                const signedUrl = cloudinary.url(publicId, {
-                    sign_url: true,
-                    secure: true,
-                    resource_type: 'image', // PDFs are treated as images in Cloudinary transformations
-                    expires_at: Math.floor(Date.now() / 1000) + 3600
-                });
-
                 const response = await axios({
                     method: 'get',
-                    url: signedUrl,
+                    url: filePath,
                     responseType: 'arraybuffer',
                     timeout: 45000
                 });
@@ -392,14 +374,14 @@ router.get('/download/:type/:id', async (req, res) => {
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
                 return res.status(200).send(Buffer.from(response.data));
             } catch (proxyError) {
-                console.error('[Download] Cloudinary Proxy Error:', {
+                console.error('[Download] Cloud Proxy Error:', {
                     message: proxyError.message,
                     status: proxyError.response?.status,
                     url: filePath
                 });
                 return res.status(502).json({
                     success: false,
-                    message: 'Could not fetch file from cloud storage. Please check Cloudinary dashboard settings (Strict Transformations).',
+                    message: 'Could not fetch file from cloud storage.',
                     error: proxyError.message
                 });
             }
