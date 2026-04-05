@@ -73,10 +73,7 @@ const ContactSales = () => {
                     
                     {/* Left Column - Information */}
                     <div className="lg:col-span-5 mb-12 lg:mb-0">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal/10 text-brand-teal mb-6 border border-brand-teal/5">
-                            <ShieldCheck className="h-4 w-4" />
-                            <span className="text-xs font-bold uppercase tracking-widest">Premium Enterprise Solutions</span>
-                        </div>
+
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-display leading-[1.1] text-brand-dark mb-6">
                             Let's transform your <span className="text-brand-teal italic">facility.</span>
                         </h1>

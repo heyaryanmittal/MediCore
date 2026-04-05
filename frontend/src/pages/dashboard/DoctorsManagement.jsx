@@ -208,10 +208,7 @@ const DoctorsManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-light text-brand-dark mb-4 border border-brand-dark/5">
-            <Users className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Medical Directorate</span>
-          </div>
+
           <h1 className="text-4xl font-extrabold text-brand-dark tracking-tight font-display mb-2">Doctors Management</h1>
           <p className="text-slate-500 font-medium text-lg">View and manage all medical practitioners in the ecosystem</p>
         </div>

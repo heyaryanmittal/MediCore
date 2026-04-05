@@ -199,10 +199,7 @@ const PatientDashboard = () => {
 
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10">
-              <Shield className="h-3.5 w-3.5 text-brand-teal fill-brand-teal" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-100">Integrated Wellness Shield</span>
-            </div>
+
             <h2 className="text-3xl md:text-4xl font-black font-display tracking-tight leading-tight">
               Empowering Your <span className="text-brand-teal italic">Health Journey</span>
             </h2>

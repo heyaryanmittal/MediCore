@@ -463,10 +463,7 @@ const StaffProfile = ({ user }) => {
 
           {/* Name + role */}
           <div className="flex-1 min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 mb-3">
-              <Shield className="h-3.5 w-3.5 text-brand-teal" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-100">{roleLabel} Portal</span>
-            </div>
+
             <h1 className="text-3xl md:text-4xl font-black text-white font-display tracking-tight leading-none mb-2">{fullName}</h1>
             <p className="text-sm font-medium text-teal-100/60">{user?.email}</p>
           </div>

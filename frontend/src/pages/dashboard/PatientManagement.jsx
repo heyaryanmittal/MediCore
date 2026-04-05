@@ -70,10 +70,7 @@ const PatientManagement = () => {
       {/* ── PAGE HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-light border border-brand-teal/10 mb-3">
-            <Users className="h-3.5 w-3.5 text-brand-teal" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark">Patient Registry</span>
-          </div>
+
           <h1 className="text-4xl font-black text-brand-dark font-display tracking-tight leading-none mb-2">
             Patient Management
           </h1>

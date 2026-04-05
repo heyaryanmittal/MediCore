@@ -54,10 +54,7 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
                         <div className="sm:text-center lg:text-left lg:col-span-7">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-teal/10 text-brand-teal mb-6 animate-fade-in shadow-inner border border-brand-teal/5">
-                                <ShieldCheck className="h-4 w-4" />
-                                <span className="text-xs font-bold uppercase tracking-widest">Hospital Management System</span>
-                            </div>
+
                             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight font-display leading-[0.95]">
                                 <span className="block text-brand-dark">Modern Care,</span>{' '}
                                 <span className="relative inline-block mt-2">
@@ -174,9 +171,7 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="lg:grid lg:grid-cols-2 gap-16 items-center">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-teal/10 text-brand-teal mb-6 border border-brand-teal/5">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Our Mission</span>
-                            </div>
+
                             <h2 className="text-4xl md:text-5xl font-black font-display text-brand-dark mb-8 leading-tight">
                                 Redefining the Standard of <span className="text-brand-teal italic">Medical Excellence.</span>
                             </h2>

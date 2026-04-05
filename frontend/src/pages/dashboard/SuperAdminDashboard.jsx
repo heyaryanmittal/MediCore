@@ -124,10 +124,7 @@ const SuperAdminDashboard = () => {
 
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-2">
-              <Zap className="h-3.5 w-3.5 text-brand-teal fill-brand-teal" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-teal-100">System Command Center</span>
-            </div>
+
             <h1 className="text-4xl md:text-5xl font-black font-display tracking-tight leading-tight">
               Welcome Back, <span className="text-brand-teal italic">{(user?.profile?.lastName || 'Admin')}</span>
             </h1>
