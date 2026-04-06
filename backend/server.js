@@ -25,13 +25,21 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
+    
     const originWithoutSlash = origin.replace(/\/$/, '');
-    if (allowedOrigins.indexOf(originWithoutSlash) !== -1 || allowedOrigins.includes('*')) {
+    
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.indexOf(originWithoutSlash) !== -1 || 
+                     allowedOrigins.includes('*') ||
+                     (originWithoutSlash.endsWith('.vercel.app')); // Allow all vercel deployments
+                     
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(null, false);
     }
   },
+
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   optionsSuccessStatus: 200
@@ -106,26 +114,36 @@ app.use((err, req, res, next) => {
 
 // Database connection
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore');
     console.log(chalk.green.bold('✓ Connected to MongoDB'));
   } catch (err) {
     console.error(chalk.red.bold('✗ MongoDB Connection Failed:'), err.message);
-    process.exit(1);
+    // Don't exit on Vercel as it will kill the function worker
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 };
 
 // Export for Vercel
 module.exports = app;
 
+// Call connectDB - essential for Vercel serverless environment
+connectDB();
+
 // Listen only if not on Vercel
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(chalk.yellow.bold(`✓ Server is running on port: ${PORT}`));
-    });
+if (!process.env.VERCEL) {
+  const server = app.listen(PORT, () => {
+    console.log(chalk.yellow.bold(`✓ Server is running on port: ${PORT}`));
   });
 
-  process.on('SIGTERM', () => process.exit(0));
-  process.on('SIGINT', () => process.exit(0));
+  process.on('SIGTERM', () => {
+    server.close(() => process.exit(0));
+  });
+  process.on('SIGINT', () => {
+    server.close(() => process.exit(0));
+  });
 }
+
