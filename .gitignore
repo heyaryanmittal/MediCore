@@ -27,7 +27,7 @@ backend/uploads/
 
 # OS
 Thumbs.db
-desktop.ini
+[Dd]esktop.ini
 
 # Testing
 coverage/
