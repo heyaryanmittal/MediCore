@@ -331,11 +331,12 @@ router.post('/prescription', [
       });
     }
 
-    // Check if appointment is checked_out
-    if (appointment.status !== 'checked_out') {
+    // Allow prescription if appointment is confirmed, checked_in, or checked_out
+    const allowedStatuses = ['confirmed', 'checked_in', 'checked_out'];
+    if (!allowedStatuses.includes(appointment.status)) {
       return res.status(403).json({
         success: false,
-        message: 'Prescription can only be created after patient checkout'
+        message: `Prescription can only be created for appointments that are confirmed or in progress (Current: ${appointment.status})`
       });
     }
 

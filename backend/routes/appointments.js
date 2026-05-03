@@ -307,9 +307,10 @@ router.patch('/:appointmentId/status', [
     if (req.user.role === 'receptionist' || req.user.role === 'superadmin') {
       const allowedReceptionistTransitions = {
         pending:    ['confirmed', 'cancelled'],
-        confirmed:  ['cancelled'],
-        checked_in: ['cancelled'],
-        // checked_out & completed: visit is done — cancellation not permitted
+        confirmed:  ['checked_in', 'cancelled'],
+        checked_in: ['checked_out', 'cancelled'],
+        checked_out:['cancelled'],
+        // completed: visit is done — cancellation not permitted
       };
       const allowed = allowedReceptionistTransitions[appointment.status] || [];
       if (!allowed.includes(status)) {
@@ -500,6 +501,7 @@ router.get('/:appointmentId', authenticateToken, async (req, res) => {
           });
         }
         query.doctorId = doctor._id;
+        query.status = { $ne: 'pending' }; // Doctors should not see pending appointments even when fetching by ID
         break;
     }
 

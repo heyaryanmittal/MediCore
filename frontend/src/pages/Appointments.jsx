@@ -121,10 +121,10 @@ const Appointments = () => {
 
   const getAvailableStatuses = (appt) => {
     if (user.role === 'receptionist' || user.role === 'superadmin') {
-      if (appt.status === 'pending')   return ['confirmed', 'cancelled'];
-      if (appt.status === 'confirmed') return ['cancelled'];
-      if (appt.status === 'checked_in') return ['cancelled'];
-      // checked_out & completed: patient visit is done — no cancel allowed
+      if (appt.status === 'pending')    return ['confirmed', 'cancelled'];
+      if (appt.status === 'confirmed')  return ['checked_in', 'cancelled'];
+      if (appt.status === 'checked_in') return ['checked_out', 'cancelled'];
+      if (appt.status === 'checked_out')return ['cancelled'];
     }
     return [];
   };
@@ -178,7 +178,10 @@ const Appointments = () => {
 
       {/* ── Filter Tabs ── */}
       <div className="flex flex-wrap gap-2">
-        {FILTER_TABS.map((tab) => (
+        {FILTER_TABS.filter(tab => {
+          if (user?.role === 'doctor' && tab.value === 'pending') return false;
+          return true;
+        }).map((tab) => (
           <button
             key={tab.value}
             onClick={() => setFilter(tab.value)}
@@ -271,8 +274,10 @@ const Appointments = () => {
                   }`}
                 >
                   {status === 'confirmed' && <CheckCircle className="h-5 w-5" />}
+                  {status === 'checked_in' && <LogIn className="h-5 w-5" />}
+                  {status === 'checked_out' && <LogOut className="h-5 w-5" />}
                   {status === 'cancelled' && <Ban className="h-5 w-5" />}
-                  <span className="capitalize">{status}</span>
+                  <span className="capitalize">{status.replace('_', ' ')}</span>
                 </button>
               ))}
             </div>
@@ -413,28 +418,10 @@ const AppointmentCard = ({
             </ActionButton>
           )}
 
-          {/* Doctor: Check In → Check Out → Prescribe */}
+          {/* Doctor: Direct Prescription for any confirmed/active appointment */}
           {isDoctor && (
             <>
-              {appt.status === 'confirmed' && (
-                <ActionButton
-                  onClick={() => onUpdateStatusDirect(appt, 'checked_in')}
-                  variant="blue"
-                  icon={<LogIn className="h-4 w-4" />}
-                >
-                  Check In
-                </ActionButton>
-              )}
-              {appt.status === 'checked_in' && (
-                <ActionButton
-                  onClick={() => onUpdateStatusDirect(appt, 'checked_out')}
-                  variant="amber"
-                  icon={<LogOut className="h-4 w-4" />}
-                >
-                  Check Out
-                </ActionButton>
-              )}
-              {appt.status === 'checked_out' && (
+              {['confirmed', 'checked_in', 'checked_out'].includes(appt.status) && (
                 <ActionButton
                   onClick={() => onOpenPrescription(appt)}
                   variant="dark"

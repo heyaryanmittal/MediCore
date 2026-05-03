@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const DoctorDashboard = () => {
@@ -12,6 +13,7 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -206,7 +208,10 @@ const DoctorDashboard = () => {
               <h3 className="text-2xl font-black font-display mb-8">Clinical Actions</h3>
               
               <div className="space-y-4">
-                <button className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group">
+                <button 
+                  onClick={() => navigate('/doctor/appointments')}
+                  className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group"
+                >
                   <div className="flex items-center gap-4 text-left">
                     <div className="p-3 bg-brand-teal rounded-xl">
                       <Calendar className="h-5 w-5 text-white" />
@@ -219,7 +224,10 @@ const DoctorDashboard = () => {
                   <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
 
-                <button className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group">
+                <button 
+                  onClick={() => navigate('/doctor/appointments')}
+                  className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group"
+                >
                   <div className="flex items-center gap-4 text-left">
                     <div className="p-3 bg-blue-500 rounded-xl">
                       <Clipboard className="h-5 w-5 text-white" />
@@ -232,7 +240,10 @@ const DoctorDashboard = () => {
                   <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
 
-                <button className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group">
+                <button 
+                  onClick={() => navigate('/dashboard/patients')}
+                  className="w-full flex items-center justify-between p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[2rem] transition-all group"
+                >
                   <div className="flex items-center gap-4 text-left">
                     <div className="p-3 bg-emerald-500 rounded-xl">
                       <Users className="h-5 w-5 text-white" />
