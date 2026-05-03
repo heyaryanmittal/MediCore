@@ -24,6 +24,7 @@ const DoctorsManagement = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [isEditingDoctor, setIsEditingDoctor] = useState(false);
   const navigate = useNavigate();
 
   const ALL_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];

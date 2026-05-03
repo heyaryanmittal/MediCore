@@ -80,7 +80,7 @@ function App() {
                   <Route path="/dashboard/create-staff" element={<ProtectedRoute roles={['superadmin']}><CreateStaff /></ProtectedRoute>} />
                   <Route path="/dashboard/doctors" element={<ProtectedRoute roles={['superadmin']}><DoctorsManagement /></ProtectedRoute>} />
                   <Route path="/dashboard/staff" element={<ProtectedRoute roles={['superadmin']}><StaffManagement /></ProtectedRoute>} />
-                  <Route path="/dashboard/patients" element={<ProtectedRoute roles={['superadmin', 'receptionist']}><PatientManagement /></ProtectedRoute>} />
+                  <Route path="/dashboard/patients" element={<ProtectedRoute roles={['superadmin', 'receptionist', 'doctor']}><PatientManagement /></ProtectedRoute>} />
                   <Route path="/dashboard/analytics" element={<ProtectedRoute roles={['superadmin']}><DetailedAnalytics /></ProtectedRoute>} />
                   <Route path="/dashboard/contact-messages" element={<ProtectedRoute roles={['superadmin']}><ContactMessages /></ProtectedRoute>} />
 

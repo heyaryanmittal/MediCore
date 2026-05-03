@@ -402,7 +402,7 @@ const PatientManagement = () => {
               </div>
 
               {/* Actions (receptionist only) */}
-              {user?.role !== 'superadmin' && (
+              {user?.role === 'receptionist' && (
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => { setShowPatientModal(false); setShowLabModal(true); }}
