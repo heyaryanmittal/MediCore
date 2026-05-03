@@ -85,28 +85,28 @@ function App() {
                   <Route path="/dashboard/contact-messages" element={<ProtectedRoute roles={['superadmin']}><ContactMessages /></ProtectedRoute>} />
 
                   {/* Doctor Routes */}
-                  <Route path="doctor/dashboard" element={<ProtectedRoute roles={['doctor']}><DoctorDashboard /></ProtectedRoute>} />
-                  <Route path="doctor/appointments" element={<ProtectedRoute roles={['doctor']}><Appointments /></ProtectedRoute>} />
-                  <Route path="doctor/prescriptions" element={<ProtectedRoute roles={['doctor']}><Prescriptions /></ProtectedRoute>} />
-                  <Route path="doctor/profile" element={<ProtectedRoute roles={['doctor']}><Profile /></ProtectedRoute>} />
+                  <Route path="/doctor/dashboard" element={<ProtectedRoute roles={['doctor']}><DoctorDashboard /></ProtectedRoute>} />
+                  <Route path="/doctor/appointments" element={<ProtectedRoute roles={['doctor']}><Appointments /></ProtectedRoute>} />
+                  <Route path="/doctor/prescriptions" element={<ProtectedRoute roles={['doctor']}><Prescriptions /></ProtectedRoute>} />
+                  <Route path="/doctor/profile" element={<ProtectedRoute roles={['doctor']}><Profile /></ProtectedRoute>} />
 
                   {/* Receptionist Routes */}
-                  <Route path="receptionist/dashboard" element={<ProtectedRoute roles={['receptionist']}><ReceptionistDashboard /></ProtectedRoute>} />
-                  <Route path="receptionist/appointments" element={<ProtectedRoute roles={['receptionist']}><Appointments /></ProtectedRoute>} />
-                  <Route path="receptionist/bills" element={<ProtectedRoute roles={['receptionist']}><Bills /></ProtectedRoute>} />
-                  <Route path="receptionist/lab-reports" element={<ProtectedRoute roles={['receptionist']}><LabReports /></ProtectedRoute>} />
-                  <Route path="receptionist/doctor-availability" element={<ProtectedRoute roles={['receptionist']}><DoctorAvailability /></ProtectedRoute>} />
-                  <Route path="receptionist/profile" element={<ProtectedRoute roles={['receptionist']}><Profile /></ProtectedRoute>} />
+                  <Route path="/receptionist/dashboard" element={<ProtectedRoute roles={['receptionist']}><ReceptionistDashboard /></ProtectedRoute>} />
+                  <Route path="/receptionist/appointments" element={<ProtectedRoute roles={['receptionist']}><Appointments /></ProtectedRoute>} />
+                  <Route path="/receptionist/bills" element={<ProtectedRoute roles={['receptionist']}><Bills /></ProtectedRoute>} />
+                  <Route path="/receptionist/lab-reports" element={<ProtectedRoute roles={['receptionist']}><LabReports /></ProtectedRoute>} />
+                  <Route path="/receptionist/doctor-availability" element={<ProtectedRoute roles={['receptionist']}><DoctorAvailability /></ProtectedRoute>} />
+                  <Route path="/receptionist/profile" element={<ProtectedRoute roles={['receptionist']}><Profile /></ProtectedRoute>} />
 
                   {/* Patient Routes */}
-                  <Route path="patient/dashboard" element={<ProtectedRoute roles={['patient']}><PatientDashboard /></ProtectedRoute>} />
-                  <Route path="patient/book-appointment" element={<ProtectedRoute roles={['patient']}><BookAppointment /></ProtectedRoute>} />
-                  <Route path="patient/appointments" element={<ProtectedRoute roles={['patient']}><Appointments /></ProtectedRoute>} />
-                  <Route path="patient/bills" element={<ProtectedRoute roles={['patient']}><Bills /></ProtectedRoute>} />
-                  <Route path="patient/prescriptions" element={<ProtectedRoute roles={['patient']}><Prescriptions /></ProtectedRoute>} />
-                  <Route path="patient/lab-reports" element={<ProtectedRoute roles={['patient']}><LabReports /></ProtectedRoute>} />
-                  <Route path="patient/profile" element={<ProtectedRoute roles={['patient']}><Profile /></ProtectedRoute>} />
-                  <Route path="patient/payment-success" element={<ProtectedRoute roles={['patient']}><PaymentSuccess /></ProtectedRoute>} />
+                  <Route path="/patient/dashboard" element={<ProtectedRoute roles={['patient']}><PatientDashboard /></ProtectedRoute>} />
+                  <Route path="/patient/book-appointment" element={<ProtectedRoute roles={['patient']}><BookAppointment /></ProtectedRoute>} />
+                  <Route path="/patient/appointments" element={<ProtectedRoute roles={['patient']}><Appointments /></ProtectedRoute>} />
+                  <Route path="/patient/bills" element={<ProtectedRoute roles={['patient']}><Bills /></ProtectedRoute>} />
+                  <Route path="/patient/prescriptions" element={<ProtectedRoute roles={['patient']}><Prescriptions /></ProtectedRoute>} />
+                  <Route path="/patient/lab-reports" element={<ProtectedRoute roles={['patient']}><LabReports /></ProtectedRoute>} />
+                  <Route path="/patient/profile" element={<ProtectedRoute roles={['patient']}><Profile /></ProtectedRoute>} />
+                  <Route path="/patient/payment-success" element={<ProtectedRoute roles={['patient']}><PaymentSuccess /></ProtectedRoute>} />
                 </Route>
 
                 {/* 404 Route */}

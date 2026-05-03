@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, Eye, UserCheck, UserX, Calendar, Clock, Save, Edit2, XCircle, Star, Stethoscope, Briefcase, GraduationCap, Award, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Users, UserPlus, Search, Eye, UserCheck, UserX, 
+  Calendar, Clock, Save, Edit2, XCircle, Star, 
+  Stethoscope, Briefcase, GraduationCap, Award, 
+  ShieldCheck, Trash2, Edit 
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -15,6 +21,10 @@ const DoctorsManagement = () => {
   const [leaves, setLeaves] = useState([]);
   const [newLeaveDate, setNewLeaveDate] = useState('');
   const [loadingLeaves, setLoadingLeaves] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const navigate = useNavigate();
 
   const ALL_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const DAY_LABELS = { monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun' };
@@ -101,6 +111,52 @@ const DoctorsManagement = () => {
     } catch { toast.error('Failed to remove leave'); }
   };
 
+  const handleDeleteDoctor = async () => {
+    if (!doctorToDelete) return;
+    try {
+      const response = await api.delete(`/admin/user/${doctorToDelete.userId._id}`);
+      if (response.data.success) {
+        toast.success('Doctor deleted successfully');
+        setDoctors(prev => prev.filter(d => d._id !== doctorToDelete._id));
+        setShowDeleteConfirm(false);
+        setDoctorToDelete(null);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete doctor');
+    }
+  };
+
+  const handleEditDoctor = (doctor) => {
+    setSelectedDoctor(doctor);
+    setEditForm({
+      firstName: doctor.userId.profile.firstName,
+      lastName: doctor.userId.profile.lastName,
+      specialization: doctor.specialization,
+      department: doctor.department,
+      experience: doctor.experience,
+      qualifications: doctor.qualifications,
+      consultationFee: doctor.consultationFee,
+      licenseNumber: doctor.licenseNumber,
+      phone: doctor.userId.profile.phone
+    });
+    setIsEditingDoctor(true);
+    setShowDoctorModal(true);
+  };
+
+  const handleUpdateDoctor = async () => {
+    try {
+      const response = await api.patch(`/admin/doctor/${selectedDoctor._id}`, editForm);
+      if (response.data.success) {
+        toast.success('Doctor details updated successfully');
+        setDoctors(prev => prev.map(d => d._id === selectedDoctor._id ? { ...d, ...editForm, userId: { ...d.userId, profile: { ...d.userId.profile, firstName: editForm.firstName, lastName: editForm.lastName, phone: editForm.phone } } } : d));
+        setIsEditingDoctor(false);
+        setShowDoctorModal(false);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update doctor');
+    }
+  };
+
   const filteredDoctors = doctors.filter(doctor => {
     if (!doctor || !doctor.userId || !doctor.userId.profile) return false;
     const { firstName = '', lastName = '' } = doctor.userId.profile;
@@ -120,7 +176,7 @@ const DoctorsManagement = () => {
           <h1 className="text-4xl font-extrabold text-brand-dark tracking-tight font-display mb-2">Doctors Management</h1>
           <p className="text-slate-500 font-medium text-lg">Manage medical practitioners</p>
         </div>
-        <button onClick={() => window.location.href = '/dashboard/create-staff'} className="btn btn-primary flex items-center shadow-2xl hover:scale-105 active:scale-95 transition-all">
+        <button onClick={() => navigate('/dashboard/create-staff')} className="btn btn-primary flex items-center shadow-2xl hover:scale-105 active:scale-95 transition-all">
           <UserPlus className="h-5 w-5 mr-3" /> Onboard New Doctor
         </button>
       </div>
@@ -153,14 +209,14 @@ const DoctorsManagement = () => {
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 {['Staff Member', 'Authority', 'Specialization', 'Contact', 'Status', 'Session', 'Actions'].map((h, i) => (
-                  <th key={i} className={`px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ${i === 6 ? 'text-right' : 'text-left'}`}>{h}</th>
+                  <th key={i} className={`px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ${i === 6 ? 'text-right' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredDoctors.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-8 py-20 text-center">
+                  <td colSpan="7" className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Users className="h-12 w-12 text-slate-200" />
                       <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
@@ -174,7 +230,7 @@ const DoctorsManagement = () => {
                   const isActive = doctor.userId?.isActive;
                   return (
                     <tr key={doctor._id} className="group hover:bg-brand-light transition-colors">
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-12 w-12 rounded-2xl bg-brand-dark flex items-center justify-center text-white font-black shadow-lg transform group-hover:scale-110 transition-transform">
                             {doctor.userId?.profile?.firstName?.charAt(0)}{doctor.userId?.profile?.lastName?.charAt(0)}
@@ -187,39 +243,55 @@ const DoctorsManagement = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border bg-brand-teal/5 text-brand-teal border-brand-teal/10">
                           Doctor
                         </span>
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-xs font-bold text-slate-600">{doctor.specialization || '—'}</span>
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-xs font-bold text-slate-600 tracking-tight">{doctor.userId?.profile?.phone || '—'}</div>
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]'}`}></div>
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{isActive ? 'Active' : 'Locked'}</span>
                         </div>
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <td className="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {doctor.userId?.lastLogin ? new Date(doctor.userId.lastLogin).toLocaleDateString() : 'New'}
                       </td>
-                      <td className="px-8 py-5 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={() => { setSelectedDoctor(doctor); setShowDoctorModal(true); fetchDoctorLeaves(doctor._id); }}
+                            onClick={() => { setSelectedDoctor(doctor); setShowDoctorModal(true); setIsEditingDoctor(false); fetchDoctorLeaves(doctor._id); }}
                             className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
+                            title="View Details"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
+                            onClick={() => handleEditDoctor(doctor)}
+                            className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-blue-500 transition-colors"
+                            title="Edit Doctor"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={() => toggleDoctorStatus(doctor.userId?._id, isActive)}
-                            className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 transition-colors ${isActive ? 'text-rose-400 hover:text-rose-600' : 'text-emerald-400 hover:text-emerald-600'}`}
+                            className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 transition-colors ${isActive ? 'text-amber-400 hover:text-amber-600' : 'text-emerald-400 hover:text-emerald-600'}`}
+                            title={isActive ? 'Deactivate' : 'Activate'}
                           >
                             {isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                          </button>
+                          <button
+                            onClick={() => { setDoctorToDelete(doctor); setShowDeleteConfirm(true); }}
+                            className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-rose-400 hover:text-rose-600 transition-colors"
+                            title="Delete Doctor"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </td>
@@ -232,8 +304,82 @@ const DoctorsManagement = () => {
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)}></div>
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative animate-scale-in border border-slate-100">
+            <div className="h-16 w-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+              <Trash2 className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-black text-brand-dark text-center mb-2">Confirm Deletion</h3>
+            <p className="text-slate-500 text-center mb-8 font-medium">Are you sure you want to remove Dr. {doctorToDelete?.userId?.profile?.firstName} from the system? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={handleDeleteDoctor} className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-200">Delete</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Doctor Edit Modal */}
+      {showDoctorModal && selectedDoctor && isEditingDoctor && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-md" onClick={() => setShowDoctorModal(false)}></div>
+          <div className="bg-white rounded-[3rem] shadow-premium w-full max-w-2xl relative animate-slide-up overflow-hidden border border-slate-100">
+            <div className="p-10">
+              <h2 className="text-3xl font-black font-display text-brand-dark mb-8 flex items-center gap-3">
+                <Edit className="h-8 w-8 text-brand-teal" /> Edit Practitioner Profile
+              </h2>
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">First Name</label>
+                  <input type="text" value={editForm.firstName} onChange={e => setEditForm({ ...editForm, firstName: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
+                  <input type="text" value={editForm.lastName} onChange={e => setEditForm({ ...editForm, lastName: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specialization</label>
+                  <input type="text" value={editForm.specialization} onChange={e => setEditForm({ ...editForm, specialization: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department</label>
+                  <input type="text" value={editForm.department} onChange={e => setEditForm({ ...editForm, department: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Experience (Years)</label>
+                  <input type="number" value={editForm.experience} onChange={e => setEditForm({ ...editForm, experience: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">License Number</label>
+                  <input type="text" value={editForm.licenseNumber} onChange={e => setEditForm({ ...editForm, licenseNumber: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Consultation Fee</label>
+                  <input type="number" value={editForm.consultationFee} onChange={e => setEditForm({ ...editForm, consultationFee: e.target.value })} className="input" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone</label>
+                  <input type="text" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="input" />
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Qualifications</label>
+                  <textarea value={editForm.qualifications} onChange={e => setEditForm({ ...editForm, qualifications: e.target.value })} className="input min-h-[100px]" />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={handleUpdateDoctor} className="flex-1 btn btn-primary py-4 font-black uppercase text-xs tracking-widest">Update Records</button>
+                <button onClick={() => setIsEditingDoctor(false)} className="flex-1 btn bg-slate-100 text-slate-600 py-4 font-black uppercase text-xs tracking-widest hover:bg-slate-200">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Doctor Details Modal */}
-      {showDoctorModal && selectedDoctor && (
+      {showDoctorModal && selectedDoctor && !isEditingDoctor && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-md animate-fade-in" onClick={() => setShowDoctorModal(false)}></div>
           <div className="bg-white rounded-[3rem] shadow-premium w-full max-w-2xl relative animate-slide-up overflow-hidden border border-slate-100">

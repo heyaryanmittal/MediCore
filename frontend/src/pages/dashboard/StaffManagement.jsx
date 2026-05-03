@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Search, Filter, MoreVertical, Eye, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -8,8 +9,11 @@ const StaffManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('receptionist');
-  const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchStaff();
@@ -47,6 +51,21 @@ const StaffManagement = () => {
     }
   };
 
+  const handleDeleteStaff = async () => {
+    if (!userToDelete) return;
+    try {
+      const response = await api.delete(`/admin/user/${userToDelete._id}`);
+      if (response.data.success) {
+        toast.success('Staff member deleted successfully');
+        setStaff(prev => prev.filter(s => s._id !== userToDelete._id));
+        setShowDeleteConfirm(false);
+        setUserToDelete(null);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete staff member');
+    }
+  };
+
   const filteredStaff = staff.filter(member => {
     const matchesSearch = member.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.profile.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,7 +99,7 @@ const StaffManagement = () => {
           <p className="text-slate-500 font-medium text-lg">Manage receptionists</p>
         </div>
         <button
-          onClick={() => window.location.href = '/dashboard/create-staff'}
+          onClick={() => navigate('/dashboard/create-staff')}
           className="btn btn-primary flex items-center shadow-2xl hover:scale-105 active:scale-95 transition-all"
         >
           <UserPlus className="h-5 w-5 mr-3" />
@@ -120,22 +139,22 @@ const StaffManagement = () => {
           <table className="min-w-full">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Staff Member
                 </th>
-                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Authority
                 </th>
-                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Contact
                 </th>
-                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Status
                 </th>
-                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Session
                 </th>
-                <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   Actions
                 </th>
               </tr>
@@ -143,7 +162,7 @@ const StaffManagement = () => {
             <tbody className="divide-y divide-slate-50">
               {filteredStaff.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-8 py-20 text-center">
+                  <td colSpan="6" className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Users className="h-12 w-12 text-slate-200" />
                       <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
@@ -158,7 +177,7 @@ const StaffManagement = () => {
               ) : (
                 filteredStaff.map((member) => (
                   <tr key={member._id} className="group hover:bg-brand-light transition-colors">
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-12 w-12 rounded-2xl bg-brand-dark flex items-center justify-center text-white font-black shadow-lg transform group-hover:scale-110 transition-transform">
                           {member.profile.firstName.charAt(0)}{member.profile.lastName.charAt(0)}
@@ -173,7 +192,7 @@ const StaffManagement = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${member.role === 'doctor' ? 'bg-brand-teal/5 text-brand-teal border-brand-teal/10' :
                         member.role === 'receptionist' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                           'bg-slate-100 text-slate-600 border-slate-200'
@@ -181,12 +200,12 @@ const StaffManagement = () => {
                         {member.role}
                       </span>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-xs font-bold text-slate-600 tracking-tight">
                         {member.profile.phone || '—'}
                       </div>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${member.isActive ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]'}`}></div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">
@@ -194,13 +213,13 @@ const StaffManagement = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <td className="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       {member.lastLogin
                         ? new Date(member.lastLogin).toLocaleDateString()
                         : 'New'
                       }
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-right">
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => {
@@ -208,19 +227,38 @@ const StaffManagement = () => {
                             setShowUserModal(true);
                           }}
                           className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
+                          title="View Profile"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
+                          onClick={() => navigate(`/dashboard/create-staff?edit=${member._id}`)}
+                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
+                          title="Edit Profile"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => toggleUserStatus(member._id, member.isActive)}
-                          className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 transition-colors ${member.isActive ? 'text-rose-400 hover:text-rose-600' : 'text-emerald-400 hover:text-emerald-600'
+                          className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 transition-colors ${member.isActive ? 'text-amber-400 hover:text-amber-600' : 'text-emerald-400 hover:text-emerald-600'
                             }`}
+                          title={member.isActive ? 'Deactivate' : 'Activate'}
                         >
                           {member.isActive ? (
                             <UserX className="h-4 w-4" />
                           ) : (
                             <UserCheck className="h-4 w-4" />
                           )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setUserToDelete(member);
+                            setShowDeleteConfirm(true);
+                          }}
+                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-rose-400 hover:text-rose-600 transition-colors"
+                          title="Delete Staff"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
@@ -231,6 +269,24 @@ const StaffManagement = () => {
           </table>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)}></div>
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative animate-scale-in border border-slate-100">
+            <div className="h-16 w-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+              <Trash2 className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-black text-brand-dark text-center mb-2">Confirm Deletion</h3>
+            <p className="text-slate-500 text-center mb-8 font-medium">Are you sure you want to remove {userToDelete?.profile?.firstName} from the staff? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={handleDeleteStaff} className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-200">Delete</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* User Details Modal - Stylized */}
       {showUserModal && selectedUser && (

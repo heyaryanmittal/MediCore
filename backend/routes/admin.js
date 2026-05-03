@@ -479,6 +479,96 @@ router.patch('/update-staff/:id', async (req, res) => {
   }
 });
 
+// Delete user and associated profiles
+router.delete('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found'
+      });
+    }
+
+    // Prevent deleting super admin
+    if (user.role === 'superadmin') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete Super Admin account'
+      });
+    }
+
+    // Cascading delete for role-specific profiles
+    if (user.role === 'doctor') {
+      await Doctor.findOneAndDelete({ userId: user._id });
+    } else if (user.role === 'patient') {
+      await Patient.findOneAndDelete({ userId: user._id });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    res.json({
+      success: true,
+      message: 'User account and associated profiles removed successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during account deletion'
+    });
+  }
+});
+
+// Alias for updating doctor specific details
+router.patch('/doctor/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, phone, specialization, qualifications, experience, licenseNumber, consultationFee, department } = req.body;
+
+    const doctor = await Doctor.findById(id);
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor record not found'
+      });
+    }
+
+    // Update doctor fields
+    if (specialization) doctor.specialization = specialization;
+    if (qualifications) doctor.qualifications = qualifications;
+    if (experience !== undefined) doctor.experience = Number(experience);
+    if (licenseNumber) doctor.licenseNumber = licenseNumber;
+    if (consultationFee !== undefined) doctor.consultationFee = Number(consultationFee);
+    if (department) doctor.department = department;
+
+    await doctor.save();
+
+    // Update associated user profile
+    const user = await User.findById(doctor.userId);
+    if (user) {
+      if (firstName) user.profile.firstName = firstName;
+      if (lastName) user.profile.lastName = lastName;
+      if (phone !== undefined) user.profile.phone = phone;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Doctor profile updated successfully',
+      data: { doctor, user }
+    });
+  } catch (error) {
+    console.error('Update doctor error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating doctor profile'
+    });
+  }
+});
+
 // Get system overview
 router.get('/system-overview', getSystemOverview);
 
