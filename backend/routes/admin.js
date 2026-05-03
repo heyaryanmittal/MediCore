@@ -134,10 +134,11 @@ router.post('/create-staff', [
     const { email, password, firstName, lastName, role, phone, specialization, qualifications, experience, licenseNumber, consultationFee, department } = req.body;
 
     // Validate email domain
-    if (!email.endsWith('@medicore.com')) {
+    const expectedDomain = role === 'doctor' ? '@medicore.doc' : '@medicore.rec';
+    if (!email.endsWith(expectedDomain)) {
       return res.status(400).json({
         success: false,
-        message: 'Staff email must end with @medicore.com'
+        message: `${role.charAt(0).toUpperCase() + role.slice(1)} email must end with ${expectedDomain}`
       });
     }
 

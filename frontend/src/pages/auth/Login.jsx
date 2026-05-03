@@ -90,7 +90,7 @@ const Login = () => {
                 autoComplete="email"
                 required
                 className="input"
-                placeholder="name@company.com"
+                placeholder="name@medicore.doc"
                 value={formData.email}
                 onChange={handleChange}
               />

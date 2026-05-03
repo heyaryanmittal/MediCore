@@ -5,13 +5,20 @@ import { toast } from 'react-hot-toast';
 import {
     UserPlus, Eye, EyeOff, ShieldCheck, Mail, Phone,
     Stethoscope, Briefcase, Award, CreditCard, Landmark,
-    ChevronRight, ArrowLeft, Save, Sparkles, UserCircle
+    ChevronRight, ArrowLeft, Save, Sparkles, UserCircle, XCircle, Plus
 } from 'lucide-react';
 import api from '../../services/api';
 
 const CreateStaff = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showQualDropdown, setShowQualDropdown] = useState(false);
+    const [customQual, setCustomQual] = useState('');
+
+    const COMMON_QUALIFICATIONS = [
+        'MBBS', 'MD', 'MS', 'DNB', 'DM', 'MCH',
+        'BDS', 'MDS', 'BHMS', 'BAMS', 'PhD', 'Fellowship'
+    ];
 
     const {
         register,
@@ -69,7 +76,38 @@ const CreateStaff = () => {
         }
     };
 
+    const qualifications = watch('qualifications') || '';
+    const selectedQuals = qualifications ? qualifications.split(', ').filter(Boolean) : [];
+
+    const toggleQualification = (qual) => {
+        let newQuals;
+        if (selectedQuals.includes(qual)) {
+            newQuals = selectedQuals.filter(q => q !== qual);
+        } else {
+            newQuals = [...selectedQuals, qual];
+        }
+        setValue('qualifications', newQuals.join(', '), { shouldValidate: true });
+    };
+
+    const addCustomQualification = () => {
+        if (customQual && !selectedQuals.includes(customQual)) {
+            const newQuals = [...selectedQuals, customQual];
+            setValue('qualifications', newQuals.join(', '), { shouldValidate: true });
+            setCustomQual('');
+        }
+    };
+
     const role = watch('role');
+    const firstName = watch('firstName');
+    const lastName = watch('lastName');
+
+    useEffect(() => {
+        if (!isEditMode && firstName && lastName) {
+            const domain = role === 'doctor' ? '@medicore.doc' : '@medicore.rec';
+            const generatedEmail = `${firstName.toLowerCase()}${lastName ? '.' + lastName.toLowerCase() : ''}${domain}`;
+            setValue('email', generatedEmail, { shouldValidate: true });
+        }
+    }, [firstName, lastName, role, isEditMode, setValue]);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -229,22 +267,22 @@ const CreateStaff = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Corporate Email Address</label>
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email address</label>
                                             <div className="relative group">
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
-                                                <input
-                                                    type="email"
-                                                    {...register('email', {
-                                                        required: 'Required',
-                                                        pattern: {
-                                                            value: /^[A-Z0-9._%+-]+@medicore\.com$/i,
-                                                            message: 'Must end with @medicore.com'
-                                                        }
-                                                    })}
-                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
-                                                    placeholder="name@medicore.com"
-                                                    readOnly={isEditMode}
-                                                />
+                                                    <input
+                                                        type="email"
+                                                        {...register('email', {
+                                                            required: 'Required',
+                                                            validate: (value) => {
+                                                                const expectedDomain = role === 'doctor' ? '@medicore.doc' : '@medicore.rec';
+                                                                return value.endsWith(expectedDomain) || `Must end with ${expectedDomain}`;
+                                                            }
+                                                        })}
+                                                        className={`w-full bg-slate-50 border ${errors.email ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-100'} rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300`}
+                                                        placeholder={role === 'doctor' ? 'name@medicore.doc' : 'name@medicore.rec'}
+                                                        readOnly={isEditMode}
+                                                    />
                                             </div>
                                             {errors.email && <p className="text-[10px] text-rose-500 font-black mt-1 ml-1 uppercase">{errors.email.message}</p>}
                                         </div>
@@ -278,7 +316,7 @@ const CreateStaff = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mobile Uplink</label>
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mobile Number</label>
                                             <div className="relative group">
                                                 <Phone className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                                                 <input
@@ -315,17 +353,64 @@ const CreateStaff = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 relative">
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Credentials</label>
                                                 <div className="relative group">
                                                     <Award className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
-                                                    <input
-                                                        type="text"
-                                                        {...register('qualifications', { required: role === 'doctor' })}
-                                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
-                                                        placeholder="MBBS, MD"
-                                                    />
+                                                    <div
+                                                        onClick={() => setShowQualDropdown(!showQualDropdown)}
+                                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark cursor-pointer min-h-[54px] flex flex-wrap gap-2 items-center"
+                                                    >
+                                                        {selectedQuals.length > 0 ? (
+                                                            selectedQuals.map(q => (
+                                                                <span key={q} className="bg-brand-teal/10 text-brand-teal px-2 py-1 rounded-lg text-[10px] font-black uppercase flex items-center gap-1">
+                                                                    {q}
+                                                                    <XCircle className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); toggleQualification(q); }} />
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-slate-300">Select Qualifications</span>
+                                                        )}
+                                                    </div>
                                                 </div>
+
+                                                {showQualDropdown && (
+                                                    <div className="absolute z-50 mt-2 w-full bg-white border border-slate-100 rounded-3xl shadow-premium p-4 animate-slide-up">
+                                                        <div className="grid grid-cols-2 gap-2 mb-4">
+                                                            {COMMON_QUALIFICATIONS.map(qual => (
+                                                                <button
+                                                                    key={qual}
+                                                                    type="button"
+                                                                    onClick={() => toggleQualification(qual)}
+                                                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${selectedQuals.includes(qual)
+                                                                            ? 'bg-brand-dark border-brand-dark text-white'
+                                                                            : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-brand-teal'
+                                                                        }`}
+                                                                >
+                                                                    {qual}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={customQual}
+                                                                onChange={(e) => setCustomQual(e.target.value)}
+                                                                placeholder="Other qualification..."
+                                                                className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-brand-dark outline-none focus:border-brand-teal"
+                                                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomQualification(); } }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={addCustomQualification}
+                                                                className="bg-brand-teal text-white p-2 rounded-xl"
+                                                            >
+                                                                <Plus className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <input type="hidden" {...register('qualifications', { required: role === 'doctor' })} />
                                             </div>
                                         </div>
 
