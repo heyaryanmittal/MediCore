@@ -129,7 +129,7 @@ router.post('/register', [
     await patient.save();
 
     // Generate tokens
-    const tokens = generateTokens(user._id);
+    const tokens = generateTokens(user._id.toString());
 
     // Save refresh token to user
     user.refreshToken = tokens.refreshToken;
@@ -144,10 +144,15 @@ router.post('/register', [
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Registration error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     res.status(500).json({
       success: false,
-      message: 'Server error during registration'
+      message: 'Server error during registration',
+      error: error.message
     });
   }
 });

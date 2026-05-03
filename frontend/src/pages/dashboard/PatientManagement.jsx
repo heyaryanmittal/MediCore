@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, Search, Eye, FileUp, DollarSign, MapPin, User2,
   ShieldCheck, X, Stethoscope, Activity, Hash, LayoutGrid, LayoutList,
-  Phone, Mail, Filter, UserCheck, UserX, ChevronRight, TrendingUp
+  Phone, Mail, Filter, UserCheck, UserX, ChevronRight, TrendingUp, Droplets
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';

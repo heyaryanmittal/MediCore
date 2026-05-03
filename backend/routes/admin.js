@@ -90,9 +90,29 @@ router.get('/doctors', authorizeRoles('superadmin', 'receptionist', 'doctor'), a
 });
 
 // Get all patients (Accessible by Admin, Doctor, Receptionist)
+// Note: Doctors can only see patients who have appointments with them
 router.get('/patients', authorizeRoles('superadmin', 'receptionist', 'doctor'), async (req, res) => {
   try {
-    const patients = await Patient.find()
+    let query = {};
+
+    // If the requester is a doctor, restrict to their patients only
+    if (req.user.role === 'doctor') {
+      const doctor = await Doctor.findOne({ userId: req.user._id });
+      if (!doctor) {
+        return res.status(404).json({
+          success: false,
+          message: 'Doctor profile not found'
+        });
+      }
+
+      // Find unique patient IDs who have ever had an appointment with this doctor
+      // We use confirmed appointments or all? User said "when the patient books appointment"
+      // So any appointment (even if not yet completed) should probably count.
+      const patientIds = await Appointment.distinct('patientId', { doctorId: doctor._id });
+      query = { _id: { $in: patientIds } };
+    }
+
+    const patients = await Patient.find(query)
       .populate('userId', 'email profile isActive lastLogin')
       .sort({ createdAt: -1 });
 

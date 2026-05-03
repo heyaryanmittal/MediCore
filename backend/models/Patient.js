@@ -49,18 +49,17 @@ const patientSchema = new mongoose.Schema({
 });
 
 // Auto-generate MRN
-patientSchema.pre('save', async function(next) {
+patientSchema.pre('save', async function() {
   if (!this.medicalRecordNumber) {
     const randomNum = Math.floor(100000 + Math.random() * 900000); // 6 digit number
     this.medicalRecordNumber = `MRN-${randomNum}`;
     
     // Ensure uniqueness, extremely low collision chance but good practice
-    const existing = await mongoose.models.Patient.findOne({ medicalRecordNumber: this.medicalRecordNumber });
+    const existing = await this.constructor.findOne({ medicalRecordNumber: this.medicalRecordNumber });
     if (existing) {
       this.medicalRecordNumber = `MRN-${randomNum + 1}`;
     }
   }
-  next();
 });
 
 module.exports = mongoose.model('Patient', patientSchema);
