@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import {
     UserPlus, Eye, EyeOff, ShieldCheck, Mail, Phone,
     Stethoscope, Briefcase, Award, CreditCard, Landmark,
-    ChevronRight, ArrowLeft, Save, Sparkles, UserCircle, XCircle, Plus
+    ChevronRight, ArrowLeft, ArrowRight, Save, Sparkles, UserCircle, XCircle, Plus, CheckCircle
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -13,7 +13,16 @@ const CreateStaff = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showQualDropdown, setShowQualDropdown] = useState(false);
+    const [showDeptDropdown, setShowDeptDropdown] = useState(false);
     const [customQual, setCustomQual] = useState('');
+    const [deptSearch, setDeptSearch] = useState('');
+
+    const DEPARTMENTS = [
+        { category: 'Clinical Departments', items: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Gynecology & Obstetrics', 'Dermatology', 'General Medicine', 'Oncology', 'Radiology', 'Gastroenterology', 'Urology', 'Nephrology', 'Endocrinology', 'Pulmonology', 'Hematology', 'Rheumatology', 'Ophthalmology', 'ENT (Otolaryngology)', 'Psychiatry', 'Dentistry'] },
+        { category: 'Surgical Units', items: ['General Surgery', 'Plastic Surgery', 'Neurosurgery', 'Cardiothoracic Surgery', 'Vascular Surgery'] },
+        { category: 'Critical Care & Emergency', items: ['Emergency Medicine', 'Intensive Care Unit (ICU)', 'Anesthesiology'] },
+        { category: 'Support & Allied Health', items: ['Pathology', 'Physiotherapy', 'Nutrition & Dietetics', 'Administrative/Reception'] }
+    ];
 
     const COMMON_QUALIFICATIONS = [
         'MBBS', 'MD', 'MS', 'DNB', 'DM', 'MCH',
@@ -108,6 +117,30 @@ const CreateStaff = () => {
             setValue('email', generatedEmail, { shouldValidate: true });
         }
     }, [firstName, lastName, role, isEditMode, setValue]);
+
+    // Close dropdowns on outside click
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.dropdown-container')) {
+                setShowQualDropdown(false);
+                setShowDeptDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Handle Escape key
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+                setShowQualDropdown(false);
+                setShowDeptDropdown(false);
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, []);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -353,7 +386,7 @@ const CreateStaff = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="space-y-2 relative">
+                                            <div className="space-y-2 relative dropdown-container">
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Academic Credentials</label>
                                                 <div className="relative group">
                                                     <Award className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
@@ -448,23 +481,72 @@ const CreateStaff = () => {
                                             </div>
                                         </div>
 
-                                        <div className="md:col-span-2 space-y-2">
+                                        <div className="md:col-span-2 space-y-2 relative dropdown-container">
                                             <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Allocated Diagnostic Unit</label>
                                             <div className="relative group">
                                                 <Landmark className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
-                                                <select
-                                                    {...register('department', { required: role === 'doctor' })}
-                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all flex appearance-none"
+                                                <div
+                                                    onClick={() => setShowDeptDropdown(!showDeptDropdown)}
+                                                    className={`w-full bg-slate-50 border ${errors.department ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-100'} rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-brand-dark cursor-pointer flex items-center justify-between transition-all hover:border-brand-teal/30`}
                                                 >
-                                                    <option value="">Select Department Node</option>
-                                                    <option value="cardiology">Cardiology Unit</option>
-                                                    <option value="neurology">Neurology Ward</option>
-                                                    <option value="orthopedics">Orthopedics Dept</option>
-                                                    <option value="pediatrics">Pediatrics Wing</option>
-                                                    <option value="gynecology">Gynecology Dept</option>
-                                                    <option value="dermatology">Dermatology Unit</option>
-                                                    <option value="general">General Medicine</option>
-                                                </select>
+                                                    <span className={watch('department') ? 'text-brand-dark' : 'text-slate-300'}>
+                                                        {watch('department') || 'Select Department Node'}
+                                                    </span>
+                                                    <ChevronRight className={`h-4 w-4 text-slate-300 transition-transform duration-300 ${showDeptDropdown ? 'rotate-90 text-brand-teal' : ''}`} />
+                                                </div>
+
+                                                {showDeptDropdown && (
+                                                    <div className="absolute z-[60] mt-2 w-full bg-white border border-slate-100 rounded-[2.5rem] shadow-2xl p-6 animate-slide-up max-h-[400px] overflow-hidden flex flex-col">
+                                                        <div className="relative mb-4">
+                                                            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-brand-teal" />
+                                                            <input
+                                                                type="text"
+                                                                value={deptSearch}
+                                                                onChange={(e) => setDeptSearch(e.target.value)}
+                                                                placeholder="Search diagnostic units..."
+                                                                className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-3 text-xs font-bold text-brand-dark outline-none focus:border-brand-teal transition-all"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                        </div>
+
+                                                        <div className="overflow-y-auto custom-scrollbar flex-1 pr-2">
+                                                            {DEPARTMENTS.map((group) => {
+                                                                const filteredItems = group.items.filter(item =>
+                                                                    item.toLowerCase().includes(deptSearch.toLowerCase())
+                                                                );
+                                                                if (filteredItems.length === 0) return null;
+
+                                                                return (
+                                                                    <div key={group.category} className="mb-6 last:mb-0">
+                                                                        <h4 className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 ml-2">{group.category}</h4>
+                                                                        <div className="space-y-1">
+                                                                            {filteredItems.map(item => (
+                                                                                <button
+                                                                                    key={item}
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        setValue('department', item, { shouldValidate: true });
+                                                                                        setShowDeptDropdown(false);
+                                                                                        setDeptSearch('');
+                                                                                    }}
+                                                                                    className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/item ${watch('department') === item
+                                                                                            ? 'bg-brand-dark text-white'
+                                                                                            : 'text-slate-500 hover:bg-brand-light hover:text-brand-teal'
+                                                                                        }`}
+                                                                                >
+                                                                                    {item}
+                                                                                    {watch('department') === item && <CheckCircle className="h-3 w-3 text-brand-teal" />}
+                                                                                    <ArrowRight className={`h-3 w-3 opacity-0 -translate-x-2 transition-all group-hover/item:opacity-100 group-hover/item:translate-x-0 ${watch('department') === item ? 'hidden' : ''}`} />
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <input type="hidden" {...register('department', { required: role === 'doctor' })} />
                                             </div>
                                         </div>
                                     </div>
