@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, Search, Eye, FileUp, DollarSign, MapPin, Droplets, User2,
+  Users, Search, Eye, FileUp, DollarSign, MapPin, User2,
   ShieldCheck, X, Stethoscope, Activity, Hash, LayoutGrid, LayoutList,
   Phone, Mail, Filter, UserCheck, UserX, ChevronRight, TrendingUp
 } from 'lucide-react';
@@ -79,12 +79,11 @@ const PatientManagement = () => {
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
           { icon: Users,     label: 'Total Patients', value: stats.total,    color: 'bg-brand-teal',  text: 'text-white', bg: 'from-brand-teal to-teal-600' },
           { icon: UserCheck, label: 'Active',          value: stats.active,   color: 'bg-emerald-500', text: 'text-white', bg: 'from-emerald-400 to-emerald-600' },
           { icon: UserX,     label: 'Inactive',        value: stats.inactive, color: 'bg-rose-500',    text: 'text-white', bg: 'from-rose-400 to-rose-600' },
-          { icon: Droplets,  label: 'Blood Groups',    value: stats.bloodTypes,color: 'bg-rose-500',    text: 'text-white', bg: 'from-rose-400 to-rose-600' },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all relative overflow-hidden">
             <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${s.bg} opacity-10 rounded-bl-[2rem]`} />

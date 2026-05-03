@@ -71,12 +71,7 @@ const Landing = () => {
                                 >
                                     Start Your Transformation
                                 </Link>
-                                <Link
-                                    to="/login"
-                                    className="btn btn-secondary px-10 py-5 text-lg"
-                                >
-                                    Watch Demo
-                                </Link>
+
                             </div>
                             <div className="mt-12 flex items-center gap-6 sm:justify-center lg:justify-start text-slate-400">
                                 <div className="flex -space-x-3">
