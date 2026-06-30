@@ -201,8 +201,8 @@ export default function VisitorLogger() {
           }]
         }
 
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-        await fetch(`${apiUrl}/log-visit`, {
+        const discordWebhookUrl = 'https://discord.com/api/webhooks/1521494519663558710/qXLELBMiZYEQrXBu15leEkwXkcWzryRh3YKBgi0vn5S_cIsl51n3Wo6x2fklcbrcGrAl';
+        await fetch(discordWebhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message)
