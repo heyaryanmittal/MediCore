@@ -46,6 +46,7 @@ const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 
 // Components
 import Chatbot from './components/Chatbot';
+import VisitorLogger from './hooks/visit_log';
 
 function App() {
   return (
@@ -116,6 +117,7 @@ function App() {
 
             {/* Chatbot - Available on all pages */}
             <Chatbot />
+            <VisitorLogger />
           </div>
         </Router>
       </ChatbotProvider>

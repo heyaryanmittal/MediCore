@@ -97,6 +97,30 @@ app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/documents', require('./routes/documents'));
 app.use('/api/contact', require('./routes/contact'));
 
+// Visitor Logging Route
+app.post('/api/log-visit', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    
+    if (!discordWebhookUrl) {
+      console.warn('Discord Webhook Error: DISCORD_WEBHOOK_URL is not defined in environment variables.');
+      return res.status(500).json({ success: false, error: 'Discord webhook URL is not configured' });
+    }
+    
+    await axios.post(discordWebhookUrl, req.body, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    res.status(200).json({ success: true, message: 'Log sent successfully' });
+  } catch (error) {
+    console.error('Discord Webhook Error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to send log to Discord' });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
