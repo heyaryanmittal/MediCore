@@ -201,7 +201,8 @@ export default function VisitorLogger() {
           }]
         }
 
-        await fetch('/api/log-visit', {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        await fetch(`${apiUrl}/log-visit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message)
