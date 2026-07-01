@@ -259,7 +259,7 @@ const Landing = () => {
                             <span className="text-xl font-black font-display tracking-tight text-brand-dark">MediCore</span>
                         </div>
                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                            &copy; 2024 MediCore OS. Crafted for Excellence.
+                            &copy; 2026 MediCore OS. Crafted for Excellence.
                         </p>
                         {/* <div className="flex gap-6 text-slate-400">
                             <Github className="h-5 w-5 cursor-pointer hover:text-brand-dark transition-colors" />
