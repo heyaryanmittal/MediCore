@@ -297,7 +297,7 @@ const PatientManagement = () => {
         <div className="fixed inset-0 z-[200] flex items-start justify-center pt-16 px-4 pb-4">
           <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-lg animate-fade-in" onClick={() => setShowPatientModal(false)} />
 
-          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-slide-up border border-slate-100 max-h-[calc(100vh-5rem)] flex flex-col overflow-y-auto">
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-slide-up border border-slate-100 max-h-[calc(100vh-5rem)] flex flex-col overflow-y-auto scrollbar-none">
 
             {/* ── HERO HEADER ── */}
             <div className="relative h-44 bg-brand-dark shrink-0">

@@ -401,7 +401,7 @@ const DoctorsManagement = () => {
               </div>
             </div>
 
-            <div className="px-10 pt-12 pb-10 overflow-y-auto max-h-[75vh]">
+            <div className="px-10 pt-12 pb-10 overflow-y-auto max-h-[75vh] scrollbar-none">
               {/* Profile Header Section */}
               <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-10">
                 <div className="flex-1">
