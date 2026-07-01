@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, Users, DollarSign, FileText, AlertCircle, 
+  Calendar, Users, IndianRupee, FileText, AlertCircle, 
   ChevronRight, ArrowRight, Activity, CreditCard, Clipboard 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -64,7 +64,7 @@ const ReceptionistDashboard = () => {
 
   const metrics = [
     { label: "Today's Queue", value: stats.todaysAppointments, icon: Calendar, color: "text-brand-teal", bg: "bg-brand-light", border: "border-brand-teal/20" },
-    { label: "Pending Dues", value: stats.pendingBills, icon: DollarSign, iconColor: "text-rose-500", color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100" },
+    { label: "Pending Dues", value: stats.pendingBills, icon: IndianRupee, iconColor: "text-rose-500", color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100" },
     { label: "Lab Analytics", value: stats.labReports, icon: Activity, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
     { label: "System Status", value: "Active", icon: Activity, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
   ];
@@ -135,7 +135,7 @@ const ReceptionistDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { title: 'Appointments', desc: 'Secure patient bookings and scheduling.', icon: Calendar, path: '/receptionist/appointments', color: 'text-brand-teal', bg: 'bg-brand-light' },
-                { title: 'Billing Center', desc: 'Process invoices and revenue collection.', icon: DollarSign, path: '/receptionist/bills', color: 'text-rose-500', bg: 'bg-rose-50' },
+                { title: 'Billing Center', desc: 'Process invoices and revenue collection.', icon: IndianRupee, path: '/receptionist/bills', color: 'text-rose-500', bg: 'bg-rose-50' },
                 { title: 'Lab Reports', desc: 'Clinical result distribution and tracking.', icon: FileText, path: '/receptionist/lab-reports', color: 'text-blue-500', bg: 'bg-blue-50' },
                 { title: 'Staff Mapping', desc: 'Clinician availability and ward shifts.', icon: Users, path: '/receptionist/doctor-availability', color: 'text-violet-500', bg: 'bg-violet-50' },
               ].map((action) => (
