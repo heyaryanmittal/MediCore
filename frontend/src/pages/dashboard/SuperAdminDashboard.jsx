@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, UserPlus, Calendar, DollarSign, TrendingUp,
+  Users, UserPlus, Calendar, IndianRupee, TrendingUp,
   Activity, ArrowRight, Shield, Zap, Bell, Clock,
   ChevronRight, Database, Globe, Lock, Download
 } from 'lucide-react';
@@ -79,7 +79,7 @@ const SuperAdminDashboard = () => {
       icon: Users,
       color: 'from-emerald-400 to-emerald-600',
       shadow: 'shadow-emerald-200',
-      label: 'verified profiles'
+      label: 'Verified Profiles'
     },
     {
       name: 'Total Doctors',
@@ -87,7 +87,7 @@ const SuperAdminDashboard = () => {
       icon: UserPlus,
       color: 'from-blue-400 to-blue-600',
       shadow: 'shadow-blue-200',
-      label: 'medical staff'
+      label: 'Medical Staff'
     },
     {
       name: "Today's Appointments",
@@ -95,15 +95,15 @@ const SuperAdminDashboard = () => {
       icon: Calendar,
       color: 'from-amber-400 to-amber-600',
       shadow: 'shadow-amber-200',
-      label: 'active queue'
+      label: 'Active Queue'
     },
     {
       name: 'Monthly Revenue',
       value: `₹${(analytics?.totalRevenue || 0).toLocaleString()}`,
-      icon: DollarSign,
+      icon: IndianRupee,
       color: 'from-rose-400 to-rose-600',
       shadow: 'shadow-rose-200',
-      label: 'net earnings'
+      label: 'Net Earnings'
     },
     {
       name: 'System Health',
@@ -111,7 +111,7 @@ const SuperAdminDashboard = () => {
       icon: Activity,
       color: 'from-brand-teal to-brand-dark',
       shadow: 'shadow-teal-100',
-      label: 'uptime metrics'
+      label: 'Uptime Metrics'
     },
   ];
 
