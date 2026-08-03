@@ -2,6 +2,33 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChatbot } from '../context/ChatbotContext';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 
+// Lightweight markdown formatter for bot messages
+const formatMessage = (text) => {
+  if (!text) return text;
+
+  // Split into lines and process each
+  const lines = text.split('\n');
+  const elements = [];
+  let key = 0;
+
+  lines.forEach((line, i) => {
+    if (i > 0) elements.push(<br key={`br-${key++}`} />);
+
+    // Convert **bold** to <strong>
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    const formatted = parts.map((part, j) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={`b-${key++}`}>{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+
+    elements.push(<span key={`l-${key++}`}>{formatted}</span>);
+  });
+
+  return elements;
+};
+
 const Chatbot = () => {
   const { isOpen, messages, isLoading, error, toggleChatbot, sendMessage, clearMessages } = useChatbot();
   const [inputMessage, setInputMessage] = useState('');
@@ -95,7 +122,9 @@ const Chatbot = () => {
                 </div>
               )}
               <div className="flex-1 overflow-hidden">
-                <p className="text-[13.5px] font-medium leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                <p className="text-[13.5px] font-medium leading-relaxed whitespace-pre-wrap break-words">
+                  {message.type === 'bot' ? formatMessage(message.content) : message.content}
+                </p>
                 <div className={`flex items-center mt-1.5 gap-1.5 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <span className="text-[10px] opacity-60 font-semibold uppercase tracking-wider">
                     {new Date(message.timestamp).toLocaleTimeString([], {

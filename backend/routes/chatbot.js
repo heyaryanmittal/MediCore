@@ -53,15 +53,20 @@ const generateGroqResponse = async (query, apiKey) => {
   
   CRITICAL RULE: You MUST ONLY answer questions regarding healthcare, medicine, health advice, hospital operations, or wellness. 
   
+  Response Style:
+  1. Keep responses SHORT and CONCISE — maximum 3 to 5 sentences per point.
+  2. Use brief bullet points or numbered lists when listing things, but keep each point to one short sentence.
+  3. Do NOT write long paragraphs or essays. Be direct and to the point.
+  4. Do NOT use markdown bold (** **) or any special formatting. Write in plain, clean text.
+  
   Strict Limitations:
   1. DO NOT answer questions about general knowledge, history, politics, sports, entertainment, technology (unrelated to health), or any other non-healthcare topics.
-  2. If the user asks a non-healthcare question, you must politely decline and state: "I am specialized only in healthcare-related topics. Please ask me questions about health, medical conditions, doctors, medicines, or MediCore hospital services."
-  3. Always include this disclaimer: "I am an AI assistant and not a medical professional. Please consult with a qualified healthcare provider for medical advice, diagnosis, or treatment."
+  2. If the user asks a non-healthcare question, politely decline and state: "I am specialized only in healthcare-related topics. Please ask me questions about health, medical conditions, doctors, medicines, or MediCore hospital services."
+  3. Always end with a short disclaimer: "Note: I am an AI assistant. Please consult a qualified doctor for proper medical advice."
   4. Never provide specific prescriptions or dosages.
-  5. For emergencies, always tell the user to contact emergency services (like 911 or their local equivalent) immediately.
-  6. Be professional, empathetic, and concise.
+  5. For emergencies, tell the user to contact emergency services immediately.
 
-  Remember: If it's not about health, medicine, or the hospital, DO NOT answer it.`;
+  Remember: If it's not about health, medicine, or the hospital, DO NOT answer it. Keep it brief.`;
 
   try {
     const chatCompletion = await groq.chat.completions.create({
@@ -77,7 +82,7 @@ const generateGroqResponse = async (query, apiKey) => {
       ],
       model: "llama-3.3-70b-versatile", // Using a newer, more capable model
       temperature: 0.3, // Lower temperature for more factual and constrained responses
-      max_tokens: 500
+      max_tokens: 300
     });
 
     return chatCompletion.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
