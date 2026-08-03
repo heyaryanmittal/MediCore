@@ -676,7 +676,133 @@ const BookAppointment = () => {
                   View Appointments
                 </button>
                 <button 
-                  onClick={() => window.print()}
+                  onClick={() => {
+                    const doctorName = `Dr. ${selectedDoctor?.userId.profile.firstName} ${selectedDoctor?.userId.profile.lastName}`;
+                    const specialization = selectedDoctor?.specialization || '';
+                    const appointmentId = bookingDetails._id.slice(-8).toUpperCase();
+                    const dateStr = format(new Date(selectedDate), 'EEEE, MMMM do, yyyy');
+                    const timeStr = `${selectedSlot?.start} - ${selectedSlot?.end}`;
+                    const fee = selectedDoctor?.consultationFee;
+                    const now = new Date();
+                    const printDate = now.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const printTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                    const receiptHTML = `
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                        <title>MediCore Receipt - #${appointmentId}</title>
+                        <style>
+                          * { margin: 0; padding: 0; box-sizing: border-box; }
+                          body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #fff; color: #1e293b; padding: 40px; max-width: 700px; margin: 0 auto; }
+                          .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 3px solid #0f3a3a; margin-bottom: 32px; }
+                          .logo { font-size: 28px; font-weight: 900; color: #0f3a3a; letter-spacing: -0.5px; }
+                          .logo span { color: #0d9488; }
+                          .logo-sub { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 3px; margin-top: 2px; }
+                          .receipt-label { text-align: right; }
+                          .receipt-label h2 { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px; }
+                          .receipt-label p { font-size: 14px; font-weight: 700; color: #0f3a3a; }
+                          .status-badge { display: inline-block; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
+                          .section { margin-bottom: 28px; }
+                          .section-title { font-size: 10px; font-weight: 800; color: #0d9488; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+                          .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                          .detail-item label { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+                          .detail-item p { font-size: 15px; font-weight: 700; color: #1e293b; }
+                          .detail-item p.highlight { color: #0d9488; }
+                          .amount-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+                          .amount-box .label { font-size: 13px; font-weight: 600; color: #64748b; }
+                          .amount-box .amount { font-size: 28px; font-weight: 900; color: #0f3a3a; }
+                          .amount-box .amount span { font-size: 16px; color: #64748b; font-weight: 600; }
+                          .instructions { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 28px; }
+                          .instructions h4 { font-size: 11px; font-weight: 800; color: #0f3a3a; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+                          .instructions ul { list-style: none; padding: 0; }
+                          .instructions li { font-size: 12px; color: #475569; padding: 5px 0; padding-left: 18px; position: relative; line-height: 1.5; }
+                          .instructions li::before { content: '•'; position: absolute; left: 0; color: #0d9488; font-weight: 900; font-size: 14px; }
+                          .footer { text-align: center; padding-top: 24px; border-top: 1px solid #e2e8f0; }
+                          .footer p { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; line-height: 2; }
+                          .footer .brand { font-weight: 800; color: #0f3a3a; }
+                          @media print { body { padding: 20px; } @page { margin: 15mm; } }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="header">
+                          <div>
+                            <div class="logo">Medi<span>Core</span></div>
+                            <div class="logo-sub">Hospital Management System</div>
+                          </div>
+                          <div class="receipt-label">
+                            <h2>Appointment Receipt</h2>
+                            <p>#${appointmentId}</p>
+                            <div class="status-badge">✓ Confirmed & Paid</div>
+                          </div>
+                        </div>
+
+                        <div class="section">
+                          <div class="section-title">Doctor Details</div>
+                          <div class="details-grid">
+                            <div class="detail-item">
+                              <label>Practitioner</label>
+                              <p>${doctorName}</p>
+                            </div>
+                            <div class="detail-item">
+                              <label>Specialization</label>
+                              <p class="highlight">${specialization}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="section">
+                          <div class="section-title">Appointment Schedule</div>
+                          <div class="details-grid">
+                            <div class="detail-item">
+                              <label>Date</label>
+                              <p>${dateStr}</p>
+                            </div>
+                            <div class="detail-item">
+                              <label>Time Slot</label>
+                              <p class="highlight">${timeStr}</p>
+                            </div>
+                            <div class="detail-item">
+                              <label>Consultation Type</label>
+                              <p>${consultationType === 'in-person' ? 'In-Person Visit' : 'Video Consultation'}</p>
+                            </div>
+                            <div class="detail-item">
+                              <label>Issued On</label>
+                              <p>${printDate}, ${printTime}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="amount-box">
+                          <div class="label">Total Amount Paid</div>
+                          <div class="amount"><span>₹</span>${fee}</div>
+                        </div>
+
+                        <div class="instructions">
+                          <h4>Patient Instructions</h4>
+                          <ul>
+                            <li>Please arrive 15 minutes before your scheduled slot.</li>
+                            <li>Carry your original ID card for physical verification.</li>
+                            <li>Digital prescription will be available in your portal after the session.</li>
+                            <li>For rescheduling, contact the receptionist at least 2 hours prior.</li>
+                          </ul>
+                        </div>
+
+                        <div class="footer">
+                          <p class="brand">MediCore — Hospital Management System</p>
+                          <p>This is a computer-generated receipt. No signature required.</p>
+                          <p>For queries, contact support@medicore.com</p>
+                        </div>
+
+                        <script>window.onload = function() { window.print(); }</script>
+                      </body>
+                      </html>
+                    `;
+
+                    const receiptWindow = window.open('', '_blank', 'width=800,height=900');
+                    receiptWindow.document.write(receiptHTML);
+                    receiptWindow.document.close();
+                  }}
                   className="flex-1 py-5 bg-white border-2 border-slate-100 text-brand-dark rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all"
                 >
                   Download Receipt
