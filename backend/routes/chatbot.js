@@ -44,10 +44,11 @@ const isHealthRelated = (query) => {
   return healthKeywords.some(keyword => lowerQuery.includes(keyword));
 };
 
-// Generate response using Groq API
-const generateGroqResponse = async (query, apiKey) => {
-  const Groq = require('groq-sdk');
-  const groq = new Groq({ apiKey });
+// Generate response using OpenRouter API
+const generateOpenRouterResponse = async (query, apiKey) => {
+  const axios = require('axios');
+  const model = process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b:free';
+  const baseURL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
 
   const systemPrompt = `You are a dedicated Healthcare and Medical Assistant for the MediCore Hospital Management System. 
   
@@ -69,25 +70,31 @@ const generateGroqResponse = async (query, apiKey) => {
   Remember: If it's not about health, medicine, or the hospital, DO NOT answer it. Keep it brief.`;
 
   try {
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
+    const response = await axios.post(
+      `${baseURL}/chat/completions`,
+      {
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: query }
+        ],
+        temperature: 0.3,
+        max_tokens: 300
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': process.env.SITE_URL || 'http://localhost:5000',
+          'X-Title': 'MediCore HMS',
+          'Content-Type': 'application/json'
         },
-        {
-          role: "user",
-          content: query
-        }
-      ],
-      model: "llama-3.3-70b-versatile", // Using a newer, more capable model
-      temperature: 0.3, // Lower temperature for more factual and constrained responses
-      max_tokens: 300
-    });
+        timeout: 30000
+      }
+    );
 
-    return chatCompletion.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
+    return response.data?.choices?.[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try again.";
   } catch (error) {
-    console.error('Groq API error:', error);
+    console.error('OpenRouter API error:', error.response?.data || error.message);
     throw error;
   }
 };
@@ -122,22 +129,28 @@ router.post('/chat', [
     let response;
     let usedBackupKey = false;
 
+    const primaryKey = process.env.OPENROUTER_API_KEY_PRIMARY || process.env.OPENROUTER_API_KEY || process.env.GROQ_API_KEY_PRIMARY;
+    const backupKey = process.env.OPENROUTER_API_KEY_BACKUP || process.env.GROQ_API_KEY_BACKUP;
+
     // Try primary API key first
     try {
-      response = await generateGroqResponse(message, process.env.GROQ_API_KEY_PRIMARY);
+      if (!primaryKey) {
+        throw new Error('Primary API key not configured');
+      }
+      response = await generateOpenRouterResponse(message, primaryKey);
     } catch (primaryError) {
-      console.error('Primary Groq API failed:', primaryError);
+      console.error('Primary AI API failed:', primaryError);
 
       // Try backup API key
       try {
-        if (process.env.GROQ_API_KEY_BACKUP) {
-          response = await generateGroqResponse(message, process.env.GROQ_API_KEY_BACKUP);
+        if (backupKey) {
+          response = await generateOpenRouterResponse(message, backupKey);
           usedBackupKey = true;
         } else {
           throw new Error('Backup API key not configured');
         }
       } catch (backupError) {
-        console.error('Backup Groq API also failed:', backupError);
+        console.error('Backup AI API also failed:', backupError);
         return res.status(503).json({
           success: false,
           message: 'Chatbot service is temporarily unavailable. Please try again later.'
@@ -165,10 +178,14 @@ router.post('/chat', [
 // Get chatbot status
 router.get('/status', authenticateToken, async (req, res) => {
   try {
+    const primaryKey = process.env.OPENROUTER_API_KEY_PRIMARY || process.env.OPENROUTER_API_KEY || process.env.GROQ_API_KEY_PRIMARY;
+    const backupKey = process.env.OPENROUTER_API_KEY_BACKUP || process.env.GROQ_API_KEY_BACKUP;
+
     const status = {
-      isAvailable: !!(process.env.GROQ_API_KEY_PRIMARY || process.env.GROQ_API_KEY_BACKUP),
-      hasPrimaryKey: !!process.env.GROQ_API_KEY_PRIMARY,
-      hasBackupKey: !!process.env.GROQ_API_KEY_BACKUP,
+      isAvailable: !!(primaryKey || backupKey),
+      hasPrimaryKey: !!primaryKey,
+      hasBackupKey: !!backupKey,
+      model: process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b:free',
       rateLimit: {
         windowMs: 60000, // 1 minute
         maxRequests: 10

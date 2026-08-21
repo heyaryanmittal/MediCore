@@ -30,7 +30,7 @@ MediCore addresses these challenges by providing a **Unified Digital Operating S
 - **Node.js & Express**: A robust, event-driven architecture for handling high-concurrency medical records.
 - **MongoDB & Mongoose**: A flexible NoSQL database to store complex patient histories and clinical data.
 - **Cloudinary API**: Secure, cloud-based storage for clinical images, lab reports, and doctor signatures.
-- **Groq AI (Llama 3.3)**: Integrated Large Language Model (LLM) for intelligent clinical analysis and patient assistance.
+- **OpenRouter AI (Nemotron 3 Ultra)**: Integrated Large Language Model (LLM) for intelligent clinical analysis and patient assistance.
 - **Razorpay**: Integrated payment gateway for seamless, real-time healthcare billing and refunds.
 
 ---
@@ -68,7 +68,7 @@ Empowering patients to take control of their health journey.
 - **One-Click Booking**: Find doctors by specialization, check their availability, and book slots instantly.
 - **Medical Vault**: Access all personal prescriptions, lab reports, and medical history in one place.
 - **Unified Billing**: View, pay, and download receipts for all consultations and hospital services.
-- **Health Chatbot**: A Groq-powered AI assistant to answer medical queries, explain symptoms, or provide general wellness advice.
+- **Health Chatbot**: An OpenRouter-powered AI assistant to answer medical queries, explain symptoms, or provide general wellness advice.
 - **Profile Management**: Update allergies, blood group, and emergency contact details for better care.
 
 ### 4. ⌨️ Receptionist Dashboard (Operational Hub)
@@ -105,7 +105,7 @@ The front-line hub for hospital coordination and logistics.
 2. **Backend Setup**:
    - `cd backend`
    - `npm install`
-   - Configure `.env` (MongoDB URI, Cloudinary, Razorpay, Groq API Keys).
+   - Configure `.env` (MongoDB URI, Cloudinary, Razorpay, OpenRouter API Keys).
    - `npm run dev`
 3. **Frontend Setup**:
    - `cd frontend`
