@@ -282,7 +282,7 @@ const Layout = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 lg:ml-72 bg-brand-light">
         {/* Top bar - Professional and Minimal */}
-        <header className="sticky top-0 z-[150] bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 py-4">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button

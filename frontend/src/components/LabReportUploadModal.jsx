@@ -62,13 +62,13 @@ const LabReportUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
             <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-md animate-fade-in" onClick={onClose}></div>
-            <div className="bg-white rounded-[2.5rem] shadow-premium w-full max-w-2xl relative animate-slide-up overflow-hidden border border-slate-100 max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-3xl sm:rounded-[2.5rem] shadow-premium w-full max-w-2xl relative animate-slide-up overflow-hidden border border-slate-100 max-h-[90dvh] flex flex-col">
                 {/* Header */}
-                <div className="px-8 py-6 bg-brand-dark flex items-center justify-between shrink-0">
+                <div className="px-5 sm:px-8 py-5 sm:py-6 bg-brand-dark flex items-center justify-between shrink-0">
                     <div>
-                        <h2 className="text-2xl font-black font-display text-white">Upload Lab Report</h2>
+                        <h2 className="text-xl sm:text-2xl font-black font-display text-white">Upload Lab Report</h2>
                         <p className="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
                             For Patient: {patient.userId.profile.firstName} {patient.userId.profile.lastName}
                         </p>
@@ -79,7 +79,7 @@ const LabReportUploadModal = ({ isOpen, onClose, patient, onSuccess }) => {
                 </div>
 
                 {/* Content */}
-                <form onSubmit={handleSubmit} className="overflow-y-auto p-8 space-y-8">
+                <form onSubmit={handleSubmit} className="overflow-y-auto p-5 sm:p-8 space-y-6 sm:space-y-8">
                     {/* File Upload Area */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-brand-dark">
