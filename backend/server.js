@@ -107,7 +107,8 @@ app.use(async (req, res, next) => {
 });
 
 // ─── Static / health routes ───────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  try { await connectDB(); } catch (_) {}
   res.status(200).json({
     success: true,
     message: 'Server is running',
