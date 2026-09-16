@@ -140,8 +140,7 @@ router.post('/book', [
       data: { appointment }
     });
   } catch (error) {
-    require('fs').writeFileSync('d:/MediCore/backend/last_error.txt', (error.stack || error.message) + '\n');
-    console.error('Book appointment error:', error);
+    console.error('Book appointment error:', error.stack || error);
     res.status(500).json({
       success: false,
       message: 'Server error booking appointment',

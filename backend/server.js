@@ -112,18 +112,34 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Database connection
+// Database connection — optimised for Vercel serverless cold-starts
+let isConnecting = false;
+
 const connectDB = async () => {
+  // Already connected or connecting — skip
   if (mongoose.connection.readyState >= 1) return;
+  if (isConnecting) return;
+
+  isConnecting = true;
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore', {
+      // Fail fast on cold-start instead of hanging the request
+      serverSelectionTimeoutMS: 8000,
+      // Don't buffer operations when DB is not yet connected
+      bufferCommands: false,
+      // Keep the connection alive between invocations
+      maxPoolSize: 10,
+    });
     console.log(chalk.green.bold('✓ Connected to MongoDB'));
   } catch (err) {
     console.error(chalk.red.bold('✗ MongoDB Connection Failed:'), err.message);
+    isConnecting = false;
     // Don't exit on Vercel as it will kill the function worker
     if (!process.env.VERCEL) {
       process.exit(1);
     }
+  } finally {
+    isConnecting = false;
   }
 };
 

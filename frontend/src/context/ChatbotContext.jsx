@@ -78,8 +78,21 @@ export const ChatbotProvider = ({ children }) => {
         });
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to send message';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      } else {
+        // Seamless client-side network fallback
+        dispatch({
+          type: 'ADD_MESSAGE',
+          payload: {
+            type: 'bot',
+            content: "I am having temporary trouble reaching the medical network. For urgent health symptoms or emergencies, please contact emergency services or visit MediCore immediately.\n\nNote: I am an AI assistant. Please consult a qualified doctor for proper medical advice.",
+            timestamp: new Date(),
+            isHealthRelated: true,
+          },
+        });
+      }
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
