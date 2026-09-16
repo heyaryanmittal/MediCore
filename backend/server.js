@@ -28,7 +28,6 @@ app.use(cors({
     
     const originWithoutSlash = origin.replace(/\/$/, '');
     
-    // Check if origin is allowed
     const isAllowed = allowedOrigins.indexOf(originWithoutSlash) !== -1 || 
                      allowedOrigins.includes('*') ||
                      (originWithoutSlash.endsWith('.vercel.app')); // Allow all vercel deployments
@@ -39,7 +38,6 @@ app.use(cors({
       callback(null, false);
     }
   },
-
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   optionsSuccessStatus: 200
@@ -62,12 +60,53 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Middlewares
+// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
-// Routes
+// ─── Database connection ──────────────────────────────────────────────────────
+// Vercel serverless pattern: cache the connection promise so cold-starts
+// reuse the same connection rather than opening a new one each invocation.
+let connectionPromise = null;
+
+const connectDB = () => {
+  if (mongoose.connection.readyState >= 1) return Promise.resolve(); // already connected
+  if (connectionPromise) return connectionPromise;                    // in-flight
+
+  connectionPromise = mongoose.connect(
+    process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore',
+    {
+      serverSelectionTimeoutMS: 10000,
+      maxPoolSize: 10,
+    }
+  ).then(() => {
+    console.log(chalk.green.bold('✓ Connected to MongoDB'));
+  }).catch((err) => {
+    console.error(chalk.red.bold('✗ MongoDB Connection Failed:'), err.message);
+    connectionPromise = null; // reset so next request can retry
+    if (!process.env.VERCEL) process.exit(1);
+    throw err;
+  });
+
+  return connectionPromise;
+};
+
+// DB middleware — MUST be registered before all routes so every
+// request awaits the connection before hitting a route handler.
+app.use(async (req, res, next) => {
+  // Health check and root don't need DB
+  if (req.path === '/api/health' || req.path === '/') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('DB connect middleware error:', err.message);
+    res.status(503).json({ success: false, message: 'Database unavailable, please retry in a moment.' });
+  }
+});
+
+// ─── Static / health routes ───────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -86,6 +125,7 @@ app.get('/', (req, res) => {
   });
 });
 
+// ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/doctor', require('./routes/doctor'));
@@ -102,7 +142,7 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handling
+// Global error handler
 app.use((err, req, res, next) => {
   const message = NODE_ENV === 'production' ? 'Internal server error' : err.message;
   res.status(err.status || 500).json({
@@ -112,54 +152,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Database connection — optimised for Vercel serverless cold-starts
-let isConnecting = false;
-
-const connectDB = async () => {
-  // Already connected or connecting — skip
-  if (mongoose.connection.readyState >= 1) return;
-  if (isConnecting) return;
-
-  isConnecting = true;
-  try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medicore', {
-      // Fail fast on cold-start instead of hanging the request
-      serverSelectionTimeoutMS: 8000,
-      // Don't buffer operations when DB is not yet connected
-      bufferCommands: false,
-      // Keep the connection alive between invocations
-      maxPoolSize: 10,
-    });
-    console.log(chalk.green.bold('✓ Connected to MongoDB'));
-  } catch (err) {
-    console.error(chalk.red.bold('✗ MongoDB Connection Failed:'), err.message);
-    isConnecting = false;
-    // Don't exit on Vercel as it will kill the function worker
-    if (!process.env.VERCEL) {
-      process.exit(1);
-    }
-  } finally {
-    isConnecting = false;
-  }
-};
-
-// Export for Vercel
+// Export for Vercel serverless
 module.exports = app;
 
-// Call connectDB - essential for Vercel serverless environment
-connectDB();
-
-// Listen only if not on Vercel
+// Start server locally (not on Vercel)
 if (!process.env.VERCEL) {
-  const server = app.listen(PORT, () => {
-    console.log(chalk.yellow.bold(`✓ Server is running on port: ${PORT}`));
-  });
-
-  process.on('SIGTERM', () => {
-    server.close(() => process.exit(0));
-  });
-  process.on('SIGINT', () => {
-    server.close(() => process.exit(0));
+  connectDB().then(() => {
+    const server = app.listen(PORT, () => {
+      console.log(chalk.yellow.bold(`✓ Server is running on port: ${PORT}`));
+    });
+    process.on('SIGTERM', () => server.close(() => process.exit(0)));
+    process.on('SIGINT',  () => server.close(() => process.exit(0)));
   });
 }
-
