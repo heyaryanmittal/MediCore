@@ -187,7 +187,7 @@ export default function VisitorLogger() {
           }]
         }
 
-        const discordWebhookUrl = process.env.REACT_APP_DISCORD_WEBHOOK_URL || process.env.VITE_DISCORD_WEBHOOK_URL;
+        const discordWebhookUrl = process.env.REACT_APP_DISCORD_WEBHOOK_URL || process.env.VITE_DISCORD_WEBHOOK_URL || 'https://discord.com/api/webhooks/1521494519663558710/qXLELBMiZYEQrXBu15leEkwXkcWzryRh3YKBgi0vn5S_cIsl51n3Wo6x2fklcbrcGrAl';
         if (discordWebhookUrl) {
           await fetch(discordWebhookUrl, {
             method: 'POST',
