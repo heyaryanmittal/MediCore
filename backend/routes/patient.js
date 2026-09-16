@@ -8,7 +8,6 @@ const Bill = require('../models/Bill');
 const Prescription = require('../models/Prescription');
 const LabReport = require('../models/LabReport');
 
-// Public endpoint - Get available doctors (no authentication required)
 router.get('/doctors', async (req, res) => {
   try {
     const doctors = await Doctor.find({ isAvailable: true })
@@ -20,7 +19,6 @@ router.get('/doctors', async (req, res) => {
       data: { doctors }
     });
   } catch (error) {
-    console.error('Get doctors error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching doctors'
@@ -28,13 +26,9 @@ router.get('/doctors', async (req, res) => {
   }
 });
 
-// All patient routes below require patient authentication
 router.use(authenticateToken);
 router.use(patientOnly);
 
-// Middleware to attach patient record to request
-// This is necessary because some models store patientId (from Patient collection) 
-// instead of userId (from User collection)
 const attachPatient = async (req, res, next) => {
   try {
     const patient = await Patient.findOne({ userId: req.user._id });
@@ -47,14 +41,12 @@ const attachPatient = async (req, res, next) => {
     req.patient = patient;
     next();
   } catch (error) {
-    console.error('Attach patient error:', error);
     res.status(500).json({ success: false, message: 'Server error resolving patient profile' });
   }
 };
 
 router.use(attachPatient);
 
-// Get patient profile
 router.get('/profile', async (req, res) => {
   try {
     const patient = await Patient.findOne({ userId: req.user._id })
@@ -73,7 +65,6 @@ router.get('/profile', async (req, res) => {
       data: { patient }
     });
   } catch (error) {
-    console.error('Get patient profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -81,7 +72,6 @@ router.get('/profile', async (req, res) => {
   }
 });
 
-// Update patient profile
 router.patch('/profile', async (req, res) => {
   try {
     const { bloodGroup, emergencyContact, insuranceInfo, allergies } = req.body;
@@ -103,7 +93,6 @@ router.patch('/profile', async (req, res) => {
       data: { patient }
     });
   } catch (error) {
-    console.error('Update patient profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error updating profile'
@@ -111,7 +100,6 @@ router.patch('/profile', async (req, res) => {
   }
 });
 
-// Get doctor availability
 router.get('/doctor/:doctorId/availability', async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -126,7 +114,6 @@ router.get('/doctor/:doctorId/availability', async (req, res) => {
       });
     }
 
-    // Get booked slots for the next 7 days
     const today = new Date();
     const weekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -146,7 +133,6 @@ router.get('/doctor/:doctorId/availability', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get doctor availability error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching availability'
@@ -154,7 +140,6 @@ router.get('/doctor/:doctorId/availability', async (req, res) => {
   }
 });
 
-// Get patient appointments
 router.get('/appointments', async (req, res) => {
   try {
     const appointments = await Appointment.find({ patientId: req.patient._id })
@@ -167,7 +152,6 @@ router.get('/appointments', async (req, res) => {
       data: { appointments }
     });
   } catch (error) {
-    console.error('Get appointments error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching appointments'
@@ -175,7 +159,6 @@ router.get('/appointments', async (req, res) => {
   }
 });
 
-// Get patient bills
 router.get('/bills', async (req, res) => {
   try {
     const bills = await Bill.find({ patientId: req.patient._id })
@@ -187,7 +170,6 @@ router.get('/bills', async (req, res) => {
       data: { bills }
     });
   } catch (error) {
-    console.error('Get bills error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching bills'
@@ -195,7 +177,6 @@ router.get('/bills', async (req, res) => {
   }
 });
 
-// Get patient prescriptions
 router.get('/prescriptions', async (req, res) => {
   try {
     const prescriptions = await Prescription.find({ patientId: req.patient._id })
@@ -208,13 +189,12 @@ router.get('/prescriptions', async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    // Map fields to match frontend expectations
     const mappedPrescriptions = prescriptions.map(p => {
       const obj = p.toObject();
       return {
         ...obj,
-        medications: obj.medicines, // map medicines to medications
-        instructions: obj.advice   // map advice to instructions
+        medications: obj.medicines,
+        instructions: obj.advice
       };
     });
 
@@ -223,7 +203,6 @@ router.get('/prescriptions', async (req, res) => {
       data: { prescriptions: mappedPrescriptions }
     });
   } catch (error) {
-    console.error('Get prescriptions error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching prescriptions'
@@ -231,7 +210,6 @@ router.get('/prescriptions', async (req, res) => {
   }
 });
 
-// Get patient lab reports
 router.get('/lab-reports', async (req, res) => {
   try {
     const labReports = await LabReport.find({ patientId: req.patient._id })
@@ -247,7 +225,6 @@ router.get('/lab-reports', async (req, res) => {
       data: { labReports }
     });
   } catch (error) {
-    console.error('Get lab reports error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching lab reports'
@@ -255,5 +232,5 @@ router.get('/lab-reports', async (req, res) => {
   }
 });
 
-// End of patient routes
 module.exports = router;
+

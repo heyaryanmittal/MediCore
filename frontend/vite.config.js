@@ -6,6 +6,8 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const apiUrl = env.REACT_APP_API_URL || env.VITE_API_URL || (mode === 'production' ? 'https://medi-core-backend.vercel.app/api' : 'http://localhost:5000/api');
+
   return {
     plugins: [
       react(),
@@ -18,10 +20,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'process.env.REACT_APP_API_URL': JSON.stringify(
-        env.REACT_APP_API_URL || 
-        (mode === 'production' ? 'https://medi-core-backend.vercel.app/api' : 'http://localhost:5000/api')
-      ),
+      'process.env.REACT_APP_API_URL': JSON.stringify(apiUrl),
     },
     server: {
       port: 3000,
@@ -32,3 +31,4 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+

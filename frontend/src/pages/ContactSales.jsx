@@ -22,7 +22,6 @@ const ContactSales = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Need to change the import to handle this manually since api defaults requires auth tokens. Wait, the public api call doesn't need to intercept with a token. I'll import axios directly instead of api to avoid 401s if no token exists, but let's just use fetch or axios. 
             const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/contact`, {
                 method: 'POST',
                 headers: {

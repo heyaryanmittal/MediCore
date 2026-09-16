@@ -1,15 +1,15 @@
 import axios from 'axios';
 
-// Create axios instance
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
-  timeout: 30000, // 30s — Vercel cold starts can be slow
+  baseURL: BASE_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const tokens = JSON.parse(localStorage.getItem('tokens'));
@@ -23,32 +23,28 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is 401 and we haven't tried to refresh token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const tokens = JSON.parse(localStorage.getItem('tokens'));
         if (tokens && tokens.refreshToken) {
-          const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/refresh`, {
+          const response = await axios.post(`${BASE_URL}/auth/refresh`, {
             refreshToken: tokens.refreshToken,
           });
 
           const { tokens: newTokens } = response.data.data;
           localStorage.setItem('tokens', JSON.stringify(newTokens));
 
-          // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, logout user
         localStorage.removeItem('tokens');
         localStorage.removeItem('user');
         window.location.href = '/';
@@ -61,3 +57,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

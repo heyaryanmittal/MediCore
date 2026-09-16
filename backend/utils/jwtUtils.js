@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-// Generate access token
 const generateAccessToken = (userId) => {
   return jwt.sign(
     { userId },
@@ -9,7 +8,6 @@ const generateAccessToken = (userId) => {
   );
 };
 
-// Generate refresh token
 const generateRefreshToken = (userId) => {
   return jwt.sign(
     { userId },
@@ -18,12 +16,10 @@ const generateRefreshToken = (userId) => {
   );
 };
 
-// Verify refresh token
 const verifyRefreshToken = (token) => {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 };
 
-// Generate both tokens
 const generateTokens = (userId) => {
   return {
     accessToken: generateAccessToken(userId),
@@ -37,3 +33,4 @@ module.exports = {
   verifyRefreshToken,
   generateTokens
 };
+

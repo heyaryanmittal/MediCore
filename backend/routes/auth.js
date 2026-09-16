@@ -11,10 +11,9 @@ const { profilePicStorage } = require('../config/cloudinary');
 
 const upload = multer({
   storage: profilePicStorage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Test route
 router.get('/test', (req, res) => {
   res.json({
     success: true,
@@ -23,13 +22,11 @@ router.get('/test', (req, res) => {
   });
 });
 
-// Create superadmin (for testing)
 router.post('/create-superadmin', async (req, res) => {
   try {
-    const adminEmail = 'superadmin@medicore.com';
-    const adminPassword = 'adminmedicore';
+    const adminEmail = process.env.SUPERADMIN_EMAIL || 'superadmin@medicore.com';
+    const adminPassword = process.env.SUPERADMIN_PASSWORD || 'adminmedicore';
 
-    // Check if admin exists
     const existingAdmin = await User.findOne({ email: adminEmail });
     if (existingAdmin) {
       return res.json({
@@ -43,7 +40,6 @@ router.post('/create-superadmin', async (req, res) => {
       });
     }
 
-    // Create new admin
     const admin = new User({
       email: adminEmail,
       password: adminPassword,
@@ -69,7 +65,6 @@ router.post('/create-superadmin', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Create superadmin error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error creating superadmin',
@@ -78,7 +73,6 @@ router.post('/create-superadmin', async (req, res) => {
   }
 });
 
-// Register new patient (public signup)
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
@@ -98,7 +92,6 @@ router.post('/register', [
 
     const { email, password, firstName, lastName, phone, dateOfBirth, gender, address } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -107,7 +100,6 @@ router.post('/register', [
       });
     }
 
-    // Create new user
     const user = new User({
       email,
       password,
@@ -124,14 +116,11 @@ router.post('/register', [
 
     await user.save();
 
-    // Create patient profile
     const patient = new Patient({ userId: user._id });
     await patient.save();
 
-    // Generate tokens
     const tokens = generateTokens(user._id.toString());
 
-    // Save refresh token to user
     user.refreshToken = tokens.refreshToken;
     await user.save();
 
@@ -144,11 +133,6 @@ router.post('/register', [
       }
     });
   } catch (error) {
-    console.error('Registration error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
     res.status(500).json({
       success: false,
       message: 'Server error during registration',
@@ -157,7 +141,6 @@ router.post('/register', [
   }
 });
 
-// Login
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
@@ -174,7 +157,6 @@ router.post('/login', [
 
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email }).select('+password');
     if (!user || !user.isActive) {
       return res.status(401).json({
@@ -183,7 +165,6 @@ router.post('/login', [
       });
     }
 
-    // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -192,14 +173,11 @@ router.post('/login', [
       });
     }
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save();
 
-    // Generate tokens
     const tokens = generateTokens(user._id);
 
-    // Save refresh token
     user.refreshToken = tokens.refreshToken;
     await user.save();
 
@@ -212,7 +190,6 @@ router.post('/login', [
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during login'
@@ -220,7 +197,6 @@ router.post('/login', [
   }
 });
 
-// Refresh token
 router.post('/refresh', async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -232,10 +208,8 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    // Verify refresh token
     const decoded = verifyRefreshToken(refreshToken);
 
-    // Find user
     const user = await User.findById(decoded.userId);
     if (!user || !user.isActive || user.refreshToken !== refreshToken) {
       return res.status(403).json({
@@ -244,10 +218,8 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    // Generate new tokens
     const tokens = generateTokens(user._id);
 
-    // Update refresh token
     user.refreshToken = tokens.refreshToken;
     await user.save();
 
@@ -257,7 +229,6 @@ router.post('/refresh', async (req, res) => {
       data: { tokens }
     });
   } catch (error) {
-    console.error('Token refresh error:', error);
     res.status(403).json({
       success: false,
       message: 'Invalid refresh token'
@@ -265,10 +236,8 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-// Logout
 router.post('/logout', authenticateToken, async (req, res) => {
   try {
-    // Remove refresh token from user
     await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } });
 
     res.json({
@@ -276,7 +245,6 @@ router.post('/logout', authenticateToken, async (req, res) => {
       message: 'Logout successful'
     });
   } catch (error) {
-    console.error('Logout error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during logout'
@@ -284,12 +252,10 @@ router.post('/logout', authenticateToken, async (req, res) => {
   }
 });
 
-// Get current user
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     let profileData = null;
 
-    // Get additional profile data based on role
     if (req.user.role === 'patient') {
       profileData = await Patient.findOne({ userId: req.user._id });
     } else if (req.user.role === 'doctor') {
@@ -304,7 +270,6 @@ router.get('/me', authenticateToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -312,7 +277,6 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// Update user profile - for staff members (date of birth, gender, address)
 router.patch('/profile', authenticateToken, async (req, res) => {
   try {
     const { dateOfBirth, gender, address } = req.body;
@@ -333,7 +297,6 @@ router.patch('/profile', authenticateToken, async (req, res) => {
       data: { user }
     });
   } catch (error) {
-    console.error('Update user profile error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error updating profile'
@@ -341,7 +304,6 @@ router.patch('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Upload profile picture (avatar)
 router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
@@ -359,7 +321,6 @@ router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async
       });
     }
 
-    // Update avatar in profile
     user.profile.avatar = req.file.path;
     await user.save();
 
@@ -372,7 +333,6 @@ router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async
       }
     });
   } catch (error) {
-    console.error('Avatar upload error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error uploading profile picture'
@@ -381,3 +341,4 @@ router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async
 });
 
 module.exports = router;
+

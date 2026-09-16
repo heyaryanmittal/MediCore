@@ -2,12 +2,8 @@ const express = require('express');
 const router = express.Router();
 const ContactMessage = require('../models/ContactMessage');
 const { authenticateToken, superAdminOnly } = require('../middleware/auth');
-
 const { sendEmail } = require('../utils/emailService');
 
-// @route   POST /api/contact
-// @desc    Submit a contact sales message
-// @access  Public
 router.post('/', async (req, res) => {
   try {
     const { name, email, facility, role, phone, message } = req.body;
@@ -26,7 +22,6 @@ router.post('/', async (req, res) => {
       data: newMessage
     });
   } catch (error) {
-    console.error('Error in contact form submission:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error'
@@ -34,9 +29,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/contact
-// @desc    Get all contact sales messages
-// @access  Private/SuperAdmin
 router.get('/', authenticateToken, superAdminOnly, async (req, res) => {
   try {
     const messages = await ContactMessage.find().sort({ createdAt: -1 });
@@ -47,7 +39,6 @@ router.get('/', authenticateToken, superAdminOnly, async (req, res) => {
       data: messages
     });
   } catch (error) {
-    console.error('Error fetching contact messages:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error'
@@ -55,9 +46,6 @@ router.get('/', authenticateToken, superAdminOnly, async (req, res) => {
   }
 });
 
-// @route   PUT /api/contact/:id/status
-// @desc    Update message status
-// @access  Private/SuperAdmin
 router.put('/:id/status', authenticateToken, superAdminOnly, async (req, res) => {
   try {
     const { status } = req.body;
@@ -81,7 +69,6 @@ router.put('/:id/status', authenticateToken, superAdminOnly, async (req, res) =>
       data: message
     });
   } catch (error) {
-    console.error('Error updating message status:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error'
@@ -89,9 +76,6 @@ router.put('/:id/status', authenticateToken, superAdminOnly, async (req, res) =>
   }
 });
 
-// @route   POST /api/contact/:id/reply
-// @desc    Reply to a contact message and set status to replied
-// @access  Private/SuperAdmin
 router.post('/:id/reply', authenticateToken, superAdminOnly, async (req, res) => {
   try {
     const { replyMessage } = req.body;
@@ -106,7 +90,6 @@ router.post('/:id/reply', authenticateToken, superAdminOnly, async (req, res) =>
       return res.status(404).json({ success: false, message: 'Message not found' });
     }
 
-    // Send email to standard user
     const emailSubject = `Re: Your Inquiry with MediCore`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -121,14 +104,12 @@ router.post('/:id/reply', authenticateToken, superAdminOnly, async (req, res) =>
       </div>
     `;
 
-    // Fire & Forget email or await it
     await sendEmail({
       to: message.email,
       subject: emailSubject,
       html: emailHtml
     });
 
-    // Update message status directly to replied
     message.status = 'replied';
     await message.save();
 
@@ -137,7 +118,6 @@ router.post('/:id/reply', authenticateToken, superAdminOnly, async (req, res) =>
       data: message
     });
   } catch (error) {
-    console.error('Error replying to message:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error'
@@ -146,3 +126,4 @@ router.post('/:id/reply', authenticateToken, superAdminOnly, async (req, res) =>
 });
 
 module.exports = router;
+
