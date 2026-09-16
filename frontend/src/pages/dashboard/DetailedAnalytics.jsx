@@ -257,8 +257,8 @@ const DetailedAnalytics = () => {
             </div>
           </div>
           
-          <div className="h-[400px] w-full relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[400px] min-h-[400px] w-full relative z-10">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={400}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorApp" x1="0" y1="0" x2="0" y2="1">
@@ -323,8 +323,8 @@ const DetailedAnalytics = () => {
             </div>
           </div>
           
-          <div className="h-[400px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[400px] min-h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={400}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="8 8" stroke="#f2f4f4" vertical={false} />
                 <XAxis 
@@ -360,8 +360,8 @@ const DetailedAnalytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pt-8">
         <div className="card-soft lg:col-span-1 p-10 rounded-[3rem] bg-white">
           <h3 className="text-lg font-black text-[#0F3A3A] font-display mb-8">Outcomes Status</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[300px] min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
               <PieChart>
                 <Pie
                   data={appointmentStatusData}
@@ -392,8 +392,8 @@ const DetailedAnalytics = () => {
 
         <div className="card-soft lg:col-span-1 p-10 rounded-[3rem] bg-white">
           <h3 className="text-lg font-black text-[#0F3A3A] font-display mb-8">Internal Distribution</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[300px] min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
               <PieChart>
                 <Pie
                   data={departmentData}

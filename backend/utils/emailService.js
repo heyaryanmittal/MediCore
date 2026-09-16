@@ -79,7 +79,28 @@ const sendPaymentConfirmationEmail = async (patientEmail, appointmentDetails) =>
   return sendEmail({ to: patientEmail, subject, html });
 };
 
+const sendPasswordResetEmail = async (userEmail, resetUrl, resetToken) => {
+  const subject = 'MediCore Password Reset Request';
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-top: 6px solid #0d9488; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #374151;">
+      <h2 style="color: #111827; margin-top: 0; font-size: 24px; font-weight: 700;">Password Reset Request</h2>
+      <p style="font-size: 16px; line-height: 1.6;">You requested a password reset for your MediCore account.</p>
+      <p style="font-size: 16px; line-height: 1.6;">Your 6-digit reset code is:</p>
+      <div style="text-align: center; margin: 24px 0;">
+        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #0d9488; background-color: #f0fdf4; padding: 12px 24px; border-radius: 8px; border: 1px border #0d9488;">${resetToken}</span>
+      </div>
+      <p style="font-size: 14px; line-height: 1.6; color: #6b7280;">This code will expire in 1 hour. If you did not request this password reset, please ignore this email.</p>
+      <div style="padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center; margin-top: 32px;">
+        <p style="font-size: 14px; color: #6b7280; font-weight: 600; margin: 0;">MediCore Security Team</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({ to: userEmail, subject, html });
+};
+
 module.exports = {
   sendEmail,
-  sendPaymentConfirmationEmail
+  sendPaymentConfirmationEmail,
+  sendPasswordResetEmail
 };

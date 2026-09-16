@@ -201,8 +201,7 @@ Strict Limitations:
 
 Remember: If it's not about health, medicine, or the hospital, DO NOT answer it. Keep it brief.`;
 
-// Single model call with tight timeout
-const callOpenRouterModel = async (query, apiKey, model, timeoutMs = 3500) => {
+const callOpenRouterModel = async (query, apiKey, model, timeoutMs = 2000) => {
   const baseURL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
 
   const response = await axios.post(
@@ -219,7 +218,7 @@ const callOpenRouterModel = async (query, apiKey, model, timeoutMs = 3500) => {
     {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:5000',
+        'HTTP-Referer': process.env.SITE_URL || 'https://medicore-hmss.vercel.app',
         'X-Title': 'MediCore HMS',
         'Content-Type': 'application/json'
       },
@@ -234,18 +233,52 @@ const callOpenRouterModel = async (query, apiKey, model, timeoutMs = 3500) => {
   return content.trim();
 };
 
-// Fast Multi-Model AI Cascade with Zero-Downtime Fallback
-const generateAIResponse = async (query) => {
-  const primaryKey = process.env.OPENROUTER_API_KEY_PRIMARY || process.env.OPENROUTER_API_KEY || process.env.GROQ_API_KEY_PRIMARY;
-  const backupKey = process.env.OPENROUTER_API_KEY_BACKUP || process.env.GROQ_API_KEY_BACKUP;
+const callGroqModel = async (query, apiKey, timeoutMs = 2000) => {
+  const response = await axios.post(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: query }
+      ],
+      temperature: 0.3,
+      max_tokens: 300
+    },
+    {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: timeoutMs
+    }
+  );
 
-  // Candidate models in order of priority (fastest, most responsive free models)
+  const content = response.data?.choices?.[0]?.message?.content;
+  if (!content || typeof content !== 'string' || content.trim().length === 0) {
+    throw new Error('Empty response from Groq model');
+  }
+  return content.trim();
+};
+
+const generateAIResponse = async (query) => {
+  const groqKey = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_PRIMARY;
+  if (groqKey) {
+    try {
+      const content = await callGroqModel(query, groqKey, 2000);
+      return { response: content, source: 'ai', model: 'groq/llama-3.1-8b-instant' };
+    } catch (e) {}
+  }
+
+  const primaryKey = process.env.OPENROUTER_API_KEY_PRIMARY || process.env.OPENROUTER_API_KEY;
+  const backupKey = process.env.OPENROUTER_API_KEY_BACKUP;
+
   const candidateModels = [
     process.env.OPENROUTER_MODEL,
-    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-    'nex-agi/nex-n2.5-mini:free',
-    'nex-agi/nex-n2.5-pro:free',
-    'liquid/lfm-2.5-2.6b:free'
+    'meta-llama/llama-3.2-3b-instruct:free',
+    'qwen/qwen-2.5-7b-instruct:free',
+    'google/gemma-2-9b-it:free',
+    'mistralai/mistral-7b-instruct:free'
   ].filter((m, i, arr) => m && arr.indexOf(m) === i);
 
   const keysToTry = [primaryKey, backupKey].filter(Boolean);
@@ -254,18 +287,13 @@ const generateAIResponse = async (query) => {
     for (const key of keysToTry) {
       for (const model of candidateModels) {
         try {
-          const content = await callOpenRouterModel(query, key, model, 3500);
+          const content = await callOpenRouterModel(query, key, model, 2000);
           return { response: content, source: 'ai', model };
-        } catch (err) {
-          console.warn(`[Chatbot] Model ${model} failed (${err.message || 'error'}). Trying next fallback...`);
-        }
+        } catch (err) {}
       }
     }
   }
 
-  // If all external AI models fail, time out, or keys are missing:
-  // Use our built-in medical intelligence engine to guarantee 100% uptime with 0 downtime
-  console.log('[Chatbot] All external AI models timed out or failed. Serving verified Medical Fallback Engine.');
   const fallbackResponse = generateHealthcareFallback(query);
   return { response: fallbackResponse, source: 'fallback', model: 'medicore-expert-engine' };
 };

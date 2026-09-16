@@ -16,6 +16,7 @@ const PageLoader = () => (
 // Auth Pages
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
 const Landing = lazy(() => import('./pages/Landing'));
 const ContactSales = lazy(() => import('./pages/ContactSales'));
 
@@ -72,6 +73,7 @@ function App() {
                 <Route path="/contact-sales" element={<ContactSales />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/doctors" element={<Doctors />} />
 
                 {/* Protected Routes */}

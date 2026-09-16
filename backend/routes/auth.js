@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const { generateTokens, verifyRefreshToken } = require('../utils/jwtUtils');
 const { authenticateToken } = require('../middleware/auth');
+const { sendPasswordResetEmail } = require('../utils/emailService');
 const multer = require('multer');
 const { profilePicStorage } = require('../config/cloudinary');
 
@@ -337,6 +339,88 @@ router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async
       success: false,
       message: 'Server error uploading profile picture'
     });
+  }
+});
+
+router.post('/forgot-password', [
+  body('email').isEmail().normalizeEmail()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: 'Invalid email address' });
+    }
+
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'If an account exists with that email, a password reset code has been sent.'
+      });
+    }
+
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpires = Date.now() + 3600000;
+
+    await user.save();
+
+    try {
+      await sendPasswordResetEmail(user.email, null, resetToken);
+    } catch (emailErr) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      return res.status(500).json({ success: false, message: 'Email could not be sent. Please verify SMTP settings.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Password reset code sent to your email.'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error processing request' });
+  }
+});
+
+router.post('/reset-password', [
+  body('email').isEmail().normalizeEmail(),
+  body('resetToken').notEmpty().trim(),
+  body('newPassword').isLength({ min: 6 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: 'Validation failed. Password must be at least 6 characters.' });
+    }
+
+    const { email, resetToken, newPassword } = req.body;
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    const user = await User.findOne({
+      email,
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired password reset code.' });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successful. You can now login with your new password.'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error resetting password' });
   }
 });
 

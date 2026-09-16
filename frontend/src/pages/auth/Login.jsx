@@ -140,13 +140,12 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <button
-                  type="button"
+                <Link
+                  to="/forgot-password"
                   className="font-semibold text-brand-teal hover:text-brand-dark transition-colors"
-                  onClick={() => toast.error('Forgot password functionality not implemented yet')}
                 >
                   Forgot password?
-                </button>
+                </Link>
               </div>
             </div>
 
