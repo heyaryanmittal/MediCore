@@ -46,8 +46,8 @@ app.use(helmet({
 app.set('trust proxy', 1);
 
 const limiter = rateLimit({
-  windowMs: NODE_ENV === 'production' ? 15 * 60 * 1000 : 60 * 60 * 1000,
-  max: NODE_ENV === 'production' ? 100 : 1000,
+  windowMs: 15 * 60 * 1000,
+  max: NODE_ENV === 'production' ? 500 : 1000,
   message: 'Too many requests from this IP, please try again later.',
   skip: (req) => req.path === '/api/health' || req.path.startsWith('/uploads')
 });
