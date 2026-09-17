@@ -27,7 +27,7 @@ const sendEmail = async ({ to, subject, html }) => {
 
 const sendPaymentConfirmationEmail = async (patientEmail, appointmentDetails) => {
   const { doctorName, date, time, amount, paymentId } = appointmentDetails;
-  
+
   const subject = 'Appointment Confirmation and Payment Received';
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-top: 6px solid #0d9488; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); color: #374151;">
