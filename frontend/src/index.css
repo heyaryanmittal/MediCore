@@ -14,6 +14,19 @@
   h6 {
     @apply font-display font-semibold tracking-tight;
   }
+
+  /* Make all interactive elements have a pointer cursor globally */
+  button:not(:disabled), 
+  a, 
+  select, 
+  label,
+  [role="button"],
+  input[type="submit"], 
+  input[type="button"], 
+  input[type="checkbox"], 
+  input[type="radio"] {
+    @apply cursor-pointer;
+  }
 }
 
 @layer components {

@@ -29,7 +29,7 @@ router.post('/book', [
     const { doctorId, date, timeSlot, symptoms, consultationType, patientDocuments } = req.body;
 
     // Check if doctor exists and is available
-    const doctor = await Doctor.findById(doctorId);
+    const doctor = await Doctor.findById(doctorId).populate('userId', 'profile');
     if (!doctor || !doctor.isAvailable) {
       return res.status(404).json({
         success: false,
@@ -122,6 +122,26 @@ router.post('/book', [
     });
 
     await appointment.save();
+
+    // Create a Bill for the appointment payment
+    const bill = new Bill({
+      patientId: patient._id,
+      appointmentId: appointment._id,
+      items: [{
+        description: `Consultation Fee (Dr. ${doctor.userId?.profile?.firstName || ''} ${doctor.userId?.profile?.lastName || ''})`.trim(),
+        quantity: 1,
+        unitPrice: doctor.consultationFee || 0,
+        total: doctor.consultationFee || 0
+      }],
+      subtotal: doctor.consultationFee || 0,
+      tax: 0,
+      total: doctor.consultationFee || 0,
+      status: 'paid', // Assuming payment is processed on the frontend for now
+      paymentMethod: 'online',
+      createdBy: req.user._id
+    });
+
+    await bill.save();
 
     // Populate appointment details for response
     try {

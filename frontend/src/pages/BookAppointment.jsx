@@ -89,6 +89,44 @@ const BookAppointment = () => {
   };
 
   const handlePayment = async () => {
+    if (paymentMethod === 'card') {
+      const { cardNumber, expiry, cvv, cardHolder } = paymentDetails;
+      if (!cardNumber || cardNumber.length < 19) {
+        toast.error('Please enter a valid 16-digit card number');
+        return;
+      }
+      if (!cardHolder) {
+        toast.error('Please enter card holder name');
+        return;
+      }
+      if (!cvv || cvv.length < 3) {
+        toast.error('Please enter a valid CVV');
+        return;
+      }
+      if (!expiry || !expiry.includes('/')) {
+        toast.error('Please enter a valid expiry date (MM / YY)');
+        return;
+      }
+
+      const [monthStr, yearStr] = expiry.split('/').map(s => s.trim());
+      const month = parseInt(monthStr, 10);
+      const year = parseInt(yearStr, 10) + 2000;
+
+      if (month < 1 || month > 12) {
+        toast.error('Invalid expiry month (must be 01-12)');
+        return;
+      }
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+
+      if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        toast.error('Card has expired. Please use a valid card.');
+        return;
+      }
+    }
+
     setIsProcessingPayment(true);
     try {
       // Simulate payment processing delay
@@ -263,11 +301,22 @@ const BookAppointment = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             {/* Calendar */}
-            <div className="lg:col-span-7 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Select Appointment Date</h3>
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-premium">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-black text-brand-dark uppercase tracking-widest">Select Date</h3>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-brand-dark"></div> Selected
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500"></div> Leave
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
                 {[...Array(28)].map((_, i) => {
                   const date = addDays(startOfToday(), i);
                   const dateStr = format(date, 'yyyy-MM-dd');
@@ -284,17 +333,16 @@ const BookAppointment = () => {
                       key={i}
                       disabled={isDisabled}
                       onClick={() => { if (!isDisabled) { setSelectedDate(dateStr); setSelectedSlot(null); } }}
-                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer ${
                         isOnLeave ? 'bg-rose-50 border-rose-100 opacity-50 cursor-not-allowed' :
                         isSelected ? 'bg-brand-dark border-brand-dark text-white shadow-xl scale-105' :
                         'bg-white border-slate-50 hover:border-brand-teal/30 hover:bg-brand-light/20'
                       }`}
                     >
-                      <span className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">
+                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">
                         {format(date, 'EEE')}
                       </span>
-                      <span className="text-xl font-black">{format(date, 'd')}</span>
-                      {isOnLeave && <span className="text-[8px] font-black text-rose-500 uppercase mt-1">Leave</span>}
+                      <span className="text-lg sm:text-xl font-black">{format(date, 'd')}</span>
                     </button>
                   );
                 })}
@@ -302,10 +350,9 @@ const BookAppointment = () => {
             </div>
 
             {/* Slots */}
-            <div className="lg:col-span-5 bg-brand-dark p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-              <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.2em] mb-6">Available Time Slots</h3>
-              <div className="grid grid-cols-1 gap-3">
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-premium flex flex-col h-full max-h-[500px]">
+              <h3 className="text-sm font-black text-brand-dark uppercase tracking-widest mb-6">Available Time Slots</h3>
+              <div className="grid grid-cols-2 gap-3 overflow-y-auto pr-2 scrollbar-thin flex-1">
                 {selectedDoctor?.availability.timeSlots.map((slot, i) => {
                   const isBooked = bookedSlots.includes(slot.start);
                   const isSelected = selectedSlot?.start === slot.start;
@@ -315,25 +362,25 @@ const BookAppointment = () => {
                       key={i}
                       disabled={isBooked}
                       onClick={() => setSelectedSlot(slot)}
-                      className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
+                      className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer ${
                         isSelected ? 'bg-brand-teal border-brand-teal text-white shadow-lg' :
-                        isBooked ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' :
-                        'bg-white/10 border-white/10 text-white hover:bg-white/20'
+                        isBooked ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed' :
+                        'bg-white border-slate-100 text-slate-600 hover:border-brand-teal/30 hover:shadow-md'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Clock className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-brand-teal'}`} />
-                        <span className="font-bold">{slot.start} - {slot.end}</span>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <Clock className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
+                        <span className="text-sm sm:text-base font-bold">{slot.start}</span>
                       </div>
-                      {isSelected && <CheckCircle className="h-5 w-5" />}
+                      {isSelected && <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />}
                     </button>
                   );
                 })}
               </div>
               {selectedDoctor?.availability.timeSlots.length === 0 && (
-                <div className="text-center py-12">
-                  <Clock className="h-12 w-12 text-white/10 mx-auto mb-4" />
-                  <p className="text-white/40 font-bold italic">No slots for this date</p>
+                <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
+                  <Clock className="h-10 w-10 text-slate-200 mb-3" />
+                  <p className="text-slate-400 font-bold italic text-sm">No slots for this date</p>
                 </div>
               )}
             </div>
@@ -513,10 +560,16 @@ const BookAppointment = () => {
                     <div className="relative">
                       <input 
                         type="text" 
-                        className="input bg-slate-50 border-transparent focus:bg-white pl-12" 
+                        className="input bg-slate-50 border-transparent focus:bg-white pl-12 font-mono" 
                         placeholder="0000 0000 0000 0000"
+                        maxLength="19"
                         value={paymentDetails.cardNumber}
-                        onChange={(e) => setPaymentDetails({...paymentDetails, cardNumber: e.target.value})}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          if (val.length > 16) val = val.substring(0, 16);
+                          let formatted = val.match(/.{1,4}/g)?.join(' ') || '';
+                          setPaymentDetails({...paymentDetails, cardNumber: formatted});
+                        }}
                       />
                       <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                     </div>
@@ -526,20 +579,36 @@ const BookAppointment = () => {
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</label>
                       <input 
                         type="text" 
-                        className="input bg-slate-50 border-transparent focus:bg-white" 
+                        className="input bg-slate-50 border-transparent focus:bg-white text-center font-mono" 
                         placeholder="MM / YY"
+                        maxLength="7"
                         value={paymentDetails.expiry}
-                        onChange={(e) => setPaymentDetails({...paymentDetails, expiry: e.target.value})}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          if (val.length > 4) val = val.substring(0, 4);
+                          let formatted = val;
+                          if (val.length > 2) {
+                            formatted = `${val.substring(0, 2)} / ${val.substring(2)}`;
+                          } else if (val.length === 2 && e.target.value.length > (paymentDetails.expiry || '').length) {
+                            formatted = `${val} / `;
+                          }
+                          setPaymentDetails({...paymentDetails, expiry: formatted});
+                        }}
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CVV Code</label>
                       <input 
                         type="password" 
-                        className="input bg-slate-50 border-transparent focus:bg-white" 
+                        className="input bg-slate-50 border-transparent focus:bg-white text-center font-mono tracking-widest" 
                         placeholder="***"
+                        maxLength="4"
                         value={paymentDetails.cvv}
-                        onChange={(e) => setPaymentDetails({...paymentDetails, cvv: e.target.value})}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          if (val.length > 4) val = val.substring(0, 4);
+                          setPaymentDetails({...paymentDetails, cvv: val});
+                        }}
                       />
                     </div>
                   </div>
