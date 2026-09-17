@@ -4,7 +4,7 @@ import {
   Users, UserPlus, Search, Eye, UserCheck, UserX, 
   Calendar, Clock, Save, Edit2, XCircle, Star, 
   Stethoscope, Briefcase, GraduationCap, Award, 
-  ShieldCheck, Trash2, Edit 
+  ShieldCheck, Trash2, Edit, X, Activity
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -383,169 +383,170 @@ const DoctorsManagement = () => {
       {showDoctorModal && selectedDoctor && !isEditingDoctor && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-brand-dark/60 backdrop-blur-md animate-fade-in" onClick={() => setShowDoctorModal(false)}></div>
-          <div className="bg-white rounded-[3rem] shadow-premium w-full max-w-2xl relative animate-slide-up overflow-hidden border border-slate-100">
-            <div className="h-48 bg-brand-dark relative overflow-hidden">
-              <div className="absolute top-10 right-10">
-                <div className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur text-[10px] font-black text-white uppercase tracking-widest border border-white/10">License: {selectedDoctor.licenseNumber}</div>
-              </div>
-              <div className="absolute -bottom-12 left-12 h-40 w-40 rounded-[3rem] bg-teal-gradient shadow-2xl flex items-center justify-center text-white text-5xl font-black border-[10px] border-white relative overflow-hidden group/avatar">
-                <div className="absolute inset-0 opacity-10 flex items-center justify-center transform -rotate-12 scale-150 group-hover/avatar:scale-125 transition-transform duration-700">
-                  <Stethoscope className="h-full w-full" />
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl relative animate-scale-in flex flex-col h-full max-h-[90vh] sm:max-h-[85vh] overflow-hidden border border-slate-200">
+            {/* Header */}
+            <div className="shrink-0 bg-brand-dark px-6 py-5 flex items-start justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-teal/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="flex items-center gap-5 relative z-10">
+                <div className="h-16 w-16 rounded-xl bg-teal-gradient flex items-center justify-center text-white text-3xl font-black shadow-lg border border-white/20 relative">
+                  {selectedDoctor.userId?.profile?.firstName?.[0] || 'D'}
+                  {selectedDoctor.userId?.isActive && (
+                    <div className="absolute -top-2 -right-2 h-6 w-6 bg-emerald-500 rounded-full border-2 border-brand-dark flex items-center justify-center shadow-md">
+                      <ShieldCheck className="h-3.5 w-3.5 text-white" />
+                    </div>
+                  )}
                 </div>
-                <span className="relative z-10 drop-shadow-lg">{selectedDoctor.userId?.profile?.firstName?.[0] || 'D'}</span>
-                {selectedDoctor.userId?.isActive && (
-                  <div className="absolute top-3 right-3 h-10 w-10 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center shadow-lg group-hover/avatar:scale-110 transition-transform">
-                    <ShieldCheck className="h-5 w-5 text-white" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="px-10 pt-12 pb-10 overflow-y-auto max-h-[75vh] scrollbar-none">
-              {/* Profile Header Section */}
-              <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-10">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${selectedDoctor.userId?.isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
-                      {selectedDoctor.userId?.isActive ? 'Authorized Practitioner' : 'Access Restricted'}
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest ${selectedDoctor.userId?.isActive ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                      {selectedDoctor.userId?.isActive ? 'Authorized' : 'Access Restricted'}
                     </span>
-                    <span className="px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                      <Star className="h-3.5 w-3.5 fill-amber-600" /> Excellence Accredited
-                    </span>
+                    {selectedDoctor.licenseNumber && (
+                      <span className="px-2.5 py-0.5 rounded-md bg-white/10 text-white/90 text-[9px] font-bold tracking-widest border border-white/10">
+                        LIC: {selectedDoctor.licenseNumber}
+                      </span>
+                    )}
                   </div>
-                  
-                  <h2 className="text-4xl md:text-5xl font-black font-display text-brand-dark leading-tight mb-4">
+                  <h2 className="text-2xl font-bold text-white leading-tight">
                     Dr. {selectedDoctor.userId?.profile?.firstName} {selectedDoctor.userId?.profile?.lastName}
                   </h2>
-                  
-                  <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 w-fit">
-                    <div className="p-3 bg-brand-teal text-white rounded-xl shadow-lg shadow-brand-teal/20">
-                      <Stethoscope className="h-6 w-6" />
+                  <p className="text-brand-teal text-xs font-semibold mt-1">
+                    {selectedDoctor.specialization} • {selectedDoctor.department} Ward
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowDoctorModal(false)} 
+                className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors relative z-10"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto bg-slate-50 p-6 space-y-6 custom-scrollbar">
+              {/* Stats & Actions */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <Briefcase className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-brand-teal font-black uppercase text-[10px] tracking-[0.2em] mb-0.5">{selectedDoctor.specialization} specialist</p>
-                      <p className="text-slate-500 font-bold text-sm capitalize">{selectedDoctor.department} Medical Ward</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Experience</p>
+                      <p className="text-sm font-bold text-brand-dark">{selectedDoctor.experience} Years</p>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-brand-light text-brand-teal flex items-center justify-center shrink-0">
+                      <Activity className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Consultation Fee</p>
+                      <p className="text-sm font-bold text-brand-dark">₹{selectedDoctor.consultationFee}</p>
                     </div>
                   </div>
                 </div>
-                
-                <div className="flex flex-col items-stretch gap-4 w-full md:w-auto">
-                  <div className="bg-brand-dark p-6 rounded-[2.5rem] flex flex-col items-center min-w-[180px] shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 relative z-10">Consultation Fee</p>
-                    <div className="text-4xl font-black text-white font-display relative z-10">₹{selectedDoctor.consultationFee}</div>
-                    <p className="text-[8px] font-black text-brand-teal uppercase tracking-widest mt-1 relative z-10">per clinical session</p>
-                  </div>
-                  
+                <div className="md:w-1/3 flex flex-col justify-end">
                   <button
                     onClick={() => toggleDoctorStatus(selectedDoctor.userId?._id, selectedDoctor.userId?.isActive)}
-                    className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-lg active:scale-95 ${selectedDoctor.userId?.isActive ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-200' : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-200'}`}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wide transition-colors shadow-sm ${selectedDoctor.userId?.isActive ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}`}
                   >
                     {selectedDoctor.userId?.isActive ? <><UserX className="h-4 w-4" /> Unauthorize Access</> : <><UserCheck className="h-4 w-4" /> Grant Authorization</>}
                   </button>
                 </div>
               </div>
 
-              {/* Stats & Highlights Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 hover:bg-white hover:shadow-xl transition-all group">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Briefcase className="h-6 w-6" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Clinical Experience</p>
-                  <p className="text-xl font-black text-brand-dark">{selectedDoctor.experience} Years</p>
+              {/* Qualifications */}
+              <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <GraduationCap className="h-4 w-4 text-purple-500" />
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Medical Qualifications</h3>
                 </div>
-                
-                <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 hover:bg-white hover:shadow-xl transition-all group md:col-span-2">
-                  <div className="h-12 w-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <GraduationCap className="h-6 w-6" />
-                  </div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Medical Qualifications</p>
-                  <p className="text-xl font-black text-brand-dark truncate" title={selectedDoctor.qualifications}>{selectedDoctor.qualifications}</p>
-                </div>
+                <p className="text-sm font-semibold text-brand-dark leading-relaxed">
+                  {selectedDoctor.qualifications}
+                </p>
               </div>
 
               {/* Availability Section */}
               {isEditingAvailability ? (
-                <div className="mb-8 p-6 bg-slate-50 rounded-2xl border-2 border-blue-200">
-                  <h3 className="font-black text-brand-dark mb-6 flex items-center"><Calendar className="h-5 w-5 mr-2" />Edit Availability</h3>
-                  <div className="mb-6">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest mb-3 block">Available Days</label>
-                    <div className="grid grid-cols-7 gap-2">
+                <div className="p-5 bg-white rounded-xl border border-blue-200 shadow-sm">
+                  <h3 className="font-bold text-brand-dark mb-4 flex items-center text-sm"><Calendar className="h-4 w-4 mr-2 text-blue-500" />Edit Availability</h3>
+                  <div className="mb-5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Available Days</label>
+                    <div className="grid grid-cols-7 gap-1.5">
                       {ALL_DAYS.map(day => (
                         <button key={day} type="button" onClick={() => toggleDay(day)}
-                          className={`rounded-lg p-2 text-xs font-bold transition-all ${availabilityForm.days.includes(day) ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
+                          className={`rounded-lg py-1.5 text-xs font-bold transition-all ${availabilityForm.days.includes(day) ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}>
                           {DAY_LABELS[day]}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <div className="mb-6">
-                    <label className="text-xs font-black text-gray-600 uppercase tracking-widest mb-3 block">Time Slots</label>
+                  <div className="mb-5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Time Slots</label>
                     <div className="space-y-2">
                       {availabilityForm.timeSlots.map((slot, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
-                          <input type="time" value={slot.start} onChange={(e) => updateTimeSlot(idx, 'start', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-                          <span className="text-gray-400">—</span>
-                          <input type="time" value={slot.end} onChange={(e) => updateTimeSlot(idx, 'end', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-                          <button type="button" onClick={() => removeTimeSlot(idx)} className="px-3 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition-colors"><XCircle className="h-4 w-4" /></button>
+                          <input type="time" value={slot.start} onChange={(e) => updateTimeSlot(idx, 'start', e.target.value)} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm outline-none w-32" />
+                          <span className="text-slate-400">—</span>
+                          <input type="time" value={slot.end} onChange={(e) => updateTimeSlot(idx, 'end', e.target.value)} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm outline-none w-32" />
+                          <button type="button" onClick={() => removeTimeSlot(idx)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><XCircle className="h-4 w-4" /></button>
                         </div>
                       ))}
                     </div>
-                    <button type="button" onClick={addTimeSlot} className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium text-sm transition-colors">+ Add Slot</button>
+                    <button type="button" onClick={addTimeSlot} className="mt-3 px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 rounded-lg font-bold text-xs transition-colors">+ Add Slot</button>
                   </div>
-                  <div className="flex gap-3">
-                    <button onClick={saveAvailability} disabled={savingAvailability} className="flex-1 btn btn-primary flex items-center justify-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" />{savingAvailability ? 'Saving...' : 'Save'}</button>
-                    <button onClick={() => setIsEditingAvailability(false)} className="flex-1 btn bg-gray-200 text-gray-700 hover:bg-gray-300">Cancel</button>
+                  <div className="flex gap-3 justify-end pt-3 border-t border-slate-100">
+                    <button onClick={() => setIsEditingAvailability(false)} className="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-bold transition-colors">Cancel</button>
+                    <button onClick={saveAvailability} disabled={savingAvailability} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50">
+                      <Save className="h-3.5 w-3.5" />{savingAvailability ? 'Saving...' : 'Save Changes'}
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-black text-brand-dark flex items-center"><Calendar className="h-5 w-5 mr-2" />Weekly Availability</h3>
-                    <button onClick={startEditingAvailability} className="btn btn-sm bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center gap-2"><Edit2 className="h-4 w-4" />Edit</button>
+                    <h3 className="font-bold text-brand-dark flex items-center text-sm"><Calendar className="h-4 w-4 mr-2 text-blue-500" />Weekly Availability</h3>
+                    <button onClick={startEditingAvailability} className="px-3 py-1.5 bg-slate-50 text-blue-600 border border-blue-100 hover:bg-blue-50 hover:border-blue-200 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors">
+                      <Edit2 className="h-3.5 w-3.5" />Edit
+                    </button>
                   </div>
                   <div className="grid grid-cols-7 gap-1.5 mb-4">
                     {ALL_DAYS.map(day => {
                       const active = selectedDoctor?.availability?.days?.includes(day);
-                      return <div key={day} className={`rounded-lg p-2 text-center text-xs font-bold ${active ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-400'}`}>{DAY_LABELS[day]}</div>;
+                      return <div key={day} className={`rounded-lg py-1.5 text-center text-xs font-bold ${active ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-50 border border-slate-100 text-slate-400'}`}>{DAY_LABELS[day]}</div>;
                     })}
                   </div>
                   {selectedDoctor?.availability?.timeSlots?.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {selectedDoctor.availability.timeSlots.map((slot, i) => (
-                        <span key={i} className="flex items-center bg-blue-50 text-blue-700 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-semibold">
-                          <Clock className="h-3.5 w-3.5 mr-1.5" />{slot.start} – {slot.end}
+                        <span key={i} className="flex items-center bg-blue-50 text-blue-700 border border-blue-100 rounded-lg px-2.5 py-1 text-xs font-semibold">
+                          <Clock className="h-3 w-3 mr-1.5" />{slot.start} – {slot.end}
                         </span>
                       ))}
                     </div>
-                  ) : <p className="text-sm text-gray-400 italic">No time slots configured</p>}
+                  ) : <p className="text-xs text-slate-400 italic">No time slots configured</p>}
                 </div>
               )}
 
               {/* Leaves */}
-              <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                <h3 className="font-black text-brand-dark mb-4 flex items-center"><XCircle className="h-5 w-5 mr-2" />Doctor Leaves</h3>
+              <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
+                <h3 className="font-bold text-brand-dark mb-4 flex items-center text-sm"><XCircle className="h-4 w-4 mr-2 text-rose-500" />Doctor Leaves</h3>
                 <div className="flex gap-2 mb-4">
-                  <input type="date" value={newLeaveDate} onChange={(e) => setNewLeaveDate(e.target.value)} className="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal outline-none text-sm" />
-                  <button onClick={handleAddLeave} className="px-6 py-2 bg-brand-dark text-white text-sm font-black rounded-xl hover:bg-brand-dark/90 transition-all">Mark on Leave</button>
+                  <input type="date" value={newLeaveDate} onChange={(e) => setNewLeaveDate(e.target.value)} className="w-40 px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-teal outline-none text-sm" />
+                  <button onClick={handleAddLeave} className="px-4 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors">Mark on Leave</button>
                 </div>
-                {loadingLeaves ? <div className="loading-spinner h-6 w-6 mx-auto" /> : leaves.length > 0 ? (
+                {loadingLeaves ? <div className="loading-spinner h-5 w-5 border-brand-teal/30 border-t-brand-teal" /> : leaves.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {leaves.sort().map(date => (
-                      <div key={date} className="flex items-center bg-red-50 text-red-600 border border-red-100 rounded-lg px-3 py-1.5 text-xs font-bold">
+                      <div key={date} className="flex items-center bg-rose-50 text-rose-600 border border-rose-100 rounded-lg px-2.5 py-1 text-xs font-semibold">
                         {new Date(date).toLocaleDateString()}
-                        <button onClick={() => handleRemoveLeave(date)} className="ml-2 hover:text-red-800 transition-colors"><XCircle className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => handleRemoveLeave(date)} className="ml-1.5 text-rose-400 hover:text-rose-600 transition-colors"><XCircle className="h-3.5 w-3.5" /></button>
                       </div>
                     ))}
                   </div>
-                ) : <p className="text-sm text-slate-400 italic">No leaves currently scheduled</p>}
+                ) : <p className="text-xs text-slate-400 italic">No leaves currently scheduled</p>}
               </div>
-
-              <button onClick={() => setShowDoctorModal(false)} className="group relative w-full py-6 bg-brand-dark text-white rounded-[2rem] overflow-hidden shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <div className="absolute inset-0 bg-brand-teal translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                <span className="relative z-10 text-xl font-display font-black tracking-widest uppercase">Close Practitioner File</span>
-              </button>
             </div>
           </div>
         </div>

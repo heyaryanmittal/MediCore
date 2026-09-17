@@ -83,12 +83,7 @@ const Layout = () => {
             icon: BarChart3,
             current: location.pathname.includes('/analytics'),
           },
-          {
-            name: 'Contact Messages',
-            href: '/dashboard/contact-messages',
-            icon: FileText,
-            current: location.pathname.includes('/contact-messages'),
-          },
+
         ];
 
       case 'doctor':

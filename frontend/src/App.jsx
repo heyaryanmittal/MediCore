@@ -33,7 +33,7 @@ const StaffManagement = lazy(() => import('./pages/dashboard/StaffManagement'));
 const PatientManagement = lazy(() => import('./pages/dashboard/PatientManagement'));
 const DoctorsManagement = lazy(() => import('./pages/dashboard/DoctorsManagement'));
 const DetailedAnalytics = lazy(() => import('./pages/dashboard/DetailedAnalytics'));
-const ContactMessages = lazy(() => import('./pages/dashboard/ContactMessages'));
+
 
 // Other Pages
 const Doctors = lazy(() => import('./pages/Doctors'));
@@ -85,7 +85,7 @@ function App() {
                   <Route path="/dashboard/staff" element={<ProtectedRoute roles={['superadmin']}><StaffManagement /></ProtectedRoute>} />
                   <Route path="/dashboard/patients" element={<ProtectedRoute roles={['superadmin', 'receptionist', 'doctor']}><PatientManagement /></ProtectedRoute>} />
                   <Route path="/dashboard/analytics" element={<ProtectedRoute roles={['superadmin']}><DetailedAnalytics /></ProtectedRoute>} />
-                  <Route path="/dashboard/contact-messages" element={<ProtectedRoute roles={['superadmin']}><ContactMessages /></ProtectedRoute>} />
+
 
                   {/* Doctor Routes */}
                   <Route path="/doctor/dashboard" element={<ProtectedRoute roles={['doctor']}><DoctorDashboard /></ProtectedRoute>} />
