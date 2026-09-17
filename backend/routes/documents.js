@@ -53,6 +53,8 @@ router.post('/upload', upload.single('document'), async (req, res) => {
 // ---------------------------------------------------------------------------
 const generateBillPDF = (bill, res, filename) => {
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    doc.registerFont('Roboto', path.join(__dirname, '../utils/Roboto-Regular.ttf'));
+    doc.registerFont('Roboto-Bold', path.join(__dirname, '../utils/Roboto-Bold.ttf'));
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -83,17 +85,17 @@ const generateBillPDF = (bill, res, filename) => {
     const patientName = bill.patientId?.userId?.profile
         ? `${bill.patientId.userId.profile.firstName || ''} ${bill.patientId.userId.profile.lastName || ''}`.trim()
         : 'Patient';
-    doc.fillColor('#111827').fontSize(11).font('Helvetica-Bold').text(patientName, 50, metaY + 16);
+    doc.fillColor('#111827').fontSize(11).font('Roboto-Bold').text(patientName, 50, metaY + 16);
 
     // Right column
-    doc.fillColor('#374151').fontSize(9).font('Helvetica-Bold').text(`Invoice #: ${billNum}`, 350, metaY, { align: 'left' });
-    doc.fillColor('#6B7280').font('Helvetica').fontSize(9)
+    doc.fillColor('#374151').fontSize(9).font('Roboto-Bold').text(`Invoice #: ${billNum}`, 350, metaY, { align: 'left' });
+    doc.fillColor('#6B7280').font('Roboto').fontSize(9)
         .text(`Date: ${createdAt}`, 350, metaY + 16)
         .text(`Due: ${dueDate}`, 350, metaY + 30);
 
     // Status badge
     const statusColor = bill.status === 'paid' ? '#16a34a' : bill.status === 'overdue' ? '#dc2626' : '#d97706';
-    doc.fillColor(statusColor).fontSize(10).font('Helvetica-Bold')
+    doc.fillColor(statusColor).fontSize(10).font('Roboto-Bold')
         .text(bill.status.toUpperCase().replace('_', ' '), 350, metaY + 46);
 
     doc.moveDown(5);
@@ -104,7 +106,7 @@ const generateBillPDF = (bill, res, filename) => {
 
     // Table header
     doc.rect(50, tableTop, doc.page.width - 100, 24).fill('#0d9488');
-    doc.fillColor('white').fontSize(9).font('Helvetica-Bold')
+    doc.fillColor('white').fontSize(9).font('Roboto-Bold')
         .text('Description', colDesc + 4, tableTop + 7)
         .text('Qty', colQty, tableTop + 7, { width: 60, align: 'center' })
         .text('Unit Price', colUnit, tableTop + 7, { width: 70, align: 'right' })
@@ -115,7 +117,7 @@ const generateBillPDF = (bill, res, filename) => {
     (bill.items || []).forEach((item, idx) => {
         const bg = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
         doc.rect(50, rowY - 4, doc.page.width - 100, 22).fill(bg);
-        doc.fillColor('#111827').fontSize(9).font('Helvetica')
+        doc.fillColor('#111827').fontSize(9).font('Roboto')
             .text(item.description || '-', colDesc + 4, rowY, { width: 250 })
             .text(String(item.quantity), colQty, rowY, { width: 60, align: 'center' })
             .text(`\u20B9${Number(item.unitPrice).toFixed(2)}`, colUnit, rowY, { width: 70, align: 'right' })
@@ -128,7 +130,7 @@ const generateBillPDF = (bill, res, filename) => {
     doc.moveTo(350, rowY).lineTo(510, rowY).strokeColor('#E5E7EB').stroke();
     rowY += 8;
 
-    doc.fillColor('#374151').fontSize(9).font('Helvetica')
+    doc.fillColor('#374151').fontSize(9).font('Roboto')
         .text('Subtotal:', 350, rowY)
         .text(`\u20B9${Number(bill.subtotal).toFixed(2)}`, 440, rowY, { width: 70, align: 'right' });
     rowY += 18;
@@ -137,12 +139,12 @@ const generateBillPDF = (bill, res, filename) => {
     rowY += 18;
 
     doc.rect(350, rowY, 160, 26).fill('#0d9488');
-    doc.fillColor('white').fontSize(11).font('Helvetica-Bold')
+    doc.fillColor('white').fontSize(11).font('Roboto-Bold')
         .text('Total:', 356, rowY + 7)
         .text(`\u20B9${Number(bill.total).toFixed(2)}`, 440, rowY + 7, { width: 66, align: 'right' });
 
     // ── Footer ────────────────────────────────────────────────────────────────
-    doc.fillColor('#9CA3AF').fontSize(8).font('Helvetica')
+    doc.fillColor('#9CA3AF').fontSize(8).font('Roboto')
         .text('Thank you for choosing MediCore. For billing queries call +91-555-000-1111.',
             50, doc.page.height - 60, { align: 'center', width: doc.page.width - 100 });
 
