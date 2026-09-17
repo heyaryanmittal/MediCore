@@ -181,21 +181,21 @@ const Prescriptions = () => {
       <div className="space-y-6">
         {filteredPrescriptions.length > 0 ? (
           filteredPrescriptions.map((p, idx) => (
-            <div key={p._id} className="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden animate-slide-up" style={{ animationDelay: `${idx * 50}ms` }}>
+            <div key={p._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden animate-slide-up" style={{ animationDelay: `${idx * 50}ms` }}>
               {/* Top Accent Bar */}
-              <div className="h-1.5 w-full bg-gradient-to-r from-brand-dark via-brand-teal to-brand-light" />
+              <div className="h-1 w-full bg-brand-teal" />
               
-              <div className="p-6 md:p-8">
-                <div className="flex flex-col lg:flex-row gap-8">
+              <div className="p-5 md:p-6">
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
                   {/* Left Column: Doctor & Diagnosis */}
-                  <div className="lg:w-1/3 xl:w-1/4 space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-2xl bg-brand-dark flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform shrink-0">
-                        <User className="h-7 w-7" />
+                  <div className="lg:w-1/3 xl:w-1/4 flex flex-col space-y-5">
+                    <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                      <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-brand-dark shrink-0">
+                        <User className="h-6 w-6" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Attending Physician</p>
-                        <h3 className="font-black text-brand-dark font-display leading-tight text-lg">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Attending Physician</p>
+                        <h3 className="font-bold text-brand-dark text-sm">
                           {currentUser.role === 'patient'
                             ? `Dr. ${p.doctorId?.userId?.profile?.firstName || ''} ${p.doctorId?.userId?.profile?.lastName || 'Expert'}`
                             : `Patient: ${p.patientId?.userId?.profile?.firstName || ''} ${p.patientId?.userId?.profile?.lastName || 'Unknown'}`}
@@ -203,41 +203,41 @@ const Prescriptions = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100">
-                        <Calendar className="h-3.5 w-3.5 text-brand-teal" />
-                        <span className="text-xs font-bold text-slate-600">
+                    <div className="space-y-3 flex-1">
+                      <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200">
+                        <Calendar className="h-3 w-3 text-slate-500" />
+                        <span className="text-[11px] font-bold text-slate-600">
                           {format(new Date(p.createdAt), 'PPP')}
                         </span>
                       </div>
                       
-                      <div className="p-4 rounded-2xl bg-brand-light/40 border border-brand-teal/10">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div className="flex items-center gap-1.5 mb-1.5">
                           <Activity className="h-3.5 w-3.5 text-brand-teal" />
-                          <span className="text-[10px] font-black text-brand-dark uppercase tracking-widest">Diagnosis & Case</span>
+                          <span className="text-[10px] font-bold text-brand-dark uppercase tracking-widest">Diagnosis & Case</span>
                         </div>
-                        <p className="text-sm font-black text-brand-dark leading-snug">
+                        <p className="text-xs font-medium text-slate-700 leading-relaxed">
                           {p.diagnosis || 'Clinical Investigation'}
                         </p>
                       </div>
-                    </div>
 
-                    {p.followUpDate && (
-                      <div className="flex items-center gap-3 p-3 bg-violet-50 rounded-xl border border-violet-100">
-                        <div className="h-8 w-8 rounded-lg bg-violet-500 flex items-center justify-center text-white shrink-0">
-                          <Clock className="h-4 w-4" />
+                      {p.followUpDate && (
+                        <div className="flex items-center gap-2.5 p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                          <div className="h-7 w-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                            <Clock className="h-3.5 w-3.5" />
+                          </div>
+                          <div>
+                            <p className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Follow-up Due</p>
+                            <p className="text-xs font-bold text-blue-700">{format(new Date(p.followUpDate), 'dd MMM yyyy')}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[8px] font-black text-violet-400 uppercase tracking-widest">Follow-up Due</p>
-                          <p className="text-[10px] font-bold text-violet-700">{format(new Date(p.followUpDate), 'dd MMM yyyy')}</p>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     <div className="pt-2">
                       <button
                         onClick={() => handleDownload(p._id)}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg active:scale-95"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-dark text-white rounded-lg text-xs font-bold shadow-sm hover:bg-slate-800 transition-colors"
                       >
                         <Download className="h-3.5 w-3.5" /> Official Copy
                       </button>
@@ -245,35 +245,35 @@ const Prescriptions = () => {
                   </div>
 
                   {/* Right Column: Medications & Details */}
-                  <div className="flex-1 space-y-6">
+                  <div className="flex-1 lg:border-l lg:border-slate-100 lg:pl-8 space-y-6">
                     {/* Medications Section */}
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                          <Pill className="h-3.5 w-3.5 text-brand-teal" /> Prescribed Medications
+                      <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                        <h4 className="flex items-center gap-1.5 text-xs font-bold text-brand-dark uppercase tracking-widest">
+                          <Pill className="h-4 w-4 text-brand-teal" /> Prescribed Medications
                         </h4>
-                        <span className="text-[9px] font-black bg-brand-teal text-white px-2 py-0.5 rounded-full uppercase tracking-widest">
+                        <span className="text-[10px] font-bold bg-brand-light text-brand-teal px-2 py-0.5 rounded-md uppercase">
                           {p.meds?.length || 0} ITEMS
                         </span>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {p.meds?.map((med, mIdx) => (
-                          <div key={mIdx} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex gap-4 hover:border-brand-teal/20 transition-colors">
-                            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
-                              <Sparkles className="h-5 w-5 text-brand-teal" />
+                          <div key={mIdx} className="bg-white border border-slate-200 rounded-xl p-3 flex gap-3 shadow-sm hover:border-brand-teal/30 transition-colors">
+                            <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                              <Sparkles className="h-4 w-4 text-brand-teal" />
                             </div>
-                            <div className="min-w-0">
-                              <h5 className="text-sm font-black text-brand-dark truncate">{med.name}</h5>
-                              <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1">
-                                <span className="text-[10px] font-bold text-slate-400">{med.dosage}</span>
-                                <span className="text-[10px] font-bold text-slate-400">•</span>
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-sm font-bold text-brand-dark truncate">{med.name}</h5>
+                              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
+                                <span className="text-[10px] font-semibold text-slate-500">{med.dosage}</span>
+                                <span className="text-[8px] text-slate-300">•</span>
                                 <span className="text-[10px] font-bold text-brand-teal">{med.frequency}</span>
-                                <span className="text-[10px] font-bold text-slate-400">•</span>
-                                <span className="text-[10px] font-bold text-slate-400">{med.duration}</span>
+                                <span className="text-[8px] text-slate-300">•</span>
+                                <span className="text-[10px] font-semibold text-slate-500">{med.duration}</span>
                               </div>
                               {med.instructions && (
-                                <p className="text-[10px] italic text-slate-400 mt-1.5 leading-relaxed bg-brand-light/50 px-2 py-1 rounded-lg">
+                                <p className="text-[10px] italic text-slate-500 mt-1.5 bg-slate-50 px-2 py-1 rounded-md border border-slate-100 inline-block">
                                   {med.instructions}
                                 </p>
                               )}
@@ -281,29 +281,29 @@ const Prescriptions = () => {
                           </div>
                         ))}
                         {(!p.meds || p.meds.length === 0) && (
-                          <div className="col-span-full py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-2">
-                             <Pill className="h-5 w-5 opacity-20" />
-                             <p className="text-xs font-bold uppercase tracking-widest">No medications listed</p>
+                          <div className="col-span-full py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-1.5">
+                             <Pill className="h-4 w-4 opacity-30" />
+                             <p className="text-[10px] font-bold uppercase tracking-widest">No medications listed</p>
                           </div>
                         )}
                       </div>
                     </div>
 
                     {/* Tests & Advice in Grid */}
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                       {/* Diagnostic Tests */}
                       {p.tests && p.tests.length > 0 && (
-                        <div className="space-y-3">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                             <Activity className="h-3.5 w-3.5 text-amber-500" /> Prescribed Tests
                           </h4>
                           <div className="space-y-2">
                             {p.tests.map((test, tIdx) => (
-                              <div key={tIdx} className="flex items-center gap-3 p-3 bg-white border-2 border-slate-50 rounded-xl hover:border-amber-100 transition-all">
-                                <div className="h-2 w-2 rounded-full bg-amber-400" />
+                              <div key={tIdx} className="flex items-center gap-2.5 p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                <div className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
                                 <div className="min-w-0">
-                                  <p className="text-sm font-black text-brand-dark leading-none">{test.name}</p>
-                                  {test.instructions && <p className="text-[10px] font-medium text-slate-400 mt-1">{test.instructions}</p>}
+                                  <p className="text-xs font-bold text-brand-dark leading-none">{test.name}</p>
+                                  {test.instructions && <p className="text-[10px] text-slate-500 mt-1 truncate">{test.instructions}</p>}
                                 </div>
                               </div>
                             ))}
@@ -313,17 +313,14 @@ const Prescriptions = () => {
 
                       {/* Doctor's Advice */}
                       {p.adviceText && (
-                        <div className="space-y-3">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                             <AlertCircle className="h-3.5 w-3.5 text-blue-500" /> Clinical Advice
                           </h4>
-                          <div className="relative group/advice">
-                            <div className="absolute inset-0 bg-blue-50/50 rounded-2xl -m-1 opacity-0 group-hover/advice:opacity-100 transition-opacity" />
-                            <div className="relative p-5 rounded-2xl bg-blue-50/20 border-2 border-blue-100/50">
-                              <p className="text-sm font-bold text-slate-600 leading-relaxed italic">
-                                "{p.adviceText}"
-                              </p>
-                            </div>
+                          <div className="p-3.5 rounded-lg bg-blue-50/50 border border-blue-100">
+                            <p className="text-[11px] font-medium text-slate-600 leading-relaxed italic">
+                              "{p.adviceText}"
+                            </p>
                           </div>
                         </div>
                       )}
