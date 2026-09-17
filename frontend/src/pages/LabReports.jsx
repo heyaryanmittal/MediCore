@@ -61,6 +61,12 @@ const LabReports = () => {
         if (filenameMatch && filenameMatch.length === 2) {
           filename = filenameMatch[1];
         }
+      } else {
+        const contentType = response.headers['content-type'];
+        if (contentType) {
+          if (contentType.includes('image/jpeg')) filename = `lab_report_${id}.jpg`;
+          else if (contentType.includes('image/png')) filename = `lab_report_${id}.png`;
+        }
       }
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
