@@ -1,13 +1,17 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false, // true for 465, false for other ports
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT) || 587,
+  secure: false, // false for STARTTLS (port 587)
+  requireTLS: true, // enforce TLS upgrade via STARTTLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // allow self-signed certs in cloud envs
+  }
 });
 
 const sendEmail = async ({ to, subject, html }) => {
@@ -87,7 +91,7 @@ const sendPasswordResetEmail = async (userEmail, resetUrl, resetToken) => {
       <p style="font-size: 16px; line-height: 1.6;">You requested a password reset for your MediCore account.</p>
       <p style="font-size: 16px; line-height: 1.6;">Your 6-digit reset code is:</p>
       <div style="text-align: center; margin: 24px 0;">
-        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #0d9488; background-color: #f0fdf4; padding: 12px 24px; border-radius: 8px; border: 1px border #0d9488;">${resetToken}</span>
+        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #0d9488; background-color: #f0fdf4; padding: 12px 24px; border-radius: 8px; border: 1px solid #0d9488;">${resetToken}</span>
       </div>
       <p style="font-size: 14px; line-height: 1.6; color: #6b7280;">This code will expire in 1 hour. If you did not request this password reset, please ignore this email.</p>
       <div style="padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center; margin-top: 32px;">
