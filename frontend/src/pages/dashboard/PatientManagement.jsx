@@ -300,15 +300,10 @@ const PatientManagement = () => {
           <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-slide-up border border-slate-100 max-h-[calc(100vh-5rem)] flex flex-col overflow-y-auto scrollbar-none">
 
             {/* ── HERO HEADER ── */}
-            <div className="relative h-44 bg-brand-dark shrink-0">
+            <div className="relative h-32 bg-brand-dark shrink-0">
               <div className="absolute inset-0 overflow-hidden rounded-t-[2rem]">
                 <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-brand-teal opacity-20 blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-rose-500 opacity-10 blur-xl" />
-                <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 400 176" fill="none">
-                  <circle cx="340" cy="20" r="80" stroke="white" strokeWidth="1"/>
-                  <circle cx="340" cy="20" r="50" stroke="white" strokeWidth="0.5"/>
-                  <line x1="0" y1="100" x2="400" y2="80" stroke="white" strokeWidth="0.5"/>
-                </svg>
+                <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-brand-teal opacity-10 blur-xl" />
               </div>
 
               <button onClick={() => setShowPatientModal(false)}
@@ -321,49 +316,52 @@ const PatientManagement = () => {
                 <span className="text-[10px] font-black text-white uppercase tracking-widest">{selectedPatient.medicalRecordNumber || 'Unassigned'}</span>
               </div>
 
-              {/* Avatar — overflows intentionally */}
-              <div className="absolute -bottom-9 left-8 z-10">
+              {/* Avatar — Centered */}
+              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-10">
                 <div className="relative">
-                  <div className="absolute inset-0 rounded-[1.25rem] bg-brand-teal opacity-30 blur-md scale-110" />
-                  <div className="relative h-20 w-20 rounded-[1.25rem] bg-gradient-to-br from-brand-teal to-brand-dark border-4 border-white shadow-2xl flex items-center justify-center text-white text-3xl font-black tracking-tighter">
-                    {selectedPatient.userId.profile.firstName[0]}{selectedPatient.userId.profile.lastName[0]}
+                  <div className="absolute inset-0 rounded-[2rem] bg-brand-teal opacity-20 blur-lg scale-110" />
+                  <div className="relative h-24 w-24 rounded-[2rem] bg-white p-1.5 shadow-2xl">
+                    <div className="w-full h-full rounded-[1.5rem] bg-gradient-to-br from-brand-teal to-brand-dark flex items-center justify-center text-white text-3xl font-black font-display tracking-tighter">
+                      {selectedPatient.userId.profile.firstName[0]}{selectedPatient.userId.profile.lastName[0]}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Status pill — overflows intentionally */}
-              <div className="absolute -bottom-4 right-8 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 shadow-sm z-10">
-                <div className={`h-1.5 w-1.5 rounded-full ${selectedPatient.userId.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${selectedPatient.userId.isActive ? 'text-emerald-600' : 'text-rose-500'}`}>
-                  {selectedPatient.userId.isActive ? 'Active' : 'Inactive'}
-                </span>
               </div>
             </div>
 
             {/* ── BODY ── */}
-            <div className="px-8 pt-14 pb-8 space-y-7">
-              <div>
-                <h2 className="text-3xl font-black font-display text-brand-dark leading-tight">
+            <div className="px-8 pt-16 pb-8 space-y-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-black font-display text-brand-dark leading-tight flex items-center justify-center gap-3">
                   {selectedPatient.userId.profile.firstName} {selectedPatient.userId.profile.lastName}
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${selectedPatient.userId.isActive ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-500'}`}>
+                    <div className={`h-1.5 w-1.5 rounded-full ${selectedPatient.userId.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`} />
+                    <span className="text-[9px] font-black uppercase tracking-widest">
+                      {selectedPatient.userId.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
                 </h2>
-                <p className="text-xs font-semibold text-slate-400 mt-1">{selectedPatient.userId.email?.toLowerCase()}</p>
+                <p className="text-sm font-semibold text-slate-400 mt-2 flex items-center justify-center gap-2">
+                  <Mail className="h-3.5 w-3.5" />
+                  {selectedPatient.userId.email?.toLowerCase()}
+                </p>
               </div>
 
               {/* Stat cards */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: 'Age',    value: `${getAge(selectedPatient.userId.profile.dateOfBirth)}`, unit: 'yr',  icon: User2,      bg: 'bg-brand-teal/10',  color: 'text-brand-teal' },
-                  { label: 'Gender', value: selectedPatient.userId.profile.gender || '—', unit: '', icon: Stethoscope, bg: 'bg-violet-50',    color: 'text-violet-500', capitalize: true },
-                  { label: 'Blood',  value: selectedPatient.bloodGroup || '??',          unit: '', icon: Droplets,    bg: 'bg-rose-50',     color: 'text-rose-500',   uppercase: true },
+                  { label: 'Age',    value: `${getAge(selectedPatient.userId.profile.dateOfBirth)}`, unit: 'yrs',  icon: User2,      bg: 'bg-brand-light',  color: 'text-brand-teal' },
+                  { label: 'Gender', value: selectedPatient.userId.profile.gender || '—', unit: '', icon: Stethoscope, bg: 'bg-brand-light',    color: 'text-brand-teal', capitalize: true },
+                  { label: 'Blood',  value: selectedPatient.bloodGroup || '??',          unit: '', icon: Droplets,    bg: 'bg-brand-light',     color: 'text-brand-teal',   uppercase: true },
                 ].map((s, i) => (
-                  <div key={i} className="flex flex-col gap-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                    <div className={`h-8 w-8 rounded-xl ${s.bg} flex items-center justify-center`}>
+                  <div key={i} className="flex flex-col items-center text-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+                    <div className={`h-10 w-10 rounded-2xl ${s.bg} flex items-center justify-center shadow-inner`}>
                       <s.icon className={`h-4 w-4 ${s.color}`} />
                     </div>
                     <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
-                      <p className={`text-xl font-black leading-none mt-0.5 ${s.uppercase ? 'uppercase' : s.capitalize ? 'capitalize' : ''} ${s.color}`}>
-                        {s.value}{s.unit && <span className="text-xs font-bold ml-0.5 text-slate-400">{s.unit}</span>}
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                      <p className={`text-lg font-black font-display leading-none mt-1 ${s.uppercase ? 'uppercase' : s.capitalize ? 'capitalize' : ''} text-brand-dark`}>
+                        {s.value}{s.unit && <span className="text-xs font-bold ml-1 text-slate-400">{s.unit}</span>}
                       </p>
                     </div>
                   </div>
@@ -371,33 +369,24 @@ const PatientManagement = () => {
               </div>
 
               {/* Contact row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <Phone className="h-4 w-4 text-brand-teal shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-brand-light flex items-center justify-center shrink-0">
+                    <Phone className="h-4 w-4 text-brand-teal" />
+                  </div>
                   <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phone</p>
-                    <p className="text-xs font-bold text-brand-dark">{selectedPatient.userId.profile.phone || '—'}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</p>
+                    <p className="text-sm font-bold text-brand-dark">{selectedPatient.userId.profile.phone || '—'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <Mail className="h-4 w-4 text-violet-500 shrink-0" />
-                  <div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</p>
-                    <p className="text-xs font-bold text-brand-dark truncate">{selectedPatient.userId.email || '—'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Address */}
-              <div>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Residential Address</p>
-                <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="h-8 w-8 rounded-xl bg-brand-light flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-brand-light flex items-center justify-center shrink-0">
                     <MapPin className="h-4 w-4 text-brand-teal" />
                   </div>
-                  <p className="text-sm font-semibold text-slate-600 leading-relaxed pt-1">
-                    {selectedPatient.userId.profile.address || 'No address on file'}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
+                    <p className="text-sm font-bold text-brand-dark truncate">{selectedPatient.userId.profile.address || 'No address'}</p>
+                  </div>
                 </div>
               </div>
 
