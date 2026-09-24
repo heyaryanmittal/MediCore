@@ -187,20 +187,45 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Super Admin Credentials Info - Simplified for Professional look */}
+          {/* Demo Credentials Info */}
           <div className="mt-8 p-6 bg-brand-light rounded-2xl border border-teal-50/50">
             <h4 className="text-xs font-bold text-brand-dark uppercase tracking-widest mb-3 flex items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-teal mr-2"></span>
-              Super Admin Credentials
+              Demo Credentials
             </h4>
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <p className="text-slate-500 mb-0.5">Admin Email</p>
-                <p className="font-semibold text-brand-dark">superadmin@medicore.com</p>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <p className="text-slate-500 mb-0.5">Superadmin</p>
+                  <p className="font-semibold text-brand-dark">superadmin@medicore.com</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 mb-0.5">Password</p>
+                  <p className="font-semibold text-brand-dark">adminmedicore</p>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-500 mb-0.5">Password</p>
-                <p className="font-semibold text-brand-dark">adminmedicore</p>
+
+              <div className="grid grid-cols-2 gap-4 text-xs border-t border-slate-200 pt-3">
+                <div>
+                  <p className="text-slate-500 mb-0.5">Doctor</p>
+                  <p className="font-semibold text-brand-dark">vedika@medicore.doc</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 mb-0.5">Password</p>
+                  <p className="font-semibold text-brand-dark">vedika123</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-xs border-t border-slate-200 pt-3">
+                <div>
+                  <p className="text-slate-500 mb-0.5">Receptionist</p>
+                  <p className="font-semibold text-brand-dark">megha@medicore.rec</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 mb-0.5">Password</p>
+                  <p className="font-semibold text-brand-dark">megha123</p>
+                </div>
               </div>
             </div>
           </div>
