@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Mail, Phone, MapPin, Send, Building2, User, ChevronRight, ShieldCheck } from 'lucide-react';
+import api from '../services/api';
 
 const ContactSales = () => {
     const [formData, setFormData] = useState({
@@ -22,15 +23,8 @@ const ContactSales = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/contact`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            const data = await response.json();
-            if (data.success) {
+            const response = await api.post('/contact', formData);
+            if (response.data.success) {
                 setIsSuccess(true);
                 setFormData({
                     name: '', email: '', phone: '', facility: '', role: '', message: ''

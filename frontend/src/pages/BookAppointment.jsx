@@ -549,6 +549,7 @@ const BookAppointment = () => {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Holder Name</label>
                     <input 
                       type="text" 
+                      autoComplete="cc-name"
                       className="input bg-slate-50 border-transparent focus:bg-white" 
                       placeholder="e.g. ARYAN MITTAL"
                       value={paymentDetails.cardHolder}
@@ -560,6 +561,7 @@ const BookAppointment = () => {
                     <div className="relative">
                       <input 
                         type="text" 
+                        autoComplete="cc-number"
                         className="input bg-slate-50 border-transparent focus:bg-white pl-12 font-mono" 
                         placeholder="0000 0000 0000 0000"
                         maxLength="19"
@@ -579,6 +581,7 @@ const BookAppointment = () => {
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</label>
                       <input 
                         type="text" 
+                        autoComplete="cc-exp"
                         className="input bg-slate-50 border-transparent focus:bg-white text-center font-mono" 
                         placeholder="MM / YY"
                         maxLength="7"
@@ -600,6 +603,7 @@ const BookAppointment = () => {
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CVV Code</label>
                       <input 
                         type="password" 
+                        autoComplete="cc-csc"
                         className="input bg-slate-50 border-transparent focus:bg-white text-center font-mono tracking-widest" 
                         placeholder="***"
                         maxLength="4"

@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { processAppointmentRefund } = require('../utils/paymentHelper');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
-const razorpay = require('../utils/razorpay');
 
 // Book appointment (patient only)
 router.post('/book', [
@@ -347,35 +347,8 @@ router.patch('/:appointmentId/status', [
       appointment.cancellationReason = cancellationReason;
       appointment.cancelledBy = req.user._id;
 
-      // Actual Razorpay Refund logic
-      if (appointment.paymentStatus === 'paid' && appointment.paymentDetails.paymentId) {
-        try {
-          // Check if it's not a mock order
-          if (!appointment.paymentDetails.orderId?.startsWith('order_mock_') && razorpay) {
-            await razorpay.payments.refund(appointment.paymentDetails.paymentId, {
-              notes: {
-                reason: 'Cancelled by receptionist/doctor/admin',
-                appointmentId: appointment._id.toString()
-              }
-            });
-          }
-          appointment.paymentStatus = 'refunded';
-
-          // Update associated bill if it exists
-          try {
-            await Bill.findOneAndUpdate(
-              { appointmentId: appointment._id, status: 'paid' },
-              { status: 'refunded' }
-            );
-          } catch (billUpdateError) {
-            console.error('Failed to update associated bill status:', billUpdateError);
-          }
-        } catch (refundError) {
-          console.error('Refund processing failed during status update:', refundError);
-          // We still update the status but maybe note that the refund failed
-          appointment.notes = (appointment.notes || '') + '\n[Refund Failed: Please process manually]';
-        }
-      }
+      // Process refund if paid
+      await processAppointmentRefund(appointment, cancellationReason || 'Cancelled by receptionist/doctor/admin');
     }
 
     await appointment.save();
@@ -445,35 +418,8 @@ router.patch('/:appointmentId/cancel', [
     appointment.cancellationReason = reason;
     appointment.cancelledBy = req.user._id;
 
-    // Actual Razorpay Refund logic
-    if (appointment.paymentStatus === 'paid' && appointment.paymentDetails.paymentId) {
-      try {
-        // Check if it's not a mock order
-        if (!appointment.paymentDetails.orderId?.startsWith('order_mock_') && razorpay) {
-          await razorpay.payments.refund(appointment.paymentDetails.paymentId, {
-            notes: {
-              reason: reason || 'Cancelled by patient',
-              appointmentId: appointmentId.toString()
-            }
-          });
-        }
-        appointment.paymentStatus = 'refunded';
-
-        // Update associated bill if it exists
-        try {
-          await Bill.findOneAndUpdate(
-            { appointmentId: appointmentId, status: 'paid' },
-            { status: 'refunded' }
-          );
-        } catch (billUpdateError) {
-          console.error('Failed to update associated bill status during cancellation:', billUpdateError);
-        }
-      } catch (refundError) {
-        console.error('Refund processing failed during patient cancellation:', refundError);
-        // We still cancel but note the refund problem
-        appointment.notes = (appointment.notes || '') + '\n[Refund Failed: Please contact admin]';
-      }
-    }
+    // Process refund if paid
+    await processAppointmentRefund(appointment, reason || 'Cancelled by patient');
 
     await appointment.save();
 

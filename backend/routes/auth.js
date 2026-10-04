@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 const User = require('../models/User');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const { generateTokens, verifyRefreshToken } = require('../utils/jwtUtils');
 const { authenticateToken } = require('../middleware/auth');
+const { validateRequest } = require('../middleware/validate');
 const { sendPasswordResetEmail } = require('../utils/emailService');
 const multer = require('multer');
 const { profilePicStorage } = require('../config/cloudinary');
@@ -81,17 +82,9 @@ router.post('/register', [
   body('firstName').notEmpty().trim(),
   body('lastName').notEmpty().trim(),
   body('phone').optional(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
-
     const { email, password, firstName, lastName, phone, dateOfBirth, gender, address } = req.body;
 
     const existingUser = await User.findOne({ email });
@@ -145,18 +138,10 @@ router.post('/register', [
 
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
-  body('password').notEmpty()
+  body('password').notEmpty(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
-
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select('+password');
@@ -343,14 +328,10 @@ router.post('/profile/avatar', authenticateToken, upload.single('avatar'), async
 });
 
 router.post('/forgot-password', [
-  body('email').isEmail().normalizeEmail()
+  body('email').isEmail().normalizeEmail(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: 'Invalid email address' });
-    }
-
     const { email } = req.body;
     const user = await User.findOne({ email });
 
@@ -388,14 +369,10 @@ router.post('/forgot-password', [
 router.post('/reset-password', [
   body('email').isEmail().normalizeEmail(),
   body('resetToken').notEmpty().trim(),
-  body('newPassword').isLength({ min: 6 })
+  body('newPassword').isLength({ min: 6 }),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: 'Validation failed. Password must be at least 6 characters.' });
-    }
-
     const { email, resetToken, newPassword } = req.body;
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 

@@ -103,6 +103,7 @@ const Register = () => {
                   id="firstName"
                   name="firstName"
                   type="text"
+                  autoComplete="given-name"
                   required
                   className="input"
                   placeholder="First name"
@@ -118,6 +119,7 @@ const Register = () => {
                   id="lastName"
                   name="lastName"
                   type="text"
+                  autoComplete="family-name"
                   required
                   className="input"
                   placeholder="Last name"
@@ -158,6 +160,7 @@ const Register = () => {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   className="input pr-10"
                   placeholder="Create a password"
@@ -188,6 +191,7 @@ const Register = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   className="input pr-10"
                   placeholder="Confirm your password"
@@ -220,6 +224,7 @@ const Register = () => {
                   id="phone"
                   name="phone"
                   type="tel"
+                  autoComplete="tel"
                   className="input pl-10"
                   placeholder="Phone number (optional)"
                   value={formData.phone}

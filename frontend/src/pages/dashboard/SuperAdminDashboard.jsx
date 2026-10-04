@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Calendar, IndianRupee, TrendingUp,
   Activity, ArrowRight, Shield, Zap, Bell, Clock,
-  ChevronRight, Database, Globe, Lock, Download
+  ChevronRight, Database, Globe, Lock, Download, UserCheck
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -106,40 +106,36 @@ const SuperAdminDashboard = () => {
       label: 'Net Earnings'
     },
     {
-      name: 'System Health',
-      value: '99.9%',
-      icon: Activity,
-      color: 'from-brand-teal to-brand-dark',
-      shadow: 'shadow-teal-100',
-      label: 'Uptime Metrics'
+      name: 'Total Receptionists',
+      value: analytics?.totalReceptionists || 0,
+      icon: UserCheck,
+      color: 'from-purple-400 to-purple-600',
+      shadow: 'shadow-purple-200',
+      label: 'Front Desk Staff'
     },
   ];
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Premium Welcome Banner */}
-      <div className="relative overflow-hidden rounded-[3rem] bg-brand-dark p-8 md:p-12 text-white shadow-2xl group">
+      <div className="relative overflow-hidden rounded-3xl sm:rounded-[3rem] bg-brand-dark p-6 sm:p-8 md:p-12 text-white shadow-2xl group">
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-teal opacity-10 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-1000 group-hover:scale-110"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -ml-24 -mb-24 blur-2xl"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-3">
-
-            <h1 className="text-4xl md:text-5xl font-black font-display tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-display tracking-tight leading-tight">
               Welcome Back, <span className="text-brand-teal italic">{(user?.profile?.lastName || 'Admin')}</span>
             </h1>
-            {/* <p className="text-teal-100/60 font-medium max-w-lg text-sm md:text-base">
-              Hospital operations are running optimally. You have <span className="text-white font-bold">{analytics?.todayAppointments || 0} appointments</span> scheduled for today across all departments.
-            </p> */}
           </div>
 
-          <div className="flex flex-col items-end gap-4">
-            <div className="flex items-center gap-6 px-8 py-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl">
-              <div className="text-right">
+          <div className="flex flex-col items-start sm:items-end gap-4 w-full md:w-auto">
+            <div className="flex items-center gap-4 sm:gap-6 px-5 sm:px-8 py-3.5 sm:py-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-[2rem] shadow-2xl w-full sm:w-auto justify-between sm:justify-end">
+              <div className="text-left sm:text-right">
                 <p className="text-[10px] font-black uppercase tracking-widest text-teal-100/40 mb-0.5">Global Cluster Time</p>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-brand-teal" />
-                  <span className="text-2xl font-black font-display tabular-nums">
+                  <span className="text-xl sm:text-2xl font-black font-display tabular-nums">
                     {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
                 </div>
@@ -147,7 +143,7 @@ const SuperAdminDashboard = () => {
               <div className="h-10 w-px bg-white/10 self-center"></div>
               <div className="text-right">
                 <p className="text-[10px] font-black uppercase tracking-widest text-teal-100/40 mb-0.5">Date</p>
-                <p className="text-sm font-bold">
+                <p className="text-xs sm:text-sm font-bold">
                   {currentTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
@@ -198,14 +194,14 @@ const SuperAdminDashboard = () => {
           <div className="bg-white rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 border border-slate-100 shadow-premium relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-teal to-brand-dark"></div>
 
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-10">
               <div>
-                <h2 className="text-2xl font-black text-brand-dark font-display">Mission Control</h2>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Core System Operations</p>
+                <h2 className="text-xl sm:text-2xl font-black text-brand-dark font-display">Mission Control</h2>
+                <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Core System Operations</p>
               </div>
               <button
                 onClick={() => navigate('/dashboard/analytics')}
-                className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-brand-teal hover:text-white rounded-full text-[10px] font-black transition-all group"
+                className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-slate-50 hover:bg-brand-teal hover:text-white rounded-full text-[10px] font-black transition-all group w-fit"
               >
                 VIEW FULL SYSTEM METRICS
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -226,10 +222,10 @@ const SuperAdminDashboard = () => {
                   desc: 'Manage existing medical and administrative teams.',
                   icon: Users,
                   path: '/dashboard/staff',
-                  color: 'text-brand-dark'
+                  color: 'text-brand-teal'
                 },
                 {
-                  title: 'Clinical Database',
+                  title: 'Patients Database',
                   desc: 'Access encrypted patient records and histories.',
                   icon: Activity,
                   path: '/dashboard/patients',
@@ -246,16 +242,16 @@ const SuperAdminDashboard = () => {
                 <button
                   key={action.title}
                   onClick={() => navigate(action.path)}
-                  className="group relative flex flex-col items-start p-8 bg-white hover:bg-brand-dark border border-slate-100 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 text-left"
+                  className="group relative flex flex-col items-start p-6 sm:p-8 bg-white hover:bg-slate-50 border border-slate-100 hover:border-brand-teal/30 rounded-3xl sm:rounded-[2.5rem] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left w-full"
                 >
-                  <div className={`p-4 rounded-2xl bg-slate-50 group-hover:bg-white/10 transition-colors mb-6`}>
-                    <action.icon className={`h-6 w-6 ${action.color} group-hover:text-brand-teal`} />
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-brand-teal group-hover:border-brand-teal transition-all mb-5 shadow-sm">
+                    <action.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${action.color} group-hover:text-white transition-colors`} />
                   </div>
-                  <h4 className="text-lg font-black text-brand-dark group-hover:text-white transition-colors font-display mb-2">{action.title}</h4>
-                  <p className="text-xs text-slate-400 group-hover:text-teal-100/60 leading-relaxed transition-colors mb-6">{action.desc}</p>
-                  <div className="mt-auto flex items-center gap-2 text-[10px] font-black text-brand-teal group-hover:text-white uppercase tracking-widest">
+                  <h4 className="text-base sm:text-lg font-black text-brand-dark group-hover:text-brand-teal transition-colors font-display mb-1.5">{action.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed transition-colors mb-5">{action.desc}</p>
+                  <div className="mt-auto flex items-center gap-2 text-[10px] font-black text-brand-teal uppercase tracking-widest group-hover:text-brand-dark transition-colors">
                     Initialize Module
-                    <ArrowRight className="h-3 w-3 group-hover:translate-x-2 transition-transform" />
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-2 transition-transform" />
                   </div>
                 </button>
               ))}

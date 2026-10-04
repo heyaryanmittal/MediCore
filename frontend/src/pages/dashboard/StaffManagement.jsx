@@ -220,28 +220,31 @@ const StaffManagement = () => {
                       }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end space-x-2 sm:space-x-3 opacity-100 transition-opacity">
                         <button
                           onClick={() => {
                             setSelectedUser(member);
                             setShowUserModal(true);
                           }}
-                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
+                          className="p-2 sm:p-2.5 rounded-xl bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-brand-teal hover:bg-slate-50 hover:border-brand-teal/30 hover:scale-105 active:scale-95 transition-all"
                           title="View Profile"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => navigate(`/dashboard/create-staff?edit=${member._id}`)}
-                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-teal transition-colors"
+                          className="p-2 sm:p-2.5 rounded-xl bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-blue-500 hover:bg-slate-50 hover:border-blue-200 hover:scale-105 active:scale-95 transition-all"
                           title="Edit Profile"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => toggleUserStatus(member._id, member.isActive)}
-                          className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 transition-colors ${member.isActive ? 'text-amber-400 hover:text-amber-600' : 'text-emerald-400 hover:text-emerald-600'
-                            }`}
+                          className={`p-2 sm:p-2.5 rounded-xl bg-white shadow-sm border border-slate-100 hover:scale-105 active:scale-95 transition-all ${
+                            member.isActive
+                              ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-50/50 hover:border-amber-200'
+                              : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 hover:border-emerald-200'
+                          }`}
                           title={member.isActive ? 'Deactivate' : 'Activate'}
                         >
                           {member.isActive ? (
@@ -255,7 +258,7 @@ const StaffManagement = () => {
                             setUserToDelete(member);
                             setShowDeleteConfirm(true);
                           }}
-                          className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 text-rose-400 hover:text-rose-600 transition-colors"
+                          className="p-2 sm:p-2.5 rounded-xl bg-white shadow-sm border border-slate-100 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 hover:border-rose-200 hover:scale-105 active:scale-95 transition-all"
                           title="Delete Staff"
                         >
                           <Trash2 className="h-4 w-4" />

@@ -10,17 +10,7 @@ import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
-/* ── STAT CARD ─────────────────────────────────────────────────────── */
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
-  <div className={`bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all relative overflow-hidden animate-fade-in`} style={{ animationDelay: `${delay}ms` }}>
-    <div className={`absolute top-0 right-0 w-24 h-24 ${color} opacity-10 rounded-bl-[4rem]`} />
-    <div className={`h-12 w-12 rounded-2xl ${color} flex items-center justify-center mb-4 text-white shadow-lg`}>
-      <Icon className="h-6 w-6" />
-    </div>
-    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{label}</p>
-    <p className="text-3xl font-black text-brand-dark font-display">{value}</p>
-  </div>
-);
+import StatCard from '../components/StatCard';
 
 const LabReports = () => {
   const { user: currentUser } = useAuth();

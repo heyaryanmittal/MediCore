@@ -204,7 +204,7 @@ const PatientManagement = () => {
                     <Phone className="h-3 w-3" />
                     {patient.userId.profile.phone || 'No phone'}
                   </p>
-                  <div className="flex items-center gap-1 text-brand-teal opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="flex items-center gap-1 text-brand-teal opacity-100 transition-all">
                     <span className="text-[10px] font-black uppercase tracking-widest">View</span>
                     <ChevronRight className="h-3.5 w-3.5" />
                   </div>
@@ -279,7 +279,7 @@ const PatientManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => { setSelectedPatient(patient); setShowPatientModal(true); }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-100 shadow-sm text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-teal hover:border-brand-teal/30 opacity-0 group-hover:opacity-100 transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-100 shadow-sm text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-teal hover:border-brand-teal/30 hover:bg-slate-50 opacity-100 transition-all hover:scale-105 active:scale-95"
                       >
                         <Eye className="h-3.5 w-3.5" /> View
                       </button>

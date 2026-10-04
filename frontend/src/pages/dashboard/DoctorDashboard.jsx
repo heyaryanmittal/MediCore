@@ -183,7 +183,7 @@ const DoctorDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <button className="p-4 bg-white rounded-[1.25rem] shadow-sm border border-slate-100 opacity-0 group-hover:opacity-100 transition-all hover:bg-brand-teal hover:text-white hover:shadow-lg hover:-translate-y-0.5">
+                  <button className="p-3.5 sm:p-4 bg-white rounded-2xl shadow-sm border border-slate-100 opacity-100 transition-all text-slate-500 hover:text-white hover:bg-brand-teal hover:border-brand-teal hover:shadow-lg hover:-translate-y-0.5 active:scale-95">
                     <Clipboard className="h-5 w-5" />
                   </button>
                 </div>

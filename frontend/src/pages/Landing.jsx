@@ -69,7 +69,7 @@ const Landing = () => {
                                     to="/register"
                                     className="btn btn-primary px-10 py-5 text-lg shadow-2xl hover:scale-105 transition-transform"
                                 >
-                                    Start Your Transformation
+                                    Book an Appointment
                                 </Link>
 
                             </div>

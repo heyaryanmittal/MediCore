@@ -116,6 +116,7 @@ const ForgotPassword = () => {
                   </div>
                   <input
                     type="email"
+                    autoComplete="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -145,6 +146,7 @@ const ForgotPassword = () => {
                   </div>
                   <input
                     type="text"
+                    autoComplete="one-time-code"
                     required
                     maxLength="6"
                     value={resetToken}
@@ -165,6 +167,7 @@ const ForgotPassword = () => {
                   </div>
                   <input
                     type="password"
+                    autoComplete="new-password"
                     required
                     minLength="6"
                     value={newPassword}
@@ -185,6 +188,7 @@ const ForgotPassword = () => {
                   </div>
                   <input
                     type="password"
+                    autoComplete="new-password"
                     required
                     minLength="6"
                     value={confirmPassword}

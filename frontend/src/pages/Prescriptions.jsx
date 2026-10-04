@@ -9,17 +9,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 
-/* ── STAT CARD ─────────────────────────────────────────────────────── */
-const StatCard = ({ icon: Icon, label, value, color, delay }) => (
-  <div className={`bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all relative overflow-hidden animate-fade-in`} style={{ animationDelay: `${delay}ms` }}>
-    <div className={`absolute top-0 right-0 w-20 h-20 ${color} opacity-10 rounded-bl-[3.5rem]`} />
-    <div className={`h-10 w-10 rounded-xl ${color} flex items-center justify-center mb-4 text-white shadow-lg shadow-${color}/20`}>
-      <Icon className="h-5 w-5" />
-    </div>
-    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{label}</p>
-    <p className="text-2xl font-black text-brand-dark font-display">{value}</p>
-  </div>
-);
+import StatCard from '../components/StatCard';
 
 const Prescriptions = () => {
   const { user: currentUser } = useAuth();

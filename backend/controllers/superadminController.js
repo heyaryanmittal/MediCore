@@ -315,7 +315,7 @@ const exportData = async (req, res) => {
           'Patient Name': `${bill.patientId?.userId?.profile?.firstName || ''} ${bill.patientId?.userId?.profile?.lastName || ''}`.trim(),
           'Total Amount (INR)': bill.total || 0,
           'Status': bill.status?.toUpperCase() || 'PENDING',
-          'Payment Method': bill.paymentMethod || 'Razorpay',
+          'Payment Method': bill.paymentMethod || 'Online',
           'Appointment Date': bill.appointmentId?.date ? new Date(bill.appointmentId.date).toLocaleDateString() : '-'
         }));
         break;

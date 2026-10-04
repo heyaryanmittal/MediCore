@@ -23,18 +23,7 @@ const STATUS_CONFIG = {
 };
 const getStatusCfg = (status) => STATUS_CONFIG[status] || { label: status, dot: 'bg-gray-400', badge: 'bg-gray-100 text-gray-700', bar: 'from-gray-300 to-gray-500' };
 
-/* ── STAT CARD ─────────────────────────────────────────────────────── */
-const StatCard = ({ icon: Icon, label, value, color, hint }) => (
-  <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all relative overflow-hidden">
-    <div className={`absolute top-0 right-0 w-20 h-20 ${color} opacity-10 rounded-bl-[3rem]`} />
-    <div className={`h-10 w-10 rounded-xl ${color} flex items-center justify-center mb-4`}>
-      <Icon className="h-5 w-5 text-white" />
-    </div>
-    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-    <p className="text-2xl font-black text-brand-dark font-display">{value}</p>
-    {hint && <p className="text-[10px] text-slate-400 font-medium mt-1">{hint}</p>}
-  </div>
-);
+import StatCard from '../components/StatCard';
 
 /* ── MAIN COMPONENT ────────────────────────────────────────────────── */
 const Bills = () => {
@@ -88,76 +77,33 @@ const Bills = () => {
     }
   };
 
-  const loadRazorpay = () => new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-
   const handlePayNow = async (bill) => {
     try {
       const orderResponse = await api.post('/payments/create-bill-order', { billId: bill._id });
       if (!orderResponse.data.success) { toast.error(orderResponse.data.message); return; }
-      const { orderId, amount, currency, keyId } = orderResponse.data.data;
-      if (orderResponse.data.isMock) {
-        setSelectedBill({ ...bill, mockOrder: orderResponse.data.data });
-        setShowMockModal(true);
-        return;
-      }
-      const isLoaded = await loadRazorpay();
-      if (!isLoaded) { toast.error('Razorpay SDK failed to load.'); return; }
-      const options = {
-        key: keyId, amount, currency,
-        name: 'MediCore',
-        description: `Payment for Invoice #${bill.billNumber || bill._id.slice(-6).toUpperCase()}`,
-        order_id: orderId,
-        handler: async (response) => {
-          try {
-            const verifyRes = await api.post('/payments/verify-bill', {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              billId: bill._id
-            });
-            if (verifyRes.data.success) {
-              toast.success('Payment successful!');
-              navigate('/patient/payment-success', { state: { bill, paymentId: response.razorpay_payment_id } });
-            } else { toast.error('Payment verification failed'); }
-          } catch { toast.error('Error verifying payment'); }
-        },
-        prefill: {
-          name: `${currentUser?.profile?.firstName || ''} ${currentUser?.profile?.lastName || ''}`,
-          email: currentUser?.email || '',
-          contact: currentUser?.profile?.phone || '',
-        },
-        theme: { color: '#0d9488' },
-      };
-      new window.Razorpay(options).open();
+      setSelectedBill({ ...bill, mockOrder: orderResponse.data.data });
+      setShowMockModal(true);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to initiate payment');
     }
   };
 
   const handleMockPayment = async () => {
-    if (!selectedBill?.mockOrder) return;
+    if (!selectedBill) return;
     setMockLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 1500));
       const verifyRes = await api.post('/payments/verify-bill', {
-        razorpay_order_id: selectedBill.mockOrder.orderId,
-        razorpay_payment_id: `pay_mock_${Date.now()}`,
-        razorpay_signature: 'mock_signature',
+        paymentId: `pay_${Date.now()}`,
         billId: selectedBill._id
       });
       if (verifyRes.data.success) {
-        toast.success('Payment successful (Demo Mode)!');
+        toast.success('Payment successful!');
         setShowMockModal(false);
-        navigate('/patient/payment-success', { state: { bill: selectedBill, paymentId: `pay_mock_${Date.now()}` } });
+        fetchBills();
+        navigate('/patient/payment-success', { state: { bill: selectedBill, paymentId: `pay_${Date.now()}` } });
       } else { toast.error('Payment verification failed'); }
-    } catch { toast.error('Error processing mock payment'); }
+    } catch { toast.error('Error processing payment'); }
     finally { setMockLoading(false); }
   };
 

@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 const multer = require('multer');
-const path = require('path');
-const { authenticateToken, receptionistOnly, superAdminOrReceptionist, authorizeRoles } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { validateRequest } = require('../middleware/validate');
+const { processAppointmentRefund } = require('../utils/paymentHelper');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
 const LabReport = require('../models/LabReport');
 const Prescription = require('../models/Prescription');
-const razorpay = require('../utils/razorpay');
 
 const { labReportStorage, prescriptionStorage } = require('../config/cloudinary');
 
@@ -117,17 +117,10 @@ router.patch('/appointment/:appointmentId/confirm', async (req, res) => {
 
 // Cancel appointment
 router.patch('/appointment/:appointmentId/cancel', [
-  body('reason').optional().isString()
+  body('reason').optional().isString(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
 
     const { appointmentId } = req.params;
     const { reason } = req.body;
@@ -151,35 +144,8 @@ router.patch('/appointment/:appointmentId/cancel', [
     appointment.cancellationReason = reason;
     appointment.cancelledBy = req.user._id;
 
-    // Actual Razorpay Refund logic
-    if (appointment.paymentStatus === 'paid' && appointment.paymentDetails.paymentId) {
-      try {
-        // Check if it's not a mock order
-        if (!appointment.paymentDetails.orderId?.startsWith('order_mock_') && razorpay) {
-          await razorpay.payments.refund(appointment.paymentDetails.paymentId, {
-            notes: {
-              reason: reason || 'Cancelled by receptionist/admin',
-              appointmentId: appointmentId.toString()
-            }
-          });
-        }
-        appointment.paymentStatus = 'refunded';
-
-        // Update associated bill if it exists
-        try {
-          await Bill.findOneAndUpdate(
-            { appointmentId: appointmentId, status: 'paid' },
-            { status: 'refunded' }
-          );
-        } catch (billUpdateError) {
-          console.error('Failed to update associated bill status during receptionist cancellation:', billUpdateError);
-        }
-      } catch (refundError) {
-        console.error('Refund processing failed during receptionist cancellation:', refundError);
-        // We still cancel but note the refund problem
-        appointment.notes = (appointment.notes || '') + '\n[Refund Failed: Please process manually]';
-      }
-    }
+    // Process refund if paid
+    await processAppointmentRefund(appointment, reason || 'Cancelled by receptionist/admin');
 
     await appointment.save();
 
@@ -226,17 +192,10 @@ router.get('/doctors/availability', async (req, res) => {
 // Update doctor availability (receptionist can update any doctor)
 router.patch('/doctors/:doctorId/availability', [
   body('days').isArray(),
-  body('timeSlots').isArray()
+  body('timeSlots').isArray(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
 
     const { doctorId } = req.params;
     const { days, timeSlots } = req.body;
@@ -296,17 +255,10 @@ router.get('/doctors/:doctorId/leaves', async (req, res) => {
 
 // Add doctor leave
 router.post('/doctors/:doctorId/leave', [
-  body('date').isISO8601().withMessage('Please provide a valid date (YYYY-MM-DD)')
+  body('date').isISO8601().withMessage('Please provide a valid date (YYYY-MM-DD)'),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
 
     const { doctorId } = req.params;
     const { date } = req.body;
@@ -383,17 +335,10 @@ router.post('/bill', [
   body('items').isArray(),
   body('items.*.description').notEmpty().trim(),
   body('items.*.quantity').isInt({ min: 1 }),
-  body('items.*.unitPrice').isFloat({ min: 0 })
+  body('items.*.unitPrice').isFloat({ min: 0 }),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
 
     const { patientId, appointmentId, items, dueDate, paymentMethod, status } = req.body;
 
@@ -458,17 +403,10 @@ router.post('/lab-report', upload.single('reportFile'), [
   body('patientId').isMongoId(),
   body('testName').notEmpty().trim(),
   body('testType').notEmpty().trim(),
-  body('reportDate').isISO8601()
+  body('reportDate').isISO8601(),
+  validateRequest
 ], async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation errors',
-        errors: errors.array()
-      });
-    }
 
     if (!req.file) {
       return res.status(400).json({
@@ -549,7 +487,6 @@ router.post('/prescription-receipt', receiptUpload.single('receipt'), async (req
       });
     }
 
-    const Prescription = require('../models/Prescription');
     const prescription = await Prescription.findById(prescriptionId);
     if (!prescription) {
       return res.status(404).json({

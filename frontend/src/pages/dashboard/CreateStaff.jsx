@@ -283,6 +283,7 @@ const CreateStaff = () => {
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">First Name</label>
                                                 <input
                                                     type="text"
+                                                    autoComplete="given-name"
                                                     {...register('firstName', { required: 'Required' })}
                                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
                                                     placeholder="Enter name"
@@ -292,6 +293,7 @@ const CreateStaff = () => {
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
                                                 <input
                                                     type="text"
+                                                    autoComplete="family-name"
                                                     {...register('lastName', { required: 'Required' })}
                                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
                                                     placeholder="Enter name"
@@ -305,6 +307,7 @@ const CreateStaff = () => {
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                                                     <input
                                                         type="email"
+                                                        autoComplete="username"
                                                         {...register('email', {
                                                             required: 'Required',
                                                             validate: (value) => {
@@ -323,11 +326,12 @@ const CreateStaff = () => {
 
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Initial Authentication Key</label>
+                                            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
                                             <div className="relative group">
                                                 <Eye className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                                                 <input
                                                     type={showPassword ? 'text' : 'password'}
+                                                    autoComplete="new-password"
                                                     {...register('password', {
                                                         required: !isEditMode && 'Password required',
                                                         minLength: { value: 6, message: 'Min 6 characters' }
@@ -354,6 +358,7 @@ const CreateStaff = () => {
                                                 <Phone className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                                                 <input
                                                     type="tel"
+                                                    autoComplete="tel"
                                                     {...register('phone')}
                                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold text-brand-dark focus:ring-0 focus:border-brand-teal transition-all placeholder:text-slate-300"
                                                     placeholder="+91 00000 00000"

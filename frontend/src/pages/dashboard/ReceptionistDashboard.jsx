@@ -142,16 +142,16 @@ const ReceptionistDashboard = () => {
                 <button
                   key={action.title}
                   onClick={() => navigate(action.path)}
-                  className="group relative flex flex-col items-start p-8 bg-white hover:bg-brand-dark border border-slate-100 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 text-left"
+                  className="group relative flex flex-col items-start p-6 sm:p-8 bg-white hover:bg-slate-50 border border-slate-100 hover:border-brand-teal/30 rounded-3xl sm:rounded-[2.5rem] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left w-full cursor-pointer"
                 >
-                  <div className={`p-4 rounded-2xl ${action.bg} group-hover:bg-white/10 transition-colors mb-6`}>
-                    <action.icon className={`h-6 w-6 ${action.color} group-hover:text-brand-teal`} />
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-brand-teal group-hover:border-brand-teal transition-all mb-5 shadow-sm">
+                    <action.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${action.color} group-hover:text-white transition-colors`} />
                   </div>
-                  <h4 className="text-lg font-black text-brand-dark group-hover:text-white transition-colors font-display mb-2">{action.title}</h4>
-                  <p className="text-xs text-slate-400 group-hover:text-teal-100/60 leading-relaxed transition-colors mb-6">{action.desc}</p>
-                  <div className="mt-auto flex items-center gap-2 text-[10px] font-black text-brand-teal group-hover:text-white uppercase tracking-widest">
+                  <h4 className="text-base sm:text-lg font-black text-brand-dark group-hover:text-brand-teal transition-colors font-display mb-1.5">{action.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed transition-colors mb-5">{action.desc}</p>
+                  <div className="mt-auto flex items-center gap-2 text-[10px] font-black text-brand-teal uppercase tracking-widest group-hover:text-brand-dark transition-colors">
                     Open Module
-                    <ArrowRight className="h-3 w-3 group-hover:translate-x-2 transition-transform" />
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-2 transition-transform" />
                   </div>
                 </button>
               ))}
